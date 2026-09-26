@@ -1,0 +1,10 @@
+{
+  "name": "osmtwich",
+  "version": "1.0.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "dev": "node dev-server.mjs",
+    "start": "node dev-server.mjs"
+  }
+}
