@@ -13,7 +13,7 @@ const TWITCH_PARENT = window.location.hostname || "localhost";
 let TWITCH_CLIENT_ID = "";
 // Cuando la app corre servida desde GitHub Pages (sin backend propio),
 // las funciones /api/* no existen ahí: apuntamos siempre al backend real en Vercel.
-const API_BASE = "https://osmtwich.vercel.app";
+const API_BASE = "https://osmtwich2.vercel.app";
 const TWITCH_TOKEN_ENDPOINT = `${API_BASE}/api/twitch-token`;
 
 let twitchAppToken = null;   // token de la app (sin usuario) — para datos públicos
