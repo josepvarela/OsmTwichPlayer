@@ -32,6 +32,22 @@ jobs:
       - name: Sincronizar configuración/plugins
         run: npx cap sync android
 
+      - name: Forzar orientación horizontal (landscape) en el manifest
+        # "cap add android" genera el AndroidManifest.xml de cero en cada
+        # build (no está commiteado), así que el bloqueo de orientación
+        # nativo hay que reinyectarlo acá. Esto complementa el intento por
+        # JS (force-landscape-v60 en osmtwich.html): el manifest es la
+        # fuente de verdad real para Android; el JS es solo un respaldo
+        # para WebViews que sí respetan la Screen Orientation API.
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          if grep -q 'android:screenOrientation="landscape"' "$MANIFEST"; then
+            echo "Ya tiene screenOrientation=landscape, no hace falta tocarlo."
+          else
+            sed -i '/android:name="\.MainActivity"/a\            android:screenOrientation="landscape"' "$MANIFEST"
+            grep -n 'MainActivity' -A1 "$MANIFEST"
+          fi
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
