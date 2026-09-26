@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=1920">
+<title>OsmTwich</title>
+<style>
+  html, body { margin:0; padding:0; width:100%; height:100%; background:#0e0e10; }
+  #boot {
+    display:flex; align-items:center; justify-content:center;
+    width:100%; height:100%; color:#adadb8; font-family:sans-serif; font-size:28px;
+  }
+</style>
+</head>
+<body>
+<!--
+  Este widget NO trae la app empaquetada adentro: es un lanzador liviano,
+  igual que hace el APK de Android con el WebView. Al abrirse, navega de
+  inmediato (top-level, no en un iframe) a la app real servida en Vercel.
+
+  Por qué así y no empaquetando el HTML/CSS/JS acá adentro:
+  1) El Twitch.Player embebido exige que "parent" coincida con el dominio
+     real que aloja la página. Si el widget cargara el HTML localmente
+     (file://), el player recae en "localhost", que Twitch no reconoce como
+     autorizado, y el reproductor no arranca.
+  2) Actualizás la app en Vercel con un solo deploy y el TV siempre ve la
+     última versión, sin tener que recompilar/reinstalar el .wgt.
+
+  Si Vercel no responde, se reintenta cada 5s y se muestra un aviso.
+-->
+<div id="boot">Cargando OsmTwich…</div>
+<script>
+  var APP_URL = "https://osmtwich2.vercel.app/osmtwich.html";
+
+  function boot() {
+    window.location.replace(APP_URL);
+  }
+
+  // Pequeño margen para que la Smart Hub termine de inicializar la red
+  // antes del primer intento (evita una pantalla en blanco momentánea).
+  setTimeout(boot, 300);
+
+  // Si por algún motivo la navegación no ocurrió (ej. sin red al abrir la
+  // app), seguimos reintentando y avisamos en pantalla.
+  var attempts = 0;
+  var retry = setInterval(function () {
+    attempts++;
+    document.getElementById("boot").textContent =
+      "Sin conexión, reintentando… (" + attempts + ")";
+    boot();
+  }, 5000);
+</script>
+</body>
+</html>

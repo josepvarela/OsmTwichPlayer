@@ -1,0 +1,22 @@
+{
+  "appId": "com.osmtwich.app",
+  "appName": "OsmTwich",
+  "webDir": "www",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://osmtwich2.vercel.app/osmtwich.html",
+    "cleartext": false,
+    "androidScheme": "https",
+    "allowNavigation": [
+      "osmtwich2.vercel.app",
+      "id.twitch.tv",
+      "www.twitch.tv",
+      "player.twitch.tv",
+      "embed.twitch.tv",
+      "clips.twitch.tv"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
