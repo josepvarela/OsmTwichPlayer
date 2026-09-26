@@ -29,6 +29,13 @@ jobs:
       - name: Generar proyecto Android
         run: npx cap add android
 
+      - name: Generar ícono del APK
+        # Toma capacitor/assets/icon.png (idealmente 1024x1024) y genera
+        # todos los tamaños/mipmaps de Android (legacy + adaptive icon).
+        # Igual que el manifest, esto hay que rehacerlo en cada build
+        # porque android/ se genera de cero con "cap add android".
+        run: npx @capacitor/assets generate --android --iconBackgroundColor "#0e0e10" --iconBackgroundColorDark "#0e0e10"
+
       - name: Sincronizar configuración/plugins
         run: npx cap sync android
 
@@ -74,19 +81,5 @@ jobs:
         with:
           name: OsmTwich-apk
           path: capacitor/android/app/build/outputs/apk/debug/app-debug.apk
-
-      - name: Crear Release (solo en push a main)
-        if: github.event_name == 'push'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: apk-${{ github.run_number }}
-          name: OsmTwich Android ${{ github.run_number }} (debug, sin firmar)
-          files: capacitor/android/app/build/outputs/apk/debug/app-debug.apk
-          body: |
-            APK de debug, firmado automáticamente por Gradle con la clave de
-            depuración (sirve para instalar y probar, pero no para publicar
-            en Play Store). Para una release firmada con tu propia clave,
-            hay que agregar un keystore propio como secreto del repo y un
-            paso extra de firma — avisame si lo querés y lo agrego.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Sin release automática: descargá el APK desde acá, en la
+          # pestaña "Summary" de este run de Actions (sección Artifacts).
