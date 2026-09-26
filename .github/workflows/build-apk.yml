@@ -1,0 +1,69 @@
+name: Build Android APK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "capacitor/**"
+      - ".github/workflows/build-apk.yml"
+  workflow_dispatch: {}
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: capacitor
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Instalar dependencias de Capacitor
+        run: npm install
+
+      # "cap add android" genera el proyecto Gradle completo en capacitor/android
+      # a partir de capacitor.config.json — no hace falta tenerlo commiteado.
+      - name: Generar proyecto Android
+        run: npx cap add android
+
+      - name: Sincronizar configuración/plugins
+        run: npx cap sync android
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Aceptar licencias del SDK
+        run: yes | sdkmanager --licenses || true
+
+      - name: Compilar APK debug
+        working-directory: capacitor/android
+        run: ./gradlew assembleDebug --no-daemon
+
+      - name: Subir APK como artifact del run
+        uses: actions/upload-artifact@v4
+        with:
+          name: OsmTwich-apk
+          path: capacitor/android/app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Crear Release (solo en push a main)
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-${{ github.run_number }}
+          name: OsmTwich Android ${{ github.run_number }} (debug, sin firmar)
+          files: capacitor/android/app/build/outputs/apk/debug/app-debug.apk
+          body: |
+            APK de debug, firmado automáticamente por Gradle con la clave de
+            depuración (sirve para instalar y probar, pero no para publicar
+            en Play Store). Para una release firmada con tu propia clave,
+            hay que agregar un keystore propio como secreto del repo y un
+            paso extra de firma — avisame si lo querés y lo agrego.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
