@@ -54,6 +54,13 @@ jobs:
           java-version: "21"
 
       - uses: android-actions/setup-android@v3
+        with:
+          # Por defecto esta acción intenta instalar el paquete legacy
+          # "tools", que Google sacó del repositorio del SDK — por eso
+          # fallaba con "Failed to find package 'tools'". Pidiendo acá
+          # explícitamente solo lo que hace falta para compilar (sin
+          # "tools") se evita ese error.
+          packages: "platform-tools platforms;android-34 build-tools;34.0.0"
 
       - name: Aceptar licencias del SDK
         run: yes | sdkmanager --licenses || true
