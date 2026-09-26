@@ -1,0 +1,56 @@
+
+/* ===== Foco lateral: brillante sobre icono y texto, sin recuadro ===== */
+#main-screen #sidebar #nav-list li,
+#main-screen #sidebar #nav-list #search-nav-item {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#main-screen #sidebar #nav-list li.focused,
+#main-screen #sidebar #nav-list li:hover,
+#main-screen #sidebar #nav-list #search-nav-item.focused,
+#main-screen #sidebar #nav-list #search-nav-item:hover,
+#main-screen #sidebar #nav-list #search-nav-item:focus,
+#main-screen #sidebar #nav-list #search-nav-item:focus-visible {
+    background: transparent !important;
+    background-color: transparent !important;
+    border: 0 !important;
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+#main-screen #sidebar #nav-list li.focused .nav-icon,
+#main-screen #sidebar #nav-list #search-nav-item.focused .nav-icon {
+    color: #fff !important;
+    filter:
+        drop-shadow(0 0 4px rgba(255,255,255,.95))
+        drop-shadow(0 0 10px rgba(255,255,255,.70)) !important;
+}
+
+#main-screen #sidebar #nav-list li.focused .nav-label,
+#main-screen #sidebar #nav-list #search-nav-item.focused .nav-label {
+    color: #fff !important;
+    font-weight: 600 !important;
+    text-shadow:
+        0 0 5px rgba(255,255,255,.95),
+        0 0 12px rgba(255,255,255,.60) !important;
+}
+
+/* Buscar exactamente igual: ningún fondo gris */
+#main-screen #sidebar #nav-list #search-nav-item.focused .nav-icon,
+#main-screen #sidebar #nav-list #search-nav-item:focus .nav-icon {
+    background: transparent !important;
+}
+#main-screen #sidebar #nav-list #search-nav-item.focused .nav-label,
+#main-screen #sidebar #nav-list #search-nav-item:focus .nav-label {
+    background: transparent !important;
+}
+
+/* El overlay del buscador queda por encima y vuelve a aceptar el foco. */
+#main-screen.home-search-open #home-search-overlay {
+    z-index: 1000 !important;
+    pointer-events: auto !important;
+}

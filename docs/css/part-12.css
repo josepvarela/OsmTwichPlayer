@@ -1,0 +1,10 @@
+
+/* Foto de perfil del usuario en el ítem "Cuenta" del menú lateral, una vez
+   iniciada la sesión. */
+.nav-account-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+}

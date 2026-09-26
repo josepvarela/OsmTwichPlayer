@@ -1,0 +1,23 @@
+
+#main-screen #sidebar #nav-list #search-nav-item {
+    display:flex !important;
+    width:100% !important;
+    min-height:48px !important;
+    box-sizing:border-box !important;
+    cursor:pointer !important;
+}
+#main-screen #sidebar #nav-list #search-nav-item.focused,
+#main-screen #sidebar #nav-list #search-nav-item:focus,
+#main-screen #sidebar #nav-list #search-nav-item:hover {
+    outline:none !important;
+    background:transparent !important;
+    background-color:transparent !important;
+    box-shadow:none !important;
+}
+#main-screen.sidebar-collapsed #sidebar #nav-list #search-nav-item {
+    justify-content:center !important;
+    gap:0 !important;
+}
+#main-screen.sidebar-collapsed #sidebar #nav-list #search-nav-item .nav-label {
+    display:none !important;
+}

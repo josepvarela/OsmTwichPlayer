@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+    <title>OsmTwich</title>
+    <link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-01.css">
+    <script src="https://embed.twitch.tv/embed/v1.js"></script>
+<script src="https://josepvarela.github.io/OsmTwich/js/part-01.js"></script>
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-02.css">
+
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-03.css">
+
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-04.css">
+
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-05.css">
+
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-06.css">
+
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-07.css">
+
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-08.css">
+
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-09.css">
+
+</head>
+<body>
+<div id="focus-background" aria-hidden="true"></div>
+
+    <!-- ===================== PANTALLA PRINCIPAL ===================== -->
+    <div id="main-screen" class="screen active">
+        <nav id="sidebar">
+            <div id="sidebar-logo">
+                <div id="sidebar-logo-mark">
+                    <img src="data:image/png;base64,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" alt="OsmTwich">
+                </div>
+                <div id="sidebar-logo-text">OsmTwich</div>
+            </div>
+            <ul id="nav-list"></ul>
+        </nav>
+
+        <main id="content">
+            <div id="sections" class="sections"></div>
+        </main>
+        <div id="home-search-overlay" aria-hidden="true">
+            <div class="home-search-box">
+                <input id="home-search-input" type="text" placeholder="Buscar canal…" autocomplete="off" aria-label="Buscar canal" role="combobox" aria-expanded="false" aria-controls="home-search-suggestions" aria-autocomplete="list">
+                <button id="home-search-submit" type="button">Buscar</button>
+                <button id="home-search-close" class="search-close" type="button" aria-label="Cerrar búsqueda">✕</button>
+            </div>
+            <ul id="home-search-suggestions" class="home-search-suggestions" role="listbox" aria-label="Sugerencias de canales"></ul>
+        </div>
+
+        <!-- Login con Twitch: redirección (PC/celular) o QR (TV). El
+             contenido se arma dinámicamente en JS (ver renderAccountOverlay). -->
+        <div id="account-overlay" aria-hidden="true">
+            <div class="account-box" id="account-box"></div>
+        </div>
+    </div>
+
+    <!-- ===================== PANTALLA: BÚSQUEDA ===================== -->
+    <div id="search-screen" class="screen">
+        <header>
+            <h1>Buscar canal</h1>
+            <p class="search-hint">Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.</p>
+            <div id="search-box">
+                <input type="text" id="search-input" placeholder="Nombre del canal de Twitch..." autocomplete="off">
+            </div>
+            <button id="search-submit-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Buscar</button>
+        </header>
+    </div>
+
+    <!-- ===================== PANTALLA: CANAL (perfil + VODs recientes) ===================== -->
+    <div id="results-screen" class="screen">
+        <div id="channel-header">
+            <div id="channel-banner">
+                <div id="channel-avatar-wrap">
+                    <img id="channel-avatar" src="" alt="">
+                </div>
+            </div>
+
+            <div id="channel-statusbar">
+                <span id="channel-live-badge" class="channel-badge"><span class="live-dot" aria-hidden="true"></span><span>OFFLINE</span></span>
+                <button class="ctrl-btn small hidden" id="channel-watch-btn">▶ Ver en vivo</button>
+                <button class="ctrl-btn small hidden" id="channel-chat-btn" type="button">💬 Chatear</button>
+                <button class="ctrl-btn small hidden" id="channel-follow-btn" type="button"></button>
+            </div>
+        </div>
+
+        <div id="channel-meta">
+            <h1 id="channel-name"></h1>
+            <p id="channel-substat"></p>
+            <p id="channel-followers"></p>
+            <p id="channel-description"></p>
+        </div>
+
+        <p class="results-error hidden" id="results-error"></p>
+
+        <div id="profile-content">
+            <section id="profile-section-vods" class="profile-section">
+                <h2 id="vods-title">VODs recientes</h2>
+                <div id="results-grid" class="profile-track"></div>
+            </section>
+            <section id="profile-section-clips" class="profile-section">
+                <h2 id="clips-title">Clips destacados</h2>
+                <div id="clips-grid" class="profile-track"></div>
+            </section>
+        </div>
+    </div>
+
+    <!-- ===================== PANTALLA: STREAMS DE UN JUEGO ===================== -->
+    <div id="game-screen" class="screen">
+        <header class="game-screen-header">
+            <img id="game-screen-cover" class="game-screen-cover" src="" alt="" aria-hidden="true">
+            <div class="game-screen-info">
+                <h1 id="game-screen-title">En vivo ahora</h1>
+                <div id="game-screen-viewers" class="game-screen-viewers"></div>
+            </div>
+        </header>
+        <div id="game-screen-grid" class="tile-grid cols-4"></div>
+    </div>
+
+    <!-- ===================== PANTALLA: REPRODUCTOR ===================== -->
+    <div id="player-screen" class="screen">
+        <div id="player-area">
+            <div id="twitch-player-target"></div>
+            <!-- Chat propio (no el iframe de Twitch) — así el fondo puede ser
+                 semi-transparente sin afectar la legibilidad del texto -->
+            <div id="chat-panel" class="chat-large">
+                <div id="chat-messages"></div>
+                <div id="profile-chat-composer">
+                    <input id="profile-chat-input" type="text" maxlength="500" placeholder="Chatea..." autocomplete="off">
+                </div>
+            </div>
+
+            <div id="quality-panel" class="hidden">
+                <h3>Calidad</h3>
+                <div id="quality-list"></div>
+            </div>
+
+            <div id="player-controls-bar">
+                <div class="progress-row">
+                    <span class="progress-label live-label" id="progress-elapsed"><span class="live-dot" aria-hidden="true"></span><span>EN VIVO</span></span>
+                    <div class="progress-track" id="progress-track" tabindex="0" role="slider" aria-label="Progreso del video" aria-valuemin="0" aria-valuemax="100">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                    <span class="progress-label" id="progress-remaining"></span>
+                </div>
+                <div class="player-title-row">
+                    <div id="player-stream-title"></div>
+                </div>
+                <div class="ctrl-row">
+                    <div id="player-info" aria-label="Información del stream">
+                        <button class="player-profile-btn info-focus-btn" id="player-profile-action" type="button" aria-label="Abrir canal del streamer">
+                            <img id="player-profile-image" src="" alt="Foto de perfil">
+                        </button>
+                        <div class="player-info-text">
+                            <div class="player-info-line">
+                                <span id="player-channel-name"></span>
+                            </div>
+                            <div id="player-game-row" class="player-info-line hidden">
+                                <button id="player-game-action" class="player-game-btn info-focus-btn" type="button" aria-label="Abrir streams de este juego">
+                                    <span id="player-game-name"></span>
+                                </button>
+                                <span class="player-game-viewers-wrap">
+                                    <span class="player-info-separator" aria-hidden="true">|</span>
+                                    <span id="player-game-viewers"></span>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="ctrl-center">
+                        <div class="ctrl-btn" data-action="rewind" id="ctrl-rewind" tabindex="0" role="button" aria-label="Retroceder 10 segundos"></div>
+                        <div class="ctrl-btn ctrl-btn-main" data-action="play" id="ctrl-play" tabindex="0" role="button" aria-label="Pausar"></div>
+                        <div class="ctrl-btn" data-action="forward" id="ctrl-forward" tabindex="0" role="button" aria-label="Adelantar 10 segundos"></div>
+                    </div>
+                    <div class="ctrl-side ctrl-right">
+                        <div class="ctrl-btn" data-action="mute" id="ctrl-mute" tabindex="0" role="button" aria-label="Silenciar o activar sonido"></div>
+                        <div class="ctrl-btn" data-action="quality" id="ctrl-quality" tabindex="0" role="button" aria-label="Calidad de video"></div>
+                        <div class="ctrl-btn" data-action="chat" id="ctrl-chat" tabindex="0" role="button" aria-label="Mostrar u ocultar chat"></div>
+                        <div class="ctrl-btn" data-action="chat-layout" id="ctrl-chat-layout" tabindex="0" role="button" aria-label="Cambiar tamaño y posición del chat"></div>
+                        <div class="ctrl-btn" data-action="chat-send" id="ctrl-chat-send" tabindex="0" role="button" aria-label="Enviar mensaje al chat"></div>
+                        <div class="ctrl-btn" data-action="refresh" id="ctrl-refresh" tabindex="0" role="button" aria-label="Actualizar reproductor"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://josepvarela.github.io/OsmTwich/js/part-02.js"></script>
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-03.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-04.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-05.js"></script>
+
+
+
+
+
+
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-06.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-07.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-08.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-09.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-10.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-11.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-12.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-13.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-14.js"></script>
+
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-15.js"></script>
+
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-10.css">
+<script src="https://josepvarela.github.io/OsmTwich/js/part-16.js"></script>
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-11.css">
+<script src="https://josepvarela.github.io/OsmTwich/js/part-17.js"></script>
+
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-12.css">
+
+<!-- v57: quitar el difuminado de fondo (miniatura enfocada) para aliviar
+     la carga de GPU en TVs de gama baja/media. El filtro blur() sobre un
+     fondo a pantalla completa que se recalcula en cada cambio de foco era
+     una de las causas principales de la lentitud en TV. Se desactiva por
+     completo en vez de solo reducir el blur, y se anulan las funciones
+     que lo actualizaban para no seguir gastando trabajo en cada tecla. -->
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-13.css">
+<script src="https://josepvarela.github.io/OsmTwich/js/part-18.js"></script>
+
+<!-- v58: en TVs 4K algunos navegadores reportan el ancho real del panel
+     (p. ej. 3840px) en vez de una resolución lógica de 1920, y como toda
+     la interfaz está maquetada en píxeles fijos pensados para ~1920, el
+     contenido se ve diminuto. Se aplica un escalado proporcional con
+     "zoom" (soportado por los motores basados en Chromium/WebKit que usan
+     Tizen, webOS y Android TV) para que todo se vea al tamaño esperado
+     sin tener que reescribir la maquetación. -->
+<!-- v61: rendimiento en TV. Las tarjetas enfocadas acumulaban, de varios
+     parches anteriores (v43-v50), hasta 4 box-shadow superpuestos más
+     filter:brightness() y una transition animando box-shadow/filter -
+     todas propiedades caras de repintar (no compositadas por GPU), y en
+     TVs de gama media/baja esto se nota como lag al mover el foco entre
+     tarjetas. Se reemplaza todo por un único outline sólido + scale,
+     ambas baratas (outline no afecta layout, transform sí es GPU). -->
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-14.css">
+
+<!-- v60: sustituye el escalado por "zoom" (poco fiable en el motor Tizen de
+     Samsung TV dentro de apps .wgt) por "transform:scale" sobre un
+     contenedor fijo de 1920x1080, que sí es soportado y se ve consistente
+     en todos los modelos. El body se envuelve en #tv-scale-root la primera
+     vez que corre el script. -->
+<link rel="stylesheet" href="https://josepvarela.github.io/OsmTwich/css/part-15.css">
+<script src="https://josepvarela.github.io/OsmTwich/js/part-19.js"></script>
+
+<!-- ===== v59: doble "atrás" para salir (Android/Capacitor y Tizen TV) =====
+     No modifica nada de la pantalla ni de la navegación interna: solo
+     escucha la tecla/botón "atrás" del sistema. La primera pulsación
+     muestra un aviso ("Pulsa atrás de nuevo para salir"); si se repite
+     dentro de 2s, cierra la app. Es inofensivo si se abre en un
+     navegador normal (no hace nada ahí). -->
+<script src="https://josepvarela.github.io/OsmTwich/js/part-20.js"></script>
+
+<!-- ===== v60: forzar orientación horizontal (apaisada) en Android =====
+     Mejor esfuerzo desde JS: bloquea la orientación cuando el sistema
+     operativo lo permite. Esto NO reemplaza el ajuste nativo recomendado
+     (ver nota al usuario), pero ayuda en navegadores/WebViews que sí
+     respetan la Screen Orientation API. No afecta TV (Tizen ya fuerza
+     landscape por config.xml) ni a quien navega la página normalmente. -->
+<script src="https://josepvarela.github.io/OsmTwich/js/part-21.js"></script>
+
+<script src="https://josepvarela.github.io/OsmTwich/js/part-22.js"></script>
+
+
+<!-- ============================================================
+     v65: Parche final de rendimiento y navegación para TV (Tizen).
+     ============================================================ -->
+<script src="https://josepvarela.github.io/OsmTwich/js/part-23.js"></script>
+
+</body>
+</html>
+
+
+

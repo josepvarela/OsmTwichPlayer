@@ -1,0 +1,34 @@
+
+.tile-stream,
+.tile-game,
+.tile-clip,
+.search-result-item,
+.result-card,
+.channel-card,
+.game-card,
+.stream-card {
+    transition: transform .12s ease !important;
+    box-shadow: none !important;
+    filter: none !important;
+}
+.tile-stream:hover,
+.tile-game:hover,
+.tile-clip:hover,
+.search-result-item:hover,
+.result-card:hover,
+.channel-card:hover,
+.game-card:hover,
+.stream-card:hover,
+.tile-stream.focused,
+.tile-game.focused,
+.tile-clip.focused,
+.search-result-item.focused,
+.result-card.focused,
+.channel-card.focused,
+.game-card.focused,
+.stream-card.focused {
+    box-shadow: none !important;
+    filter: none !important;
+    outline: 3px solid rgba(255,255,255,.85) !important;
+    outline-offset: 2px !important;
+}

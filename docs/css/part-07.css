@@ -1,0 +1,25 @@
+
+#focus-background {
+    position: fixed !important;
+    inset: 0 !important;
+    width: 100vw !important;
+    height: 100vh !important; height: 100dvh !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: cover !important;
+    filter: blur(28px) !important;
+    transform: scale(1.12) !important;
+    opacity: 0 !important;
+    transition: opacity .22s ease, background-image .18s ease !important;
+}
+#focus-background.visible {
+    opacity: .82 !important;
+}
+#focus-background::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: rgba(0,0,0,.48) !important;
+}

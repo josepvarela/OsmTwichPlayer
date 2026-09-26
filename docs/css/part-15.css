@@ -1,0 +1,15 @@
+
+/* v62: el tamaño fijo de 1920x1080 SOLO se aplica cuando el JS confirma
+   que estamos dentro de la app nativa de Tizen (marca data-tv-scaled en
+   <html>). Antes esta caja de 1920x1080 se imponía siempre, aunque no
+   hubiera transform activo, y eso rompía el layout responsive normal en
+   PC/Android (quedaba una caja de escritorio fija, recortada). */
+html[data-tv-scaled] , html[data-tv-scaled] body { margin:0; padding:0; overflow:hidden; }
+html[data-tv-scaled] #tv-scale-root {
+    width: 1920px;
+    height: 1080px;
+    transform-origin: top left;
+    position: absolute;
+    top: 0;
+    left: 0;
+}

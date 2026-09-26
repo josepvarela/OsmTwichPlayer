@@ -1,0 +1,22 @@
+
+/* v56: el fondo de foco debe ser visible detrás de las pantallas y no quedar
+   oculto por la capa .screen. Las pantallas mantienen su contenido intacto. */
+#focus-background {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 0 !important;
+    pointer-events: none !important;
+    display: block !important;
+    visibility: visible !important;
+    background-repeat: no-repeat !important;
+    background-position: center center !important;
+    background-size: cover !important;
+}
+#focus-background.screen-hidden { opacity: 0 !important; visibility: hidden !important; }
+#main-screen, #search-screen, #results-screen, #game-screen {
+    background-color: transparent !important;
+}
+#main-screen #sidebar { position: relative; z-index: 3; }
+#main-screen #content { position: relative; z-index: 2; }
+#search-screen > *, #results-screen > *, #game-screen > * { position: relative; z-index: 2; }
+#player-screen { background:#000 !important; }

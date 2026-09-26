@@ -1,0 +1,19 @@
+
+/* Fondo de foco: siempre detrás de la pantalla activa y nunca por encima del contenido. */
+body { position: relative !important; }
+#focus-background {
+    z-index: 0 !important;
+    pointer-events: none !important;
+}
+.screen {
+    position: relative !important;
+    z-index: 1 !important;
+}
+#focus-background.screen-hidden {
+    opacity: 0 !important;
+    visibility: hidden !important;
+    background-image: none !important;
+}
+#main-screen, #search-screen, #results-screen, #game-screen, #player-screen {
+    isolation: isolate;
+}

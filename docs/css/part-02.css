@@ -1,0 +1,15 @@
+
+/* v52: espacio invisible entre la barra lateral colapsada y el carrusel */
+#main-screen.sidebar-collapsed #content {
+    padding-left: max(82px, clamp(28px, 4vw, 50px)) !important;
+}
+
+/* Espacio adicional invisible antes de las tarjetas */
+#main-screen.sidebar-collapsed #content .tile-track {
+    padding-left: 20px !important;
+}
+
+/* La primera tarjeta nunca invade la zona de la barra */
+#main-screen.sidebar-collapsed #content .tile-track > :first-child {
+    margin-left: 4px !important;
+}

@@ -1,0 +1,38 @@
+
+/* v54: el contenido general ocupa todo el espacio disponible */
+html, body, #app {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
+}
+
+#main-screen.active {
+    display: flex !important;
+    width: 100% !important;
+    height: 100vh !important; height: 100dvh !important;
+    max-width: none !important;
+}
+
+#main-screen #content {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
+    width: auto !important;
+    max-width: none !important;
+    box-sizing: border-box !important;
+}
+
+/* Cuando la barra está colapsada, el espacio invisible solo protege
+   la zona de la barra; no limita el ancho total del contenido. */
+#main-screen.sidebar-collapsed #content {
+    width: auto !important;
+    max-width: none !important;
+    flex: 1 1 auto !important;
+    box-sizing: border-box !important;
+}
+
+/* Los carruseles aprovechan todo el ancho restante */
+#main-screen #content .tile-track {
+    width: 100% !important;
+    max-width: none !important;
+}

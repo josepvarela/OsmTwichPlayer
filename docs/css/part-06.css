@@ -1,0 +1,69 @@
+
+/* Buscar: efecto suave al enfocarse y persistente al abrirse */
+#main-screen.search-dim-content #content {
+    opacity: .6 !important;
+    transition: opacity .2s ease !important;
+}
+#main-screen.search-dim-content::after {
+    content: "" !important;
+    position: fixed !important;
+    inset: 0 !important;
+    background: rgba(0,0,0,.16) !important;
+    pointer-events: none !important;
+    z-index: 40 !important;
+}
+#main-screen.search-dim-content #sidebar,
+#main-screen.search-dim-content #home-search-overlay {
+    filter: none !important;
+}
+#main-screen.search-dim-content #sidebar { z-index: 100 !important; }
+#main-screen.search-dim-content #home-search-overlay { z-index: 110 !important; }
+
+
+
+/* ===== Fondo de miniatura difuminado en pantalla completa ===== */
+#fullscreen-bg,
+.fullscreen-bg,
+.player-background,
+#player-background {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+#fullscreen-bg::before,
+.fullscreen-bg::before,
+.player-background::before,
+#player-background::before {
+    /* v64: blur(28px) a pantalla completa quitado (muy costoso en TV);
+       queda solo la capa oscura de ::after encima del fondo sin difuminar. */
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: inherit;
+    background-position: center;
+    background-size: cover;
+}
+
+#fullscreen-bg::after,
+.fullscreen-bg::after,
+.player-background::after,
+#player-background::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.62);
+}
+
+body.player-fullscreen #fullscreen-bg,
+body.player-fullscreen .fullscreen-bg,
+body.player-fullscreen .player-background,
+body.player-fullscreen #player-background {
+    opacity: 1;
+}
+

@@ -1,0 +1,11 @@
+
+#focus-background {
+    display: none !important;
+    opacity: 0 !important;
+    filter: none !important;
+    background-image: none !important;
+}
+#results-screen {
+    background-image: none !important;
+    background-attachment: initial !important;
+}

@@ -1,0 +1,117 @@
+
+/* ===== Pantalla de inicio: foco lateral limpio ===== */
+#main-screen #nav-list li.focused,
+#main-screen #nav-list li:focus,
+#main-screen #search-nav-item.focused,
+#main-screen #search-nav-item:focus,
+#main-screen #search-nav-item:hover {
+    background: transparent !important;
+    background-color: transparent !important;
+    outline: none !important;
+    border-color: transparent !important;
+    box-shadow: none !important;
+}
+
+#main-screen #nav-list li.focused .nav-icon,
+#main-screen #nav-list li.focused .nav-label {
+    color: #fff !important;
+}
+
+#main-screen #nav-list li.focused .nav-icon {
+    filter: drop-shadow(0 0 5px rgba(255,255,255,.95))
+            drop-shadow(0 0 12px rgba(255,255,255,.65)) !important;
+}
+
+#main-screen #nav-list li.focused .nav-label {
+    text-shadow: 0 0 6px rgba(255,255,255,.95),
+                 0 0 14px rgba(255,255,255,.55) !important;
+}
+
+/* Buscar comparte exactamente el mismo foco luminoso, sin recuadro. */
+#main-screen #search-nav-item.focused svg {
+    filter: drop-shadow(0 0 5px rgba(255,255,255,.95))
+            drop-shadow(0 0 12px rgba(255,255,255,.65)) !important;
+}
+
+/* v51: foto de perfil del streamer en las tarjetas de todas las pantallas,
+   excepto las tarjetas de VOD/Clips dentro del perfil. */
+.tile-stream .streamer-profile-avatar {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    z-index: 30;
+    border: 2px solid rgba(255,255,255,.95);
+    background: #18181b;
+    box-shadow: 0 2px 10px rgba(0,0,0,.6);
+    pointer-events: none;
+}
+#results-screen .tile-stream .streamer-profile-avatar,
+#results-screen .tile-clip .streamer-profile-avatar {
+    display: none !important;
+}
+
+
+/* v51: en la pantalla de streams de un juego, la miniatura ocupa todo el fondo
+   de cada tarjeta y la información queda superpuesta sobre ella. */
+#game-screen-grid .game-stream-card {
+    position: relative !important;
+    min-height: 0 !important;
+    aspect-ratio: 16 / 9 !important;
+    background-image: var(--stream-thumb) !important;
+    background-size: cover !important;
+    background-position: center !important;
+    background-repeat: no-repeat !important;
+    overflow: hidden !important;
+}
+#game-screen-grid .game-stream-card > img:not(.streamer-profile-avatar) {
+    opacity: 0 !important;
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+}
+#game-screen-grid .game-stream-card::after {
+    content: "" !important;
+    position: absolute !important;
+    inset: 0 !important;
+    background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.35) 42%, rgba(0,0,0,.05) 72%, transparent 100%) !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
+}
+#game-screen-grid .game-stream-card .overlay {
+    z-index: 3 !important;
+}
+#game-screen-grid .game-stream-card .live-badge,
+#game-screen-grid .game-stream-card .viewer-badge {
+    z-index: 4 !important;
+}
+#game-screen-grid .game-stream-card .streamer-profile-avatar {
+    z-index: 4 !important;
+}
+/* v52: pantalla de streams del juego — portada y tarjetas más grandes */
+#game-screen .game-screen-header { align-items:flex-start !important; padding-top:22px !important; padding-bottom:24px !important; min-height:205px !important; }
+#game-screen .game-screen-cover { width:135px !important; height:180px !important; flex:0 0 135px !important; margin-top:8px !important; border-radius:10px !important; }
+#game-screen .game-screen-info { padding-top:24px !important; }
+#game-screen .game-screen-header { position:sticky !important; top:0 !important; z-index:50 !important; flex-shrink:0 !important; }
+#game-screen-grid { grid-template-columns:repeat(5,minmax(0,1fr)) !important; gap:24px !important; padding:0 60px 50px !important; }
+#game-screen-grid .game-stream-card { width:100% !important; min-width:0 !important; aspect-ratio:16/9 !important; transform-origin:center center !important; }
+#game-screen-grid .game-stream-card.focused { transform:scale(1.035) !important; z-index:20 !important; }
+@media (max-width:1200px){ #game-screen-grid{grid-template-columns:repeat(4,minmax(0,1fr)) !important;} }
+@media (max-width:950px){ #game-screen-grid{grid-template-columns:repeat(3,minmax(0,1fr)) !important;} }
+@media (max-width:700px){ #game-screen-grid{grid-template-columns:repeat(2,minmax(0,1fr)) !important; padding-left:30px !important; padding-right:30px !important;} }
+
+/* v64: adaptación real a la pantalla — 100dvh (definido más arriba) evita
+   que el contenido quede más alto que el área visible en Android; estas
+   pantallas necesitan poder desplazarse por su propio contenido en vez de
+   quedar cortadas sin scroll. */
+#results-screen, #game-screen {
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+}
+
