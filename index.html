@@ -10819,10 +10819,12 @@ html[data-tv-scaled] #tv-scale-root {
 
 <script id="android-back-button-v1">
 // Manejo del botón/gesto "atrás" de Android dentro del wrapper Capacitor.
-// Capacitor emite el evento nativo "backButton" en window.document en vez
-// de que Android cierre la app directamente. Sin este listener, Capacitor
-// usa su comportamiento por defecto (cerrar la Activity), que es la causa
-// de que "atrás" salga de la app en cualquier pantalla.
+// Capacitor NO dispara "backButton" como evento normal de `document`: el
+// listener real hay que registrarlo contra el bridge del plugin App
+// (window.Capacitor.Plugins.App.addListener). Antes este script escuchaba
+// solo document.addEventListener("backButton", ...), que nunca se disparaba
+// en el APK — por eso "atrás" no hacía nada en ninguna pantalla. Se agrega
+// el registro correcto abajo, sin tocar la lógica de navegación/doble atrás.
 (function () {
     if (!window.Capacitor) return; // en Tizen/navegador no existe este evento
 
@@ -10860,7 +10862,7 @@ html[data-tv-scaled] #tv-scale-root {
         return typeof currentScreen !== "undefined" && currentScreen === "main" && !accountOpen && !searchOpen;
     }
 
-    document.addEventListener("backButton", function (e) {
+    function handleAndroidBack(e) {
         // Overlays con su propio manejo de "atrás" (cuenta, buscador): los
         // dejamos cerrarse solos, igual que con la tecla Escape/10009.
         var accountOverlay = document.getElementById("account-overlay");
@@ -10889,7 +10891,62 @@ html[data-tv-scaled] #tv-scale-root {
             lastBackPressAt = now;
             showExitToast();
         }
-    });
+    }
+
+    // Registro real contra el plugin App de Capacitor (esto es lo que
+    // faltaba: sin esto, ningún listener de "atrás" se llega a ejecutar).
+    if (window.Capacitor.Plugins && window.Capacitor.Plugins.App &&
+        typeof window.Capacitor.Plugins.App.addListener === "function") {
+        window.Capacitor.Plugins.App.addListener("backButton", handleAndroidBack);
+    }
+    // Respaldo por si el bridge también emite el evento de DOM en alguna
+    // versión/plugin distinto — no molesta si nunca se dispara.
+    document.addEventListener("backButton", handleAndroidBack);
+})();
+</script>
+
+<!-- ===== v66: tocar el borde inferior del video para mostrar los
+     controles de reproducción =====
+     El iframe de Twitch ocupa el 100% de #player-area, así que un toque
+     dentro del video normalmente no llega a nuestro JS (iframe de otro
+     origen: el toque no burbujea). Esta franja angosta e invisible pegada
+     al borde inferior del reproductor SÍ es nuestra (va por encima del
+     iframe en esa zona), así que un toque ahí siempre nos llega y muestra
+     la barra de controles — sin togglear play/pausa ni interceptar el
+     resto del video. -->
+<style id="bottom-edge-touch-style-v66">
+#player-bottom-edge-touch {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 44px;
+    z-index: 9; /* debajo de #player-controls-bar (z-index:10) cuando está visible */
+    background: transparent;
+}
+</style>
+<script id="bottom-edge-touch-v66">
+(function () {
+    function ensureBottomEdgeEl() {
+        var area = document.getElementById("player-area");
+        if (!area) return null;
+        var el = document.getElementById("player-bottom-edge-touch");
+        if (!el) {
+            el = document.createElement("div");
+            el.id = "player-bottom-edge-touch";
+            area.appendChild(el);
+            var reveal = function (e) {
+                if (e) e.preventDefault();
+                if (typeof showControls === "function") showControls(false);
+            };
+            el.addEventListener("touchend", reveal, { passive: false });
+            el.addEventListener("click", reveal);
+        }
+        return el;
+    }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", ensureBottomEdgeEl);
+    } else {
+        ensureBottomEdgeEl();
+    }
 })();
 </script>
 
