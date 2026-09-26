@@ -10905,52 +10905,6 @@ html[data-tv-scaled] #tv-scale-root {
 })();
 </script>
 
-<!-- ===== v66: tocar el borde inferior del video para mostrar los
-     controles de reproducción =====
-     El iframe de Twitch ocupa el 100% de #player-area, así que un toque
-     dentro del video normalmente no llega a nuestro JS (iframe de otro
-     origen: el toque no burbujea). Esta franja angosta e invisible pegada
-     al borde inferior del reproductor SÍ es nuestra (va por encima del
-     iframe en esa zona), así que un toque ahí siempre nos llega y muestra
-     la barra de controles — sin togglear play/pausa ni interceptar el
-     resto del video. -->
-<style id="bottom-edge-touch-style-v66">
-#player-bottom-edge-touch {
-    position: absolute;
-    left: 0; right: 44px; bottom: 0;
-    height: 0;
-    z-index: 9; /* debajo de #player-controls-bar (z-index:10) cuando está visible */
-    background: transparent;
-}
-</style>
-<script id="bottom-edge-touch-v66">
-(function () {
-    function ensureBottomEdgeEl() {
-        var area = document.getElementById("player-area");
-        if (!area) return null;
-        var el = document.getElementById("player-bottom-edge-touch");
-        if (!el) {
-            el = document.createElement("div");
-            el.id = "player-bottom-edge-touch";
-            area.appendChild(el);
-            var reveal = function (e) {
-                if (e) e.preventDefault();
-                if (typeof showControls === "function") showControls(false);
-            };
-            el.addEventListener("touchend", reveal, { passive: false });
-            el.addEventListener("click", reveal);
-        }
-        return el;
-    }
-    if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", ensureBottomEdgeEl);
-    } else {
-        ensureBottomEdgeEl();
-    }
-})();
-</script>
-
-
 <!-- ============================================================
      v65: Parche final de rendimiento y navegación para TV (Tizen).
      ============================================================ -->
