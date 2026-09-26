@@ -10771,12 +10771,13 @@ html[data-tv-scaled] #tv-scale-root {
         exitTimer = setTimeout(function(){ exitArmed = false; }, 2000);
     }
 
-    // --- Android empaquetado con Capacitor ---
-    document.addEventListener('backbutton', handleBackPress, false);
-    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App &&
-        typeof window.Capacitor.Plugins.App.addListener === 'function') {
-        window.Capacitor.Plugins.App.addListener('backButton', handleBackPress);
-    }
+    // NOTA: el manejo del botón "atrás" en Android/Capacitor vive SOLO en
+    // "android-back-button-v1" (más abajo), que además navega hacia atrás
+    // dentro de la app (reproductor, perfil, etc.) antes de armar la salida.
+    // Este script (v59) ya NO escucha 'backbutton'/'backButton' para evitar
+    // registrar dos listeners sobre el mismo evento en Android (causaba
+    // que se armara "doble atrás para salir" incluso dentro del reproductor
+    // o de un overlay, en vez de solo en la pantalla de Inicio).
 
     // --- Tizen (Samsung Smart TV) ---
     document.addEventListener('tizenhwkey', function (e) {
