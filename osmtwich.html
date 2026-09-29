@@ -4658,7 +4658,6 @@ html, body {
 }
 
 </style>
-    <script src="https://embed.twitch.tv/embed/v1.js"></script>
 <script>
 
 // v45: fondo de la miniatura de la tarjeta actualmente enfocada.
@@ -5512,6 +5511,23 @@ window.onload = function () {
     window.addEventListener("keydown", handleKeyDown, true);
 
     if (twitchUser) startFollowedAutoRefresh();
+
+    // v67 — rendimiento de arranque: antes el script de Twitch Embed
+    // (embed.twitch.tv/v1.js) se cargaba con una etiqueta <script> normal
+    // arriba del todo del documento, lo que bloqueaba la descarga+ejecución
+    // de TODO el resto del JS de la app (miles de líneas) hasta que ese
+    // script externo terminaba de bajar — retrasando el arranque de toda
+    // la interfaz, no solo del video. Ahora Inicio se muestra sin esperar
+    // nada de Twitch, y acá se precarga el SDK en segundo plano (sin
+    // bloquear ni competir con el resto del render) para que, cuando el
+    // usuario elija un canal, lo más probable es que ya esté listo y el
+    // video arranque de inmediato en vez de esperar la descarga en ese momento.
+    const prefetchTwitchSDK = () => ensureTwitchSDK().catch(() => {});
+    if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(prefetchTwitchSDK, { timeout: 2000 });
+    } else {
+        setTimeout(prefetchTwitchSDK, 300);
+    }
 };
 
 function buildNav() {
@@ -10904,6 +10920,52 @@ html[data-tv-scaled] #tv-scale-root {
     document.addEventListener("backButton", handleAndroidBack);
 })();
 </script>
+
+<!-- ===== v66: tocar el borde inferior del video para mostrar los
+     controles de reproducción =====
+     El iframe de Twitch ocupa el 100% de #player-area, así que un toque
+     dentro del video normalmente no llega a nuestro JS (iframe de otro
+     origen: el toque no burbujea). Esta franja angosta e invisible pegada
+     al borde inferior del reproductor SÍ es nuestra (va por encima del
+     iframe en esa zona), así que un toque ahí siempre nos llega y muestra
+     la barra de controles — sin togglear play/pausa ni interceptar el
+     resto del video. -->
+<style id="bottom-edge-touch-style-v66">
+#player-bottom-edge-touch {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 44px;
+    z-index: 9; /* debajo de #player-controls-bar (z-index:10) cuando está visible */
+    background: transparent;
+}
+</style>
+<script id="bottom-edge-touch-v66">
+(function () {
+    function ensureBottomEdgeEl() {
+        var area = document.getElementById("player-area");
+        if (!area) return null;
+        var el = document.getElementById("player-bottom-edge-touch");
+        if (!el) {
+            el = document.createElement("div");
+            el.id = "player-bottom-edge-touch";
+            area.appendChild(el);
+            var reveal = function (e) {
+                if (e) e.preventDefault();
+                if (typeof showControls === "function") showControls(false);
+            };
+            el.addEventListener("touchend", reveal, { passive: false });
+            el.addEventListener("click", reveal);
+        }
+        return el;
+    }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", ensureBottomEdgeEl);
+    } else {
+        ensureBottomEdgeEl();
+    }
+})();
+</script>
+
 
 <!-- ============================================================
      v65: Parche final de rendimiento y navegación para TV (Tizen).

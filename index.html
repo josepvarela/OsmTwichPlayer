@@ -4658,7 +4658,6 @@ html, body {
 }
 
 </style>
-    <script src="https://embed.twitch.tv/embed/v1.js"></script>
 <script>
 
 // v45: fondo de la miniatura de la tarjeta actualmente enfocada.
@@ -5512,6 +5511,23 @@ window.onload = function () {
     window.addEventListener("keydown", handleKeyDown, true);
 
     if (twitchUser) startFollowedAutoRefresh();
+
+    // v67 — rendimiento de arranque: antes el script de Twitch Embed
+    // (embed.twitch.tv/v1.js) se cargaba con una etiqueta <script> normal
+    // arriba del todo del documento, lo que bloqueaba la descarga+ejecución
+    // de TODO el resto del JS de la app (miles de líneas) hasta que ese
+    // script externo terminaba de bajar — retrasando el arranque de toda
+    // la interfaz, no solo del video. Ahora Inicio se muestra sin esperar
+    // nada de Twitch, y acá se precarga el SDK en segundo plano (sin
+    // bloquear ni competir con el resto del render) para que, cuando el
+    // usuario elija un canal, lo más probable es que ya esté listo y el
+    // video arranque de inmediato en vez de esperar la descarga en ese momento.
+    const prefetchTwitchSDK = () => ensureTwitchSDK().catch(() => {});
+    if (typeof requestIdleCallback === "function") {
+        requestIdleCallback(prefetchTwitchSDK, { timeout: 2000 });
+    } else {
+        setTimeout(prefetchTwitchSDK, 300);
+    }
 };
 
 function buildNav() {
