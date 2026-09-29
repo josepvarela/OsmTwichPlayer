@@ -55,6 +55,32 @@ jobs:
             grep -n 'MainActivity' -A1 "$MANIFEST"
           fi
 
+      - name: Compatibilidad con TV box sin táctil (manifest)
+        # Muchos TV box de gama baja no tienen pantalla táctil (ni GPS,
+        # cámara, etc.). Por defecto Android/aapt puede marcar
+        # "android.hardware.touchscreen" como REQUERIDO, y el instalador
+        # rechaza la instalación en cualquier dispositivo que no cumpla un
+        # <uses-feature required="true">. Declarar estas features como NO
+        # requeridas es la causa más común de "no se instala" en TV box y
+        # no afecta en nada a celulares/tablets normales.
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          for FEATURE in \
+            "android.hardware.touchscreen" \
+            "android.hardware.faketouch" \
+            "android.hardware.microphone" \
+            "android.hardware.camera" \
+            "android.hardware.camera.autofocus" \
+            "android.software.leanback"
+          do
+            if grep -q "\"$FEATURE\"" "$MANIFEST"; then
+              echo "Ya declarada: $FEATURE"
+            else
+              sed -i "/<application/i\\    <uses-feature android:name=\"$FEATURE\" android:required=\"false\" />" "$MANIFEST"
+            fi
+          done
+          grep -n "uses-feature" "$MANIFEST"
+
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
