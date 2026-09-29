@@ -29,6 +29,17 @@ jobs:
       - name: Generar proyecto Android
         run: npx cap add android
 
+      - name: Bajar minSdkVersion a 16
+        # Capacitor pone minSdkVersion=22 por defecto (Android 5.1), así
+        # que en un TV box con Android 4.1 (API 16) el instalador rechaza
+        # el APK con "INSTALL_FAILED_OLDER_SDK". Esto lo baja para que
+        # instale. OJO: por debajo de API 22 el WebView del sistema es muy
+        # viejo (le faltan fetch, ES6, CSS moderno, etc.), así que puede
+        # instalar y aun así verse roto o no cargar — si pasa eso, el
+        # límite real no es de instalación sino de qué puede correr ese
+        # WebView, y no tiene arreglo por este lado.
+        run: sed -i 's/minSdkVersion = [0-9]\+/minSdkVersion = 16/' android/variables.gradle
+
       - name: Generar ícono del APK
         # Toma capacitor/assets/icon.png (idealmente 1024x1024) y genera
         # todos los tamaños/mipmaps de Android (legacy + adaptive icon).
