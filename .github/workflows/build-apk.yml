@@ -29,15 +29,14 @@ jobs:
       - name: Generar proyecto Android
         run: npx cap add android
 
-      - name: Subir minSdkVersion a 21 (mínimo real con AndroidX)
-        # Capacitor usa librerías de AndroidX, que EXIGEN minSdkVersion >= 21
-        # en cualquier app que las use — si se pone más bajo (probamos con
-        # 16 para un TV box viejo), el "manifest merger" de Gradle corta la
-        # build con un error de conflicto de minSdkVersion entre la app y
-        # esas librerías. No hay forma de bajar de 21 con este stack: un TV
-        # box con Android más viejo que eso (5.0) directamente no puede
-        # instalar apps hechas con Capacitor, sin importar qué se ajuste acá.
-        run: sed -i 's/minSdkVersion = [0-9]\+/minSdkVersion = 21/' android/variables.gradle
+      - name: Restaurar minSdkVersion a 22 (mínimo real de Capacitor/Cordova)
+        # Confirmado por el propio Gradle: cordova-android (que Capacitor
+        # usa por debajo) exige minSdkVersion >= 22. No es 21 ni 16 — con
+        # cualquier valor menor el "manifest merger" corta la build. Esto
+        # es un piso duro del framework: un TV box con Android más viejo
+        # que 5.1 (API 22) no puede instalar apps hechas con Capacitor,
+        # sin ningún workaround posible desde este lado.
+        run: sed -i 's/minSdkVersion = [0-9]\+/minSdkVersion = 22/' android/variables.gradle
 
       - name: Generar ícono del APK
         # Toma capacitor/assets/icon.png (idealmente 1024x1024) y genera
