@@ -69,9 +69,11 @@ http
       res.writeHead(404);
       return res.end("Not found");
     }
+    const extension = path.extname(filePath).toLowerCase();
+    const isImmutableAsset = [".js", ".css", ".png", ".jpg", ".svg", ".ico"].includes(extension);
     res.writeHead(200, {
-      "Content-Type": MIME[path.extname(filePath)] || "application/octet-stream",
-      "Cache-Control": "no-store",
+      "Content-Type": MIME[extension] || "application/octet-stream",
+      "Cache-Control": isImmutableAsset ? "public, max-age=31536000, immutable" : "no-cache",
     });
     fs.createReadStream(filePath).pipe(res);
   })

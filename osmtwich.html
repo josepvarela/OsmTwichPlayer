@@ -157,6 +157,10 @@ html, body { width:100%; height:100vh; height:100dvh; background:#000; color:#ff
     padding: 10px;
     margin: -10px;
     transition: opacity .25s ease;
+    /* Mantiene fuera de pantalla sin pintar las filas completas en TVs lentas. */
+    content-visibility: auto;
+    contain: layout paint style;
+    contain-intrinsic-size: 360px;
 }
 
 /* Sin filter/blur aquí: desenfocar filas no enfocadas es costoso de repintar
