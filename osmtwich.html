@@ -47,7 +47,31 @@ html, body { width:100%; height:100vh; height:100dvh; background:#000; color:#ff
 #search-nav-item.focused { border-color: #fff; transform: scale(1.08); }
 #search-nav-item svg { width: 30px; height: 30px; stroke: #fff; }
 
-#nav-list { list-style:none; }
+  #nav-list { list-style:none; }
+  #settings-nav-btn { width:100%; margin-top:24px; padding:14px; border:3px solid transparent; border-radius:8px; background:#2a2a2e; color:#fff; font:inherit; font-size:20px; text-align:left; cursor:pointer; }
+  #settings-nav-btn:hover, #settings-nav-btn:focus-visible { border-color:#9146FF; outline:none; }
+  #settings-overlay { position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,.76); z-index:300; }
+  #settings-overlay.visible { display:flex; }
+  .settings-box { width:min(560px,90vw); max-height:88vh; overflow:auto; padding:28px; border:1px solid rgba(255,255,255,.16); border-radius:16px; background:#18181b; box-shadow:0 20px 60px rgba(0,0,0,.6); }
+  .settings-box h2 { margin-bottom:20px; font-size:26px; }
+  .settings-row { display:flex; align-items:center; justify-content:space-between; gap:18px; padding:14px 0; border-bottom:1px solid rgba(255,255,255,.1); }
+  .settings-row label { font-size:17px; color:#fff; }
+  .settings-row select, .settings-close { min-width:150px; padding:10px 12px; border:2px solid transparent; border-radius:8px; background:#2a2a2e; color:#fff; font:inherit; cursor:pointer; }
+  .settings-row select:focus, .settings-close:focus-visible { outline:none; border-color:#9146FF; }
+  .settings-close { display:block; width:100%; margin-top:22px; background:#9146FF; }
+  html[data-theme="light"], html[data-theme="light"] body { background:#f4f4f5; color:#18181b; }
+  html[data-theme="light"] #main-screen, html[data-theme="light"] #content, html[data-theme="light"] #results-screen { background:#f4f4f5; }
+  html[data-theme="light"] #sidebar, html[data-theme="light"] .settings-box { background:#fff; color:#18181b; }
+  html[data-theme="light"] #nav-list li, html[data-theme="light"] .settings-row label { color:#3f3f46; }
+  html[data-theme="light"] .settings-row select, html[data-theme="light"] .settings-close, html[data-theme="light"] #settings-nav-btn { background:#e4e4e7; color:#18181b; }
+  html[data-theme="light"] .tile-stream, html[data-theme="light"] .tile-game, html[data-theme="light"] .tile-clip { border-color:#d4d4d8; }
+  html[data-text-size="small"] { --ui-text-scale:.9; }
+  html[data-text-size="large"] { --ui-text-scale:1.15; }
+  html[data-text-size="large"] #nav-list li, html[data-text-size="large"] .section-title { font-size:calc(1em * var(--ui-text-scale)); }
+  html[data-card-size="small"] #main-screen .tile-stream { flex-basis:220px !important; width:220px !important; }
+  html[data-card-size="large"] #main-screen .tile-stream { flex-basis:340px !important; width:340px !important; }
+  @media (max-width:900px) { .settings-row { align-items:flex-start; flex-direction:column; gap:8px; } .settings-row select { width:100%; } }
+
 
 #nav-list li {
     font-size: 26px;
@@ -5177,8 +5201,9 @@ body.player-fullscreen #player-background {
                 </div>
                 <div id="sidebar-logo-text">OsmTwich</div>
             </div>
-            <ul id="nav-list"></ul>
-        </nav>
+  <ul id="nav-list"></ul>
+  <button id="settings-nav-btn" type="button" aria-label="Abrir ajustes">Ajustes</button>
+  </nav>
 
         <main id="content">
             <div id="sections" class="sections"></div>
@@ -5194,9 +5219,20 @@ body.player-fullscreen #player-background {
 
         <!-- Login con Twitch: redirección (PC/celular) o QR (TV). El
              contenido se arma dinámicamente en JS (ver renderAccountOverlay). -->
-        <div id="account-overlay" aria-hidden="true">
-            <div class="account-box" id="account-box"></div>
-        </div>
+  <div id="account-overlay" aria-hidden="true">
+  <div class="account-box" id="account-box"></div>
+  </div>
+  <div id="settings-overlay" aria-hidden="true">
+    <section class="settings-box" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+      <h2 id="settings-title">Ajustes de interfaz</h2>
+      <div class="settings-row"><label for="setting-theme">Tema</label><select id="setting-theme"><option value="dark">Oscuro</option><option value="light">Claro</option></select></div>
+      <div class="settings-row"><label for="setting-card-size">Tamaño de tarjetas</label><select id="setting-card-size"><option value="small">Pequeñas</option><option value="medium">Medianas</option><option value="large">Grandes</option></select></div>
+      <div class="settings-row"><label for="setting-quality">Calidad de stream</label><select id="setting-quality"><option value="auto">Automática</option><option value="720p30">720p</option><option value="480p30">480p</option><option value="360p30">360p</option></select></div>
+      <div class="settings-row"><label for="setting-text-size">Tamaño de texto</label><select id="setting-text-size"><option value="normal">Normal</option><option value="small">Pequeño</option><option value="large">Grande</option></select></div>
+      <div class="settings-row"><label for="setting-chat">Mostrar chat al iniciar</label><select id="setting-chat"><option value="yes">Sí</option><option value="no">No</option></select></div>
+      <button id="settings-close" class="settings-close" type="button">Cerrar</button>
+    </section>
+  </div>
     </div>
 
     <!-- ===================== PANTALLA: BÚSQUEDA ===================== -->
@@ -6258,10 +6294,11 @@ function selectNavItem() {
         openSearch();
         return;
     }
-    if (item.id === "account") {
-        openAccountOverlay();
-        return;
-    }
+  if (item.id === "account") {
+  if (typeof window.openInterfaceSettings === "function") window.openInterfaceSettings();
+  else openAccountOverlay();
+  return;
+  }
     if (item.id === "seguidosChannels" && !twitchUser) {
         openAccountOverlay();
         return;
@@ -7899,7 +7936,10 @@ function applyStartupQuality() {
         const groups = list.map(q => q.group);
         // En READY la lista a veces viene vacía: en ese caso se pide la
         // primera preferida directamente.
-        const target = STARTUP_QUALITY_PREFS.find(g => groups.includes(g)) ||
+        let preferredQuality = "";
+        try { preferredQuality = localStorage.getItem("osmtwich-settings-quality") || ""; } catch (err) {}
+        const target = (preferredQuality && preferredQuality !== "auto" && groups.includes(preferredQuality)) ? preferredQuality :
+            STARTUP_QUALITY_PREFS.find(g => groups.includes(g)) ||
             (groups.length ? null : STARTUP_QUALITY_PREFS[0]);
         if (target) {
             if (twitchPlayer.getQuality() !== target) twitchPlayer.setQuality(target);
@@ -11051,6 +11091,41 @@ html[data-tv-scaled] #tv-scale-root {
 })();
 </script>
 
+<script>
+(function setupInterfaceSettings(){
+  const KEY = "osmtwich-settings-";
+  const defaults = { theme:"dark", cardSize:"medium", quality:"auto", textSize:"normal", chat:"yes" };
+  const get = (name) => { try { return localStorage.getItem(KEY + name) || defaults[name]; } catch (err) { return defaults[name]; } };
+  const save = (name, value) => { try { localStorage.setItem(KEY + name, value); } catch (err) {} };
+  const apply = () => {
+    const root = document.documentElement;
+    root.dataset.theme = get("theme");
+    root.dataset.cardSize = get("cardSize");
+    root.dataset.textSize = get("textSize");
+    const chat = document.getElementById("chat-panel");
+    if (chat && document.getElementById("player-screen")?.classList.contains("active")) chat.classList.toggle("hidden-chat", get("chat") === "no");
+  };
+  const overlay = document.getElementById("settings-overlay");
+  const open = () => {
+    if (!overlay) return;
+    ["theme","card-size","quality","text-size","chat"].forEach(id => {
+      const el = document.getElementById("setting-" + id);
+      if (el) el.value = get(({ "card-size":"cardSize", "text-size":"textSize" }[id] || id));
+    });
+    overlay.classList.add("visible"); overlay.setAttribute("aria-hidden", "false");
+    document.getElementById("setting-theme")?.focus();
+  };
+  const close = () => { overlay?.classList.remove("visible"); overlay?.setAttribute("aria-hidden", "true"); document.getElementById("settings-nav-btn")?.focus(); };
+  window.openInterfaceSettings = open;
+  document.getElementById("settings-nav-btn")?.addEventListener("click", open);
+  document.getElementById("settings-close")?.addEventListener("click", close);
+  overlay?.addEventListener("click", e => { if (e.target === overlay) close(); });
+  const bindings = { theme:"theme", "card-size":"cardSize", quality:"quality", "text-size":"textSize", chat:"chat" };
+  Object.entries(bindings).forEach(([id, name]) => document.getElementById("setting-" + id)?.addEventListener("change", e => { save(name, e.target.value); apply(); }));
+  document.addEventListener("keydown", e => { if (e.key === "Escape" && overlay?.classList.contains("visible")) { e.preventDefault(); close(); } });
+  apply();
+})();
+</script>
 </body>
 </html>
 
