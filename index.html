@@ -7933,11 +7933,20 @@ function clearStartupQualityTimer() {
 
 function applyStartupQuality() {
   if (!twitchPlayer || qualityUserPicked || qualityStartupUpgradeDone) return;
-  let savedQuality = "auto";
-  try { savedQuality = localStorage.getItem("osmtwich-settings-quality") || "auto"; } catch (err) {}
+  let savedQuality = window.interfaceQualityPreference || "auto";
+  try { savedQuality = localStorage.getItem("osmtwich-settings-quality") || savedQuality; } catch (err) {}
   if (savedQuality !== "auto") {
-    try { if ((twitchPlayer.getQualities() || []).some(q => q.group === savedQuality)) twitchPlayer.setQuality(savedQuality); } catch (err) {}
-    qualityStartupUpgradeDone = true;
+    try {
+      const qualities = twitchPlayer.getQualities() || [];
+      const exact = qualities.find(q => q.group === savedQuality || q.quality === savedQuality);
+      const resolution = String(savedQuality).match(/^(\\d+p)/i)?.[1];
+      const fallback = resolution && qualities.find(q => String(q.group || q.quality || q.name).startsWith(resolution));
+      const target = exact || fallback;
+      if (target) {
+        twitchPlayer.setQuality(target.group || target.quality || target.name);
+        qualityStartupUpgradeDone = true;
+      }
+    } catch (err) {}
     return;
   }
     try {
@@ -8392,6 +8401,7 @@ function goToPlayerScreen() {
         chatPanelInit.setAttribute("aria-hidden", "true");
         chatPanelInit.style.pointerEvents = "none";
     }
+    window.applyInterfacePreferences?.();
     hideQualityPanel();
 
     // El reproductor se inicia en silencio desde Twitch Embed.
@@ -11104,15 +11114,24 @@ html[data-tv-scaled] #tv-scale-root {
   const get = name => { try { return localStorage.getItem(KEY + name) || defaults[name]; } catch (_) { return defaults[name]; } };
   const save = (name, value) => { try { localStorage.setItem(KEY + name, value); } catch (_) {} };
   const overlay = document.getElementById("settings-overlay");
-  const apply = () => {
+    const apply = () => {
     const root = document.documentElement;
     root.dataset.theme = get("theme");
     root.dataset.cardSize = get("cardSize");
     root.dataset.textSize = get("textSize");
-    const chat = document.getElementById("chat-panel");
-    if (chat) chat.classList.toggle("hidden-chat", get("chat") === "no");
     window.interfaceChatPreference = get("chat");
     window.interfaceQualityPreference = get("quality");
+    window.applyInterfacePreferences?.();
+  };
+  window.applyInterfacePreferences = () => {
+    const chat = document.getElementById("chat-panel");
+    if (!chat) return;
+    const hidden = get("chat") === "no";
+    chat.classList.toggle("hidden-chat", hidden);
+    chat.setAttribute("aria-hidden", hidden ? "true" : "false");
+    chat.style.pointerEvents = hidden ? "none" : "auto";
+    const button = document.getElementById("ctrl-chat");
+    if (button) button.setAttribute("aria-label", hidden ? "Mostrar chat" : "Ocultar chat");
   };
   const open = () => {
     if (!overlay) return;
