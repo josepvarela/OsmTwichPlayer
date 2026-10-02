@@ -8208,7 +8208,12 @@ async function openChannel(channelLogin) {
     // silencio, y el autoplay se queda a medias hasta un play manual.
     goToPlayerScreen();
 
-    createPlayer({ channel: channelLogin });
+    // Espera a que createPlayer termine antes de abrir el chat. createPlayer
+    // puede destruir el reproductor anterior y llama a disconnectChat(); si
+    // ambas operaciones se lanzaban en paralelo, esa limpieza ocurría después
+    // de connectChat() y dejaba el aviso "Conectando…" sin socket activo.
+    await createPlayer({ channel: channelLogin });
+    if (currentChannelLogin !== channelLogin || currentScreen !== "player") return;
     connectChat(channelLogin);
     loadChatCosmetics(channelLogin); // emotes de 7TV + badges reales de este canal
     // El chat se conecta en segundo plano (para que ya tenga mensajes
