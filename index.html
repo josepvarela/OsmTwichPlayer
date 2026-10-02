@@ -7894,7 +7894,12 @@ function applyStartupQuality() {
         // primera preferida directamente.
         const target = STARTUP_QUALITY_PREFS.find(g => groups.includes(g)) ||
             (groups.length ? null : STARTUP_QUALITY_PREFS[0]);
-        if (target) twitchPlayer.setQuality(target);
+        if (target) {
+            if (twitchPlayer.getQuality() !== target) twitchPlayer.setQuality(target);
+            // Solo se da por aplicada si la calidad estaba en la lista real;
+            // así no se vuelve a llamar setQuality en cada evento PLAYING.
+            if (groups.includes(target)) qualityStartupUpgradeDone = true;
+        }
     } catch (err) {}
 }
 
@@ -7998,7 +8003,7 @@ function bindPlayerLifecycleListeners() {
         }
     });
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, applyStartupQuality);
-    twitchPlayer.addEventListener(Twitch.Player.PLAYING, scheduleStartupQualityUpgrade);
+    // Sin subida automática a Auto (provocaba play/pause repetidos): el usuario lo elige a mano en el panel de calidad.
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, refreshQualities);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, startProgressLoop);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => { if (qualityPanelVisible) hideQualityPanel(); });
