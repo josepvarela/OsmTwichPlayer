@@ -5429,11 +5429,14 @@ let controlsVisible = false;
 // descarta. Se captura en fase de "capture" sobre toda la barra para que
 // nada la esquive.
 let controlsSuppressUntil = 0;
-const CONTROLS_SUPPRESS_MS = 700; // v65
+const CONTROLS_SUPPRESS_MS = 1200;
 function armControlsSuppression() {
     controlsSuppressUntil = Date.now() + CONTROLS_SUPPRESS_MS;
 }
 function isControlsActionSuppressed() {
+    return Date.now() < controlsSuppressUntil;
+}
+function isControlsClickSuppressed() {
     return Date.now() < controlsSuppressUntil;
 }
 let controlFocusIndex = 0;
@@ -5688,7 +5691,7 @@ function enableDragScroll(track) {
 function handleKeyDown(e) {
     const keyCode = e.keyCode || ({ArrowLeft:37, ArrowRight:39, ArrowUp:38, ArrowDown:40, Enter:13, " ":32, Escape:27}[e.key] || 0);
 
-    // El overlay de cuenta/login tiene prioridad absoluta: "atrás" lo cierra
+    // El overlay de cuenta/login tiene prioridad absoluta: "atr��s" lo cierra
     // en vez de disparar la navegación general de la pantalla de fondo.
     if (document.getElementById("account-overlay")?.classList.contains("visible")) {
         handleAccountOverlayKeys(keyCode, e);
@@ -8536,7 +8539,7 @@ function setupPlayerControls() {
     CONTROL_ACTIONS.forEach((action) => {
         const btn = document.getElementById(`ctrl-${action}`);
         btn.addEventListener("click", () => {
-            if (isControlsActionSuppressed()) return;
+            if (isControlsClickSuppressed()) return;
             runControlAction(action);
         });
         btn.addEventListener("keydown", (e) => {
@@ -8561,7 +8564,7 @@ function setupPlayerControls() {
     const controlsBar = document.getElementById("player-controls-bar");
     if (controlsBar) {
         controlsBar.addEventListener("click", (e) => {
-            if (isControlsActionSuppressed()) {
+            if (isControlsClickSuppressed()) {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
