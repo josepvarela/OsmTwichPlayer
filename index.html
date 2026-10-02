@@ -157,6 +157,10 @@ html, body { width:100%; height:100vh; height:100dvh; background:#000; color:#ff
     padding: 10px;
     margin: -10px;
     transition: opacity .25s ease;
+    /* Mantiene fuera de pantalla sin pintar las filas completas en TVs lentas. */
+    content-visibility: auto;
+    contain: layout paint style;
+    contain-intrinsic-size: 360px;
 }
 
 /* Sin filter/blur aquí: desenfocar filas no enfocadas es costoso de repintar
@@ -5425,11 +5429,14 @@ let controlsVisible = false;
 // descarta. Se captura en fase de "capture" sobre toda la barra para que
 // nada la esquive.
 let controlsSuppressUntil = 0;
-const CONTROLS_SUPPRESS_MS = 700; // v65
+const CONTROLS_SUPPRESS_MS = 1200;
 function armControlsSuppression() {
     controlsSuppressUntil = Date.now() + CONTROLS_SUPPRESS_MS;
 }
 function isControlsActionSuppressed() {
+    return Date.now() < controlsSuppressUntil;
+}
+function isControlsClickSuppressed() {
     return Date.now() < controlsSuppressUntil;
 }
 let controlFocusIndex = 0;
@@ -5684,7 +5691,7 @@ function enableDragScroll(track) {
 function handleKeyDown(e) {
     const keyCode = e.keyCode || ({ArrowLeft:37, ArrowRight:39, ArrowUp:38, ArrowDown:40, Enter:13, " ":32, Escape:27}[e.key] || 0);
 
-    // El overlay de cuenta/login tiene prioridad absoluta: "atrás" lo cierra
+    // El overlay de cuenta/login tiene prioridad absoluta: "atr��s" lo cierra
     // en vez de disparar la navegación general de la pantalla de fondo.
     if (document.getElementById("account-overlay")?.classList.contains("visible")) {
         handleAccountOverlayKeys(keyCode, e);
@@ -8201,7 +8208,12 @@ async function openChannel(channelLogin) {
     // silencio, y el autoplay se queda a medias hasta un play manual.
     goToPlayerScreen();
 
-    createPlayer({ channel: channelLogin });
+    // Espera a que createPlayer termine antes de abrir el chat. createPlayer
+    // puede destruir el reproductor anterior y llama a disconnectChat(); si
+    // ambas operaciones se lanzaban en paralelo, esa limpieza ocurría después
+    // de connectChat() y dejaba el aviso "Conectando…" sin socket activo.
+    await createPlayer({ channel: channelLogin });
+    if (currentChannelLogin !== channelLogin || currentScreen !== "player") return;
     connectChat(channelLogin);
     loadChatCosmetics(channelLogin); // emotes de 7TV + badges reales de este canal
     // El chat se conecta en segundo plano (para que ya tenga mensajes
@@ -8532,7 +8544,7 @@ function setupPlayerControls() {
     CONTROL_ACTIONS.forEach((action) => {
         const btn = document.getElementById(`ctrl-${action}`);
         btn.addEventListener("click", () => {
-            if (isControlsActionSuppressed()) return;
+            if (isControlsClickSuppressed()) return;
             runControlAction(action);
         });
         btn.addEventListener("keydown", (e) => {
@@ -8557,7 +8569,7 @@ function setupPlayerControls() {
     const controlsBar = document.getElementById("player-controls-bar");
     if (controlsBar) {
         controlsBar.addEventListener("click", (e) => {
-            if (isControlsActionSuppressed()) {
+            if (isControlsClickSuppressed()) {
                 e.preventDefault();
                 e.stopPropagation();
                 e.stopImmediatePropagation();
