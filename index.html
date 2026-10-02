@@ -7778,6 +7778,7 @@ function destroyPlayer() {
     updateQualityCtrlLabel();
     stopProgressLoop();
     stopAutoplayRetry();
+    clearStartupQualityTimer();
     clearControlsAutoHide();
 
     disconnectChat();
@@ -7867,6 +7868,47 @@ let playerAutoplayAttempts = 0;
 let playerAutoplayStarted = false;
 let playerUnmuteAttempted = false;
 
+// ===== Calidad de arranque =====
+// Para que el video empiece rápido en TV se arranca en una calidad baja
+// (menos datos antes del primer frame) y, una vez reproduciendo, se pasa a
+// "Auto". Si el usuario elige una calidad a mano, no se toca más.
+// Ajusta aquí: la primera calidad disponible de la lista es la que se usa.
+const STARTUP_QUALITY_PREFS = ["480p30", "360p30", "480p60", "360p60", "160p30"];
+const STARTUP_QUALITY_UPGRADE_MS = 5000; // tiempo reproduciendo antes de subir a Auto
+const STARTUP_QUALITY_FINAL = "auto";
+let qualityUserPicked = false;
+let qualityStartupUpgradeDone = false;
+let qualityUpgradeTimer = null;
+
+function clearStartupQualityTimer() {
+    if (qualityUpgradeTimer) clearTimeout(qualityUpgradeTimer);
+    qualityUpgradeTimer = null;
+}
+
+function applyStartupQuality() {
+    if (!twitchPlayer || qualityUserPicked || qualityStartupUpgradeDone) return;
+    try {
+        const list = twitchPlayer.getQualities() || [];
+        const groups = list.map(q => q.group);
+        // En READY la lista a veces viene vacía: en ese caso se pide la
+        // primera preferida directamente.
+        const target = STARTUP_QUALITY_PREFS.find(g => groups.includes(g)) ||
+            (groups.length ? null : STARTUP_QUALITY_PREFS[0]);
+        if (target) twitchPlayer.setQuality(target);
+    } catch (err) {}
+}
+
+function scheduleStartupQualityUpgrade() {
+    if (qualityUpgradeTimer || qualityStartupUpgradeDone || qualityUserPicked) return;
+    qualityUpgradeTimer = setTimeout(() => {
+        qualityUpgradeTimer = null;
+        qualityStartupUpgradeDone = true;
+        if (!twitchPlayer || qualityUserPicked) return;
+        try { twitchPlayer.setQuality(STARTUP_QUALITY_FINAL); } catch (err) {}
+        setTimeout(refreshQualities, 500);
+    }, STARTUP_QUALITY_UPGRADE_MS);
+}
+
 function refreshQualities() {
     if (!twitchPlayer) return;
     try {
@@ -7905,6 +7947,10 @@ function requestAutoplay(forceMuted) {
 // usuario en la app (clic, toque o tecla) al abrir el canal.
 function kickAutoplay() {
     stopAutoplayRetry();
+    clearStartupQualityTimer();
+    qualityUserPicked = false;
+    qualityStartupUpgradeDone = false;
+    applyStartupQuality(); // si el player se reutilizó, ya está listo
     playerAutoplayAttempts = 0;
     playerAutoplayStarted = false;
     playerUnmuteAttempted = false;
@@ -7933,6 +7979,7 @@ function bindPlayerLifecycleListeners() {
     // getQualities() suele venir vacío justo en READY — se reintenta en PLAYING también.
     twitchPlayer.addEventListener(Twitch.Player.READY, refreshQualities);
     twitchPlayer.addEventListener(Twitch.Player.READY, syncMuteIcon);
+    twitchPlayer.addEventListener(Twitch.Player.READY, applyStartupQuality);
     twitchPlayer.addEventListener(Twitch.Player.READY, () => requestAutoplay(true));
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => {
         playerAutoplayStarted = true;
@@ -7950,6 +7997,8 @@ function bindPlayerLifecycleListeners() {
             } catch (err) {}
         }
     });
+    twitchPlayer.addEventListener(Twitch.Player.PLAYING, applyStartupQuality);
+    twitchPlayer.addEventListener(Twitch.Player.PLAYING, scheduleStartupQualityUpgrade);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, refreshQualities);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, startProgressLoop);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => { if (qualityPanelVisible) hideQualityPanel(); });
@@ -8871,6 +8920,8 @@ function updateQualityPanelFocus() {
 }
 
 function selectQuality(index) {
+    qualityUserPicked = true;
+    clearStartupQualityTimer();
     qualityIndex = index;
     const q = availableQualities[index];
     if (q && twitchPlayer) {
