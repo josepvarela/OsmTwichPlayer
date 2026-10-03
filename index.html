@@ -5572,7 +5572,8 @@ const NAV_ITEMS = [
     { id: "featured",         label: "Destacados" },
     { id: "topStreamers",     label: "Streamers top" },
     { id: "topGames",         label: "Juegos top" },
-    { id: "account",          label: "Opciones" }
+    { id: "settings",         label: "Ajustes" },
+    { id: "account",          label: "Cuenta" }
 ];
 
 // --- Login con Twitch (OAuth) ---
@@ -5758,7 +5759,8 @@ function buildNav() {
         featured: '<svg ' + SVG_ATTRS + '><path d="M12 3l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5L12 17.8 6.2 20.9l1.1-6.5L2.6 9.8l6.5-.9L12 3z"/></svg>',
         topGames: '<svg ' + SVG_ATTRS + '><path d="M6 11h4M8 9v4"/><path d="M15 12h.01M18 10h.01"/><path d="M17.3 5H6.7a4 4 0 0 0-4 3.6l-.7 7.3A2.6 2.6 0 0 0 4.6 19c.8 0 1.5-.3 2-.9L9 15h6l2.4 3.1c.5.6 1.2.9 2 .9a2.6 2.6 0 0 0 2.6-3.1l-.7-7.3a4 4 0 0 0-4-3.6z"/></svg>',
         topStreamers: '<svg ' + SVG_ATTRS + '><circle cx="12" cy="8" r="4"/><path d="M4 20a8 8 0 0 1 16 0"/></svg>',
-        account: '<svg ' + SVG_ATTRS + '><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 4.29l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>'
+        settings: '<svg ' + SVG_ATTRS + '><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06A2 2 0 1 1 7.04 4.29l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.32 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+        account: '<svg ' + SVG_ATTRS + '><circle cx="12" cy="12" r="10"/><circle cx="12" cy="10" r="3"/><path d="M6.2 18.5a7 7 0 0 1 11.6 0"/></svg>'
     };
 
     NAV_ITEMS.forEach((item, i) => {
@@ -6477,10 +6479,14 @@ function selectNavItem() {
         openSearch();
         return;
     }
+    if (item.id === "settings") {
+        openSettingsOverlay();
+        return;
+    }
     if (item.id === "account") {
-  openAccountOverlay();
-  return;
-  }
+        openAccountOverlay();
+        return;
+    }
     if (item.id === "seguidosChannels" && !twitchUser) {
         openAccountOverlay();
         return;
@@ -7617,7 +7623,18 @@ function logoutTwitch() {
 }
 
 // ---- Overlay de cuenta: UI y navegación ----
+let accountOverlayOrigin = "account"; // "account" | "settings" (ítem del sidebar que lo abrió)
+
+function openSettingsOverlay() {
+    const overlay = document.getElementById("account-overlay");
+    overlay?.classList.add("visible");
+    overlay?.setAttribute("aria-hidden", "false");
+    accountOverlayOrigin = "settings";
+    renderAccountSettings();
+}
+
 function openAccountOverlay() {
+    accountOverlayOrigin = "account";
     const overlay = document.getElementById("account-overlay");
     overlay?.classList.add("visible");
     overlay?.setAttribute("aria-hidden", "false");
@@ -7631,7 +7648,7 @@ function closeAccountOverlay() {
     overlay?.classList.remove("visible");
     overlay?.setAttribute("aria-hidden", "true");
     accountOverlayView = "menu";
-    const accountIndex = NAV_ITEMS.findIndex(item => item.id === "account");
+    const accountIndex = NAV_ITEMS.findIndex(item => item.id === accountOverlayOrigin);
     if (currentScreen === "main" && accountIndex >= 0) {
         navIndex = accountIndex;
         setFocus("nav", accountIndex);
@@ -7710,7 +7727,6 @@ function renderAccountOverlay(state, extra) {
             <p class="account-hint">Necesario para chatear con tu nombre y ver tus canales seguidos que están en vivo. Siempre inicias sesión en la pantalla real de Twitch, nunca acá.</p>
             <button class="account-btn primary" data-nav-btn data-action="redirect">Iniciar sesión</button>
             <button class="account-btn" data-nav-btn data-action="qr">Iniciar con QR (TV)</button>
-            <button class="account-btn" data-nav-btn data-action="settings"> Ajustes de interfaz</button>
             <button class="account-btn" data-nav-btn data-action="reload-app"> Recargar app</button>
             <button class="account-btn" data-nav-btn data-action="close">Salir</button>`;
     }
@@ -7723,7 +7739,7 @@ function renderAccountSettings() {
     if (!box) return;
     accountOverlayView = "settings";
     box.innerHTML = `
-        <h2>Ajustes de interfaz</h2>
+        <h2>Ajustes</h2>
         <div class="settings-row-account" data-setting="theme">
     <label>Tema</label>
     <div class="settings-options">
@@ -7782,7 +7798,7 @@ function renderAccountSettings() {
                 <button data-nav-btn data-value="no">No</button>
             </div>
         </div>
-        <button class="account-btn" data-nav-btn data-action="back-to-menu">← Volver</button>
+        <button class="account-btn" data-nav-btn data-action="close">← Volver</button>
     `;
     document.querySelectorAll("#account-box .settings-options button").forEach(btn => {
         btn.addEventListener("click", () => {
@@ -7851,7 +7867,6 @@ async function renderLoggedInAccount() {
         <div class="account-name">${escapeHtml(u.display_name || u.login || "")}</div>
         <p class="account-hint">Sesión iniciada. Ya podés chatear con tu nombre.</p>
         <button class="account-btn" data-nav-btn data-action="view-profile" data-login="${escapeHtml(u.login || "")}">Ver perfil</button>
-        <button class="account-btn" data-nav-btn data-action="settings"> Ajustes de interfaz</button>
         <button class="account-btn" data-nav-btn data-action="reload-app"> Recargar app</button>
         <button class="account-btn" data-nav-btn data-action="logout">Cerrar sesión</button>
         <button class="account-btn" data-nav-btn data-action="close">Cerrar</button>`;
@@ -7862,10 +7877,6 @@ async function renderLoggedInAccount() {
 function handleAccountOverlayKeys(keyCode, e) {
     if (keyCode === 27 || keyCode === 461 || keyCode === 10009) {
         e.preventDefault();
-        if (accountOverlayView === "settings") {
-            renderAccountOverlay(twitchUser ? "logged-in" : "logged-out");
-            return;
-        }
         closeAccountOverlay();
         return;
     }
@@ -7874,7 +7885,7 @@ function handleAccountOverlayKeys(keyCode, e) {
     // dentro de la fila, Enter/OK selecciona el valor enfocado.
     if (accountOverlayView === "settings") {
         const rows = Array.from(document.querySelectorAll("#account-box .settings-row-account"));
-        const backBtn = document.querySelector('#account-box [data-action="back-to-menu"]');
+        const backBtn = document.querySelector('#account-box [data-action="close"]');
         // "Filas navegables" = filas de ajustes + el botón "Volver".
         const items = rows.concat(backBtn ? [backBtn] : []);
 
@@ -7941,7 +7952,7 @@ function handleAccountOverlayKeys(keyCode, e) {
             const active = document.activeElement;
             if (active && active.dataset && active.dataset.value !== undefined) {
                 active.click();
-            } else if (active && active.dataset && active.dataset.action === "back-to-menu") {
+            } else if (active && active.dataset && active.dataset.action === "close") {
                 active.click();
             }
             return;
