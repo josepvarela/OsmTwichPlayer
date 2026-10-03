@@ -4979,8 +4979,7 @@ html[data-text-color] #channel-substat,
 html[data-text-color] #channel-followers,
 html[data-text-color] #channel-description,
 html[data-text-color] .profile-section h2,
-html[data-text-color] .chat-msg .chat-text,
-html[data-text-color] .chat-msg .chat-name {
+html[data-text-color] .chat-msg .chat-text {
     color: var(--app-text-color, #fff) !important;
 }
 
@@ -5445,7 +5444,7 @@ body.player-fullscreen #player-background {
             <div id="channel-statusbar">
                 <span id="channel-live-badge" class="channel-badge"><span class="live-dot" aria-hidden="true"></span><span>OFFLINE</span></span>
                 <button class="ctrl-btn small hidden" id="channel-watch-btn">▶ Ver en vivo</button>
-                <button class="ctrl-btn small hidden" id="channel-chat-btn" type="button">💬 Chatear</button>
+                <button class="ctrl-btn small hidden" id="channel-chat-btn" type="button"> Chatear</button>
                 <button class="ctrl-btn small hidden" id="channel-follow-btn" type="button"></button>
             </div>
         </div>
@@ -6920,7 +6919,8 @@ function openProfileChat(login) {
     loadChatCosmetics(login);
     const btn = document.getElementById("channel-chat-btn");
     if (btn) btn.textContent = "✕ Cerrar chat";
-    document.getElementById("profile-chat-input")?.focus();
+    // No enfocar el input automáticamente: al abrirse junto al stream,
+    // robarle el foco al reproductor rompe el autoplay silencioso en TV.
 }
 
 function closeProfileChat() {
@@ -6933,7 +6933,7 @@ function closeProfileChat() {
         panel.classList.remove("profile-chat-mode");
     }
     const btn = document.getElementById("channel-chat-btn");
-    if (btn) btn.textContent = "💬 Chatear";
+    if (btn) btn.textContent = " Chatear";
 }
 
 function toggleProfileChat(login) {
@@ -7131,7 +7131,7 @@ async function runSearch(login) {
         // El canal está offline: ofrecemos chatear igual, en un panel a la
         // derecha del propio perfil (no hay reproductor que mostrar).
         chatBtn.classList.remove("hidden");
-        chatBtn.textContent = "💬 Chatear";
+        chatBtn.textContent = " Chatear";
         chatBtn.onclick = () => toggleProfileChat(user.login || login);
         focusResultsAction("chat");
     }
@@ -8515,7 +8515,32 @@ async function createPlayer(options) {
     guardPlayerIframeFocus();
     kickAutoplay();
 }
-
+// Espera a que el reproductor reporte que ya está reproduciendo, o hasta
+// un máximo de `timeoutMs`. Se usa para no conectar el chat (WebSocket +
+// foco del input) antes de que Twitch haya arrancado el video: en TVs
+// con políticas estrictas de autoplay, el trabajo extra + cualquier
+// focus() sobre el chat puede hacer que el play() silencioso se bloquee.
+function waitForPlaybackStart(timeoutMs) {
+    return new Promise(resolve => {
+        if (!twitchPlayer) { resolve(false); return; }
+        try {
+            if (!twitchPlayer.isPaused()) { resolve(true); return; }
+        } catch (_) {}
+        let done = false;
+        const finish = (ok) => {
+            if (done) return;
+            done = true;
+            clearTimeout(timer);
+            try { twitchPlayer.removeEventListener(Twitch.Player.PLAYING, onPlaying); } catch (_) {}
+            resolve(ok);
+        };
+        const onPlaying = () => finish(true);
+        const timer = setTimeout(() => finish(false), timeoutMs);
+        try { twitchPlayer.addEventListener(Twitch.Player.PLAYING, onPlaying); } catch (_) {
+            finish(false);
+        }
+    });
+}
 // Al hacer click en el nombre del streamer (en la información inferior del reproductor), en vez de
 // salir a twitch.tv en una pestaña externa, o de saltar directo al vivo, se
 // abre el canal como si se hubiera buscado su nombre en el buscador: perfil
@@ -8604,6 +8629,11 @@ async function openChannel(channelLogin) {
     // ambas operaciones se lanzaban en paralelo, esa limpieza ocurría después
     // de connectChat() y dejaba el aviso "Conectando…" sin socket activo.
     await createPlayer({ channel: channelLogin });
+    if (currentChannelLogin !== channelLogin || currentScreen !== "player") return;
+    // Espera a que el video empiece a reproducirse antes de abrir el chat.
+    // Así el WebSocket y cualquier foco del chat no interfieren con el
+    // autoplay silencioso que dispara Twitch al cargar.
+    await waitForPlaybackStart(6000);
     if (currentChannelLogin !== channelLogin || currentScreen !== "player") return;
     connectChat(channelLogin);
     loadChatCosmetics(channelLogin); // emotes de 7TV + badges reales de este canal
@@ -8745,7 +8775,22 @@ function goToPlayerScreen() {
             chatPanelInit.style.pointerEvents = "none";
         }
     }
-    hideQualityPanel();
+      hideQualityPanel();
+
+    // Asegura que el foco NO quede en el chat ni en ningún input al abrir
+    // el stream: si el chat se muestra automáticamente (ajuste "Sí"),
+    // cualquier foco puesto ahí le roba el gesto al reproductor y el
+    // autoplay silencioso queda bloqueado por el navegador.
+    setTimeout(() => {
+        if (currentScreen !== "player") return;
+        const active = document.activeElement;
+        const inChat = active && active.closest &&
+            active.closest("#chat-panel, #profile-chat-input, #chat-composer, #chat-messages");
+        if (inChat) {
+            try { active.blur(); } catch (_) {}
+            window.focus();
+        }
+    }, 0);
 
     // El reproductor se inicia en silencio desde Twitch Embed.
     // No dependemos de un "autoclic" artificial sobre el iframe.
