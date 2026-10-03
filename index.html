@@ -43,7 +43,28 @@ html, body { width:100%; height:100vh; height:100dvh; background:#000; color:#ff
     border: 4px solid transparent;
     cursor: pointer;
 }
+        
+/* ===== Temas alternativos ===== */
+html[data-theme="gray"] body,
+html[data-theme="gray"] #main-screen,
+html[data-theme="gray"] #content { background:#3a3a3e; color:#f4f4f5; }
+html[data-theme="gray"] #sidebar { background:#2b2b2f; }
+html[data-theme="gray"] .tile-stream,
+html[data-theme="gray"] .tile-game { background:#4a4a4f; }
 
+html[data-theme="gray-dark"] body,
+html[data-theme="gray-dark"] #main-screen,
+html[data-theme="gray-dark"] #content { background:#232326; color:#f4f4f5; }
+html[data-theme="gray-dark"] #sidebar { background:#1a1a1c; }
+html[data-theme="gray-dark"] .tile-stream,
+html[data-theme="gray-dark"] .tile-game { background:#2b2b2f; }
+
+html[data-theme="amoled"] body,
+html[data-theme="amoled"] #main-screen,
+html[data-theme="amoled"] #content,
+html[data-theme="amoled"] #sidebar { background:#000000; color:#f4f4f5; }
+html[data-theme="amoled"] .tile-stream,
+html[data-theme="amoled"] .tile-game { background:#0a0a0a; }
 #search-nav-item.focused { border-color: #fff; transform: scale(1.08); }
 #search-nav-item svg { width: 30px; height: 30px; stroke: #fff; }
 
@@ -61,9 +82,65 @@ html, body { width:100%; height:100vh; height:100dvh; background:#000; color:#ff
 .settings-close { display:block; width:100%; margin-top:22px; background:#9146FF; }
 html[data-theme="light"], html[data-theme="light"] body { background:#f4f4f5; color:#18181b; }
 html[data-theme="light"] #main-screen, html[data-theme="light"] #content, html[data-theme="light"] #results-screen { background:#f4f4f5; }
-html[data-theme="light"] #sidebar, html[data-theme="light"] .settings-box { background:#fff; color:#18181b; }
-html[data-theme="light"] #nav-list li, html[data-theme="light"] .settings-row label { color:#3f3f46; }
-html[data-theme="light"] .settings-row select, html[data-theme="light"] .settings-close, html[data-theme="light"] #settings-nav-btn { background:#e4e4e7; color:#18181b; }
+html[data-theme="light"] #sidebar { background:#fff; color:#18181b; }
+html[data-theme="light"] #sidebar-logo-text { color:#18181b !important; }
+
+/* Todos los textos de la app en negro al usar tema claro. */
+html[data-theme="light"] #content,
+html[data-theme="light"] #content .section-title,
+html[data-theme="light"] #content .section-stat,
+html[data-theme="light"] #content .stream-title,
+html[data-theme="light"] #content .stream-meta,
+html[data-theme="light"] #content .game-name,
+html[data-theme="light"] #content .game-viewers,
+html[data-theme="light"] #nav-list li,
+html[data-theme="light"] #nav-list .nav-label,
+html[data-theme="light"] .followed-name,
+html[data-theme="light"] .followed-meta,
+html[data-theme="light"] .followed-heading,
+html[data-theme="light"] .section-note,
+html[data-theme="light"] #channel-name,
+html[data-theme="light"] #channel-substat,
+html[data-theme="light"] #channel-followers,
+html[data-theme="light"] #channel-description,
+html[data-theme="light"] .profile-section h2,
+html[data-theme="light"] #game-screen-title,
+html[data-theme="light"] .game-screen-viewers {
+    color:#18181b !important;
+}
+
+/* Los iconos del sidebar también se oscurecen en tema claro. */
+html[data-theme="light"] #nav-list .nav-icon,
+html[data-theme="light"] #nav-list .nav-icon svg {
+    color:#18181b !important;
+    stroke:#18181b !important;
+    fill:none !important;
+}
+html[data-theme="light"] #nav-list .nav-icon svg[stroke] {
+    stroke:#18181b !important;
+}
+
+/* Al recibir foco (o hover), el texto vuelve a blanco para contrastar con
+   el fondo destacado. */
+html[data-theme="light"] #nav-list li.focused,
+html[data-theme="light"] #nav-list li.focused .nav-label,
+html[data-theme="light"] #nav-list li:focus,
+html[data-theme="light"] #nav-list li:focus .nav-label,
+html[data-theme="light"] #nav-list li:hover,
+html[data-theme="light"] #nav-list li:hover .nav-label {
+    color:#ffffff !important;
+    text-shadow: 0 0 5px rgba(0,0,0,.85), 0 0 12px rgba(0,0,0,.55) !important;
+}
+html[data-theme="light"] #nav-list li.focused .nav-icon,
+html[data-theme="light"] #nav-list li.focused .nav-icon svg,
+html[data-theme="light"] #nav-list li:focus .nav-icon,
+html[data-theme="light"] #nav-list li:focus .nav-icon svg,
+html[data-theme="light"] #nav-list li:hover .nav-icon,
+html[data-theme="light"] #nav-list li:hover .nav-icon svg {
+    color:#ffffff !important;
+    stroke:#ffffff !important;
+    filter: drop-shadow(0 0 4px rgba(0,0,0,.9)) drop-shadow(0 0 10px rgba(0,0,0,.6)) !important;
+}
 html[data-card-size="small"] #main-screen .tile-stream { flex-basis:220px !important; width:220px !important; }
 html[data-card-size="large"] #main-screen .tile-stream { flex-basis:340px !important; width:340px !important; }
 html[data-text-size="small"] #main-screen { font-size:90%; }
@@ -728,8 +805,19 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 .chat-badge.vip { background:#e91e9a; color:#fff; }
 .chat-badge.sub { background:#9146FF; color:#fff; }
 .chat-badge.broadcaster { background:#eb0400; color:#fff; }
-.chat-msg .chat-name { font-weight: bold; }
+.chat-msg .chat-name {
+    font-weight: bold;
+    color: inherit;
+}
 .chat-msg .chat-text { color: #fff; }
+
+/* El color de texto global aplica SOLO al mensaje, nunca al nombre. */
+html[data-text-color] .chat-msg .chat-text {
+    color: var(--app-text-color, #fff) !important;
+}
+html[data-text-color] .chat-msg .chat-name {
+    color: unset !important;
+}
 .chat-emote { height: 1.6em; vertical-align: middle; margin: 0 2px; }
 .chat-real-badge { height: 1.2em; width: 1.2em; vertical-align: middle; margin-right: 4px; border-radius: 2px; }
 .chat-system { color: rgba(255,255,255,0.55); font-style: italic; font-size: 15px; }
@@ -4904,10 +4992,20 @@ html[data-card-size="250"] { --profile-card-size: clamp(438px, 40vw, 625px); }
 html[data-card-size="300"] { --profile-card-size: clamp(525px, 48vw, 750px); }
 
 #results-screen #results-grid .tile-stream,
-#results-screen #clips-grid .tile-clip {
+#results-screen #clips-grid .tile-clip,
+#main-screen #content .tile-track > .tile-stream,
+#main-screen #content .tile-track > .tile-clip {
     flex: 0 0 var(--profile-card-size, clamp(175px, 16vw, 250px)) !important;
     width: var(--profile-card-size, clamp(175px, 16vw, 250px)) !important;
     max-width: var(--profile-card-size, clamp(175px, 16vw, 250px)) !important;
+}
+
+/* En la pantalla inicial, las tarjetas de juego también siguen el tamaño
+   elegido en ajustes. */
+#main-screen #content .tile-track > .tile-game {
+    flex: 0 0 calc(var(--profile-card-size, clamp(175px, 16vw, 250px)) * 0.72) !important;
+    width: calc(var(--profile-card-size, clamp(175px, 16vw, 250px)) * 0.72) !important;
+    max-width: calc(var(--profile-card-size, clamp(175px, 16vw, 250px)) * 0.72) !important;
 }
 
 html[data-card-size="50"]  #game-screen-grid { grid-template-columns: repeat(8, minmax(0, 1fr)) !important; }
@@ -7614,8 +7712,8 @@ function renderAccountOverlay(state, extra) {
             <p class="account-hint">Necesario para chatear con tu nombre y ver tus canales seguidos que están en vivo. Siempre inicias sesión en la pantalla real de Twitch, nunca acá.</p>
             <button class="account-btn primary" data-nav-btn data-action="redirect">Iniciar sesión</button>
             <button class="account-btn" data-nav-btn data-action="qr">Iniciar con QR (TV)</button>
-            <button class="account-btn" data-nav-btn data-action="settings">⚙️ Ajustes de interfaz</button>
-            <button class="account-btn" data-nav-btn data-action="reload-app">🔄 Recargar app</button>
+            <button class="account-btn" data-nav-btn data-action="settings"> Ajustes de interfaz</button>
+            <button class="account-btn" data-nav-btn data-action="reload-app"> Recargar app</button>
             <button class="account-btn" data-nav-btn data-action="close">Salir</button>`;
     }
     wireAccountButtons();
@@ -7629,12 +7727,15 @@ function renderAccountSettings() {
     box.innerHTML = `
         <h2>Ajustes de interfaz</h2>
         <div class="settings-row-account" data-setting="theme">
-            <label>Tema</label>
-            <div class="settings-options">
-                <button data-nav-btn data-value="light">Claro</button>
-                <button data-nav-btn data-value="dark">Oscuro</button>
-            </div>
-        </div>
+    <label>Tema</label>
+    <div class="settings-options">
+        <button data-nav-btn data-value="light">Claro</button>
+        <button data-nav-btn data-value="dark">Oscuro</button>
+        <button data-nav-btn data-value="gray">Gray</button>
+        <button data-nav-btn data-value="gray-dark">Gray Dark</button>
+        <button data-nav-btn data-value="amoled">AMOLED</button>
+    </div>
+</div>
         <div class="settings-row-account" data-setting="textSize">
             <label>Tamaño texto</label>
             <div class="settings-options">
@@ -7752,8 +7853,8 @@ async function renderLoggedInAccount() {
         <div class="account-name">${escapeHtml(u.display_name || u.login || "")}</div>
         <p class="account-hint">Sesión iniciada. Ya podés chatear con tu nombre.</p>
         <button class="account-btn" data-nav-btn data-action="view-profile" data-login="${escapeHtml(u.login || "")}">Ver perfil</button>
-        <button class="account-btn" data-nav-btn data-action="settings">⚙️ Ajustes de interfaz</button>
-        <button class="account-btn" data-nav-btn data-action="reload-app">🔄 Recargar app</button>
+        <button class="account-btn" data-nav-btn data-action="settings"> Ajustes de interfaz</button>
+        <button class="account-btn" data-nav-btn data-action="reload-app"> Recargar app</button>
         <button class="account-btn" data-nav-btn data-action="logout">Cerrar sesión</button>
         <button class="account-btn" data-nav-btn data-action="close">Cerrar</button>`;
     wireAccountButtons();
@@ -8165,14 +8266,25 @@ function clearStartupQualityTimer() {
 }
 
 function applyStartupQuality() {
-  if (!twitchPlayer || qualityUserPicked || qualityStartupUpgradeDone) return;
+  if (!twitchPlayer || qualityUserPicked) return;
   let savedQuality = "auto";
   try { savedQuality = localStorage.getItem("osmtwich-settings-quality") || "auto"; } catch (err) {}
   if (savedQuality !== "auto") {
-    try { if ((twitchPlayer.getQualities() || []).some(q => q.group === savedQuality)) twitchPlayer.setQuality(savedQuality); } catch (err) {}
-    qualityStartupUpgradeDone = true;
+    try {
+      const list = twitchPlayer.getQualities() || [];
+      const groups = list.map(q => q.group);
+      const available = groups.includes(savedQuality);
+      // En READY la lista suele venir vacía: se intenta igual, pero
+      // solo se da por aplicada cuando la calidad existe realmente en
+      // la lista (si no, se reintenta en PLAYING, cuando ya está poblada).
+      if (available || !groups.length) {
+        twitchPlayer.setQuality(savedQuality);
+        qualityStartupUpgradeDone = available;
+      }
+    } catch (err) {}
     return;
   }
+  if (qualityStartupUpgradeDone) return;
     try {
         const list = twitchPlayer.getQualities() || [];
         const groups = list.map(q => q.group);
