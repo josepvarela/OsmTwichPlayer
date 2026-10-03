@@ -812,12 +812,10 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 .chat-msg .chat-text { color: #fff; }
 
 /* El color de texto global aplica SOLO al mensaje, nunca al nombre. */
-html[data-text-color] .chat-msg .chat-text {
+ .chat-msg .chat-text {
     color: var(--app-text-color, #fff) !important;
 }
-html[data-text-color] .chat-msg .chat-name {
-    color: unset !important;
-}
+ 
 .chat-emote { height: 1.6em; vertical-align: middle; margin: 0 2px; }
 .chat-real-badge { height: 1.2em; width: 1.2em; vertical-align: middle; margin-right: 4px; border-radius: 2px; }
 .chat-system { color: rgba(255,255,255,0.55); font-style: italic; font-size: 15px; }
@@ -4961,13 +4959,13 @@ html[data-text-color="white"]  { --app-text-color: #ffffff; }
 html[data-text-color="yellow"] { --app-text-color: #ffeb3b; }
 html[data-text-color="green"]  { --app-text-color: #4ade80; }
 html[data-text-color="cyan"]   { --app-text-color: #22d3ee; }
-html[data-text-color] body,
-html[data-text-color] .section-title,
-html[data-text-color] .section-stat,
-html[data-text-color] .stream-title,
-html[data-text-color] .stream-meta,
-html[data-text-color] .game-name,
-html[data-text-color] .game-viewers,
+ body,
+ .section-title,
+ .section-stat,
+ .stream-title,
+ .stream-meta,
+ .game-name,
+ .game-viewers,
 html[data-text-color] .nav-label,
 html[data-text-color] .followed-name,
 html[data-text-color] #player-channel-name,
@@ -9971,7 +9969,7 @@ function chatMessageHtml(m, showTs) {
     const textHtml = (m.fragments !== undefined || m.plainBody !== undefined)
         ? renderVodFragments(m.fragments, m.plainBody)
         : renderMessageText(m.text, m.emotes);
-    return `<div class="chat-msg">${ts}${badge}<span class="chat-name" style="color:${m.color}">${escapeHtml(m.name)}</span><span class="chat-name">: </span><span class="chat-text">${textHtml}</span></div>`;
+    return `<div class="chat-msg">${ts}${badge}<span class="chat-name" style="color:${m.color}">${escapeHtml(m.name)}</span><span class="chat-text">: </span><span class="chat-text">${textHtml}</span></div>`;
 }
 
 // Repintado completo: se usa solo cuando hace falta reconstruir todo el
