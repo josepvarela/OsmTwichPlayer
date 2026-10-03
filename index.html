@@ -7859,7 +7859,7 @@ async function renderLoggedInAccount() {
     focusFirstAccountButton();
 }
 
-function handleAccountOverlayKeys(keyCode, e) {
+fufunction handleAccountOverlayKeys(keyCode, e) {
     if (keyCode === 27 || keyCode === 461 || keyCode === 10009) {
         e.preventDefault();
         if (accountOverlayView === "settings") {
@@ -7869,27 +7869,93 @@ function handleAccountOverlayKeys(keyCode, e) {
         closeAccountOverlay();
         return;
     }
+
+    // En la vista de ajustes: ↑/↓ recorren filas, ←/→ recorren valores
+    // dentro de la fila, Enter/OK selecciona el valor enfocado.
+    if (accountOverlayView === "settings") {
+        const rows = Array.from(document.querySelectorAll("#account-box .settings-row-account"));
+        const backBtn = document.querySelector('#account-box [data-action="back-to-menu"]');
+        // "Filas navegables" = filas de ajustes + el botón "Volver".
+        const items = rows.concat(backBtn ? [backBtn] : []);
+
+        if (!items.length) return;
+
+        // Localiza el índice de la fila/botón actualmente enfocado.
+        let currentIdx = items.findIndex(el =>
+            el === document.activeElement || el.contains(document.activeElement)
+        );
+        if (currentIdx === -1) {
+            currentIdx = items.findIndex(el => el.classList.contains("focused"));
+        }
+        if (currentIdx === -1) currentIdx = 0;
+
+        // --- ← / → : mueven el valor dentro de la fila ---
+        if (keyCode === 37 || keyCode === 39) {
+            const group = items[currentIdx]?.querySelector?.(".settings-options");
+            if (group) {
+                e.preventDefault();
+                const groupBtns = Array.from(group.querySelectorAll("[data-nav-btn]"));
+                const gIdx = groupBtns.indexOf(document.activeElement);
+                const delta = keyCode === 37 ? -1 : 1;
+                const next = Math.max(0, Math.min(groupBtns.length - 1, (gIdx < 0 ? 0 : gIdx) + delta));
+                groupBtns.forEach(b => b.classList.remove("focused"));
+                groupBtns[next].classList.add("focused");
+                groupBtns[next].focus({preventScroll:true});
+            }
+            return;
+        }
+
+        // --- ↑ / ↓ : cambian de fila ---
+        if (keyCode === 38 || keyCode === 40) {
+            e.preventDefault();
+            const delta = keyCode === 38 ? -1 : 1;
+            const next = (currentIdx + delta + items.length) % items.length;
+            const target = items[next];
+
+            // Quita el foco visual de cualquier botón previo.
+            document.querySelectorAll("#account-box .settings-options button.focused")
+                .forEach(b => b.classList.remove("focused"));
+            document.querySelectorAll("#account-box .account-btn.focused")
+                .forEach(b => b.classList.remove("focused"));
+
+            if (target.classList.contains("account-btn")) {
+                // Es el botón "Volver": lo enfoca directo.
+                target.classList.add("focused");
+                target.focus({preventScroll:true});
+            } else {
+                // Es una fila de ajustes: enfoca su opción activa (o la primera).
+                const group = target.querySelector(".settings-options");
+                const buttons = group ? Array.from(group.querySelectorAll("[data-nav-btn]")) : [];
+                const active = buttons.find(b => b.classList.contains("active")) || buttons[0];
+                if (active) {
+                    active.classList.add("focused");
+                    active.focus({preventScroll:true});
+                }
+            }
+            return;
+        }
+
+        // --- Enter/OK : selecciona el valor enfocado ---
+        if (keyCode === 13) {
+            e.preventDefault();
+            const active = document.activeElement;
+            if (active && active.dataset && active.dataset.value !== undefined) {
+                active.click();
+            } else if (active && active.dataset && active.dataset.action === "back-to-menu") {
+                active.click();
+            }
+            return;
+        }
+
+        return;
+    }
+
+    // --- Vista normal de menú (login/logueado): navegación lineal ---
     const btns = Array.from(document.querySelectorAll("#account-box [data-nav-btn]"));
     if (!btns.length) return;
     let idx = btns.indexOf(document.activeElement);
     if (idx === -1) idx = btns.findIndex(b => b.classList.contains("focused"));
     if (idx === -1) idx = 0;
-
-    // Dentro de un grupo de opciones (ajustes), izquierda/derecha cambian de valor.
-    if (keyCode === 37 || keyCode === 39) {
-        const group = document.activeElement?.closest?.(".settings-options");
-        if (group) {
-            e.preventDefault();
-            const groupBtns = Array.from(group.querySelectorAll("[data-nav-btn]"));
-            const gIdx = groupBtns.indexOf(document.activeElement);
-            const delta = keyCode === 37 ? -1 : 1;
-            const next = Math.max(0, Math.min(groupBtns.length - 1, (gIdx < 0 ? 0 : gIdx) + delta));
-            groupBtns.forEach(b => b.classList.remove("focused"));
-            groupBtns[next].classList.add("focused");
-            groupBtns[next].focus({preventScroll:true});
-            return;
-        }
-    }
 
     if (keyCode === 38 || keyCode === 40) {
         e.preventDefault();
