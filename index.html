@@ -4814,6 +4814,107 @@ html, body {
 }
 </style>
 
+/* ===== Ajustes de interfaz dentro del cuadro de cuenta ===== */
+.settings-row-account {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+    text-align: left;
+}
+.settings-row-account:last-of-type { border-bottom: none; }
+.settings-row-account > label {
+    font-size: 13px;
+    color: #adadb8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+.settings-options {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.settings-options button {
+    flex: 1 1 auto;
+    min-width: 46px;
+    padding: 9px 10px;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: #2a2a2e;
+    color: #fff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+    transition: background .12s ease;
+}
+.settings-options button:hover { background: #3a3a3f; }
+.settings-options button.active {
+    background: #9146FF;
+    border-color: #fff;
+}
+.settings-options button.focused {
+    outline: 3px solid #fff;
+    outline-offset: 2px;
+}
+
+/* Tamaño de texto global (x1..x5) */
+html[data-text-size="x2"] body { zoom: 1.10; }
+html[data-text-size="x3"] body { zoom: 1.20; }
+html[data-text-size="x4"] body { zoom: 1.30; }
+html[data-text-size="x5"] body { zoom: 1.40; }
+
+/* Color de texto global */
+html[data-text-color="white"]  { --app-text-color: #ffffff; }
+html[data-text-color="yellow"] { --app-text-color: #ffeb3b; }
+html[data-text-color="green"]  { --app-text-color: #4ade80; }
+html[data-text-color="cyan"]   { --app-text-color: #22d3ee; }
+html[data-text-color] body,
+html[data-text-color] .section-title,
+html[data-text-color] .section-stat,
+html[data-text-color] .stream-title,
+html[data-text-color] .stream-meta,
+html[data-text-color] .game-name,
+html[data-text-color] .game-viewers,
+html[data-text-color] .nav-label,
+html[data-text-color] .followed-name,
+html[data-text-color] #player-channel-name,
+html[data-text-color] #player-stream-title,
+html[data-text-color] .player-title-row,
+html[data-text-color] .progress-label,
+html[data-text-color] #channel-name,
+html[data-text-color] #channel-substat,
+html[data-text-color] #channel-followers,
+html[data-text-color] #channel-description,
+html[data-text-color] .profile-section h2,
+html[data-text-color] .chat-msg .chat-text,
+html[data-text-color] .chat-msg .chat-name {
+    color: var(--app-text-color, #fff) !important;
+}
+
+/* Tamaño de tarjetas (perfil + juegos) */
+html[data-card-size="50"]  { --profile-card-size: clamp(88px, 8vw, 125px); }
+html[data-card-size="100"] { --profile-card-size: clamp(175px, 16vw, 250px); }
+html[data-card-size="200"] { --profile-card-size: clamp(350px, 32vw, 500px); }
+html[data-card-size="250"] { --profile-card-size: clamp(438px, 40vw, 625px); }
+html[data-card-size="300"] { --profile-card-size: clamp(525px, 48vw, 750px); }
+
+#results-screen #results-grid .tile-stream,
+#results-screen #clips-grid .tile-clip {
+    flex: 0 0 var(--profile-card-size, clamp(175px, 16vw, 250px)) !important;
+    width: var(--profile-card-size, clamp(175px, 16vw, 250px)) !important;
+    max-width: var(--profile-card-size, clamp(175px, 16vw, 250px)) !important;
+}
+
+html[data-card-size="50"]  #game-screen-grid { grid-template-columns: repeat(8, minmax(0, 1fr)) !important; }
+html[data-card-size="100"] #game-screen-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+html[data-card-size="200"] #game-screen-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+html[data-card-size="250"] #game-screen-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+html[data-card-size="300"] #game-screen-grid { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+
 
 <style id="osmtwich-logo-sidebar-v53">
 /* v53: logo ligeramente más grande */
@@ -5199,7 +5300,6 @@ body.player-fullscreen #player-background {
                 <div id="sidebar-logo-text">OsmTwich</div>
             </div>
             <ul id="nav-list"></ul>
-<button id="settings-nav-btn" type="button" aria-label="Abrir ajustes">Ajustes</button>
         </nav>
 
         <main id="content">
@@ -5219,18 +5319,7 @@ body.player-fullscreen #player-background {
 <div id="account-overlay" aria-hidden="true">
   <div class="account-box" id="account-box"></div>
   </div>
-  <div id="settings-overlay" aria-hidden="true">
-    <section class="settings-box" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-      <h2 id="settings-title">Ajustes de interfaz</h2>
-      <div class="settings-row"><label for="setting-theme">Tema</label><select id="setting-theme"><option value="dark">Oscuro</option><option value="light">Claro</option></select></div>
-      <div class="settings-row"><label for="setting-card-size">Tamaño de tarjetas</label><select id="setting-card-size"><option value="small">Pequeñas</option><option value="medium">Medianas</option><option value="large">Grandes</option></select></div>
-      <div class="settings-row"><label for="setting-quality">Calidad de stream</label><select id="setting-quality"><option value="auto">Automática</option><option value="720p30">720p</option><option value="480p30">480p</option><option value="360p30">360p</option></select></div>
-      <div class="settings-row"><label for="setting-text-size">Tamaño de texto</label><select id="setting-text-size"><option value="normal">Normal</option><option value="small">Pequeño</option><option value="large">Grande</option></select></div>
-      <div class="settings-row"><label for="setting-chat">Mostrar chat al iniciar</label><select id="setting-chat"><option value="yes">Sí</option><option value="no">No</option></select></div>
-      <button id="settings-close" class="settings-close" type="button">Cerrar</button>
-    </section>
-  </div>
-    </div>
+      </div>
 
     <!-- ===================== PANTALLA: BÚSQUEDA ===================== -->
     <div id="search-screen" class="screen">
@@ -5724,7 +5813,7 @@ function enableDragScroll(track) {
 function handleKeyDown(e) {
     const keyCode = e.keyCode || ({ArrowLeft:37, ArrowRight:39, ArrowUp:38, ArrowDown:40, Enter:13, " ":32, Escape:27}[e.key] || 0);
 
-    // El overlay de cuenta/login tiene prioridad absoluta: "atr��s" lo cierra
+    // El overlay de cuenta/login tiene prioridad absoluta: "atr  s" lo cierra
     // en vez de disparar la navegación general de la pantalla de fondo.
     if (document.getElementById("account-overlay")?.classList.contains("visible")) {
         handleAccountOverlayKeys(keyCode, e);
@@ -6291,9 +6380,8 @@ function selectNavItem() {
         openSearch();
         return;
     }
-  if (item.id === "account") {
-  if (typeof window.openInterfaceSettings === "function") window.openInterfaceSettings();
-  else openAccountOverlay();
+    if (item.id === "account") {
+  openAccountOverlay();
   return;
   }
     if (item.id === "seguidosChannels" && !twitchUser) {
@@ -7435,6 +7523,7 @@ function openAccountOverlay() {
     const overlay = document.getElementById("account-overlay");
     overlay?.classList.add("visible");
     overlay?.setAttribute("aria-hidden", "false");
+    accountOverlayView = "menu";
     renderAccountOverlay(twitchUser ? "logged-in" : "logged-out");
 }
 
@@ -7443,6 +7532,7 @@ function closeAccountOverlay() {
     const overlay = document.getElementById("account-overlay");
     overlay?.classList.remove("visible");
     overlay?.setAttribute("aria-hidden", "true");
+    accountOverlayView = "menu";
     const accountIndex = NAV_ITEMS.findIndex(item => item.id === "account");
     if (currentScreen === "main" && accountIndex >= 0) {
         navIndex = accountIndex;
@@ -7471,6 +7561,8 @@ function handleAccountAction(action, btn) {
     if (action === "qr") return startDeviceLogin();
     if (action === "logout") return logoutTwitch();
     if (action === "close") return closeAccountOverlay();
+    if (action === "settings") return renderAccountSettings();
+    if (action === "back-to-menu") return renderAccountOverlay(twitchUser ? "logged-in" : "logged-out");
     if (action === "reload-app") return window.location.reload();
     if (action === "open-channel") {
         const login = btn && btn.dataset ? btn.dataset.login : "";
@@ -7487,12 +7579,15 @@ function handleAccountAction(action, btn) {
     }
 }
 
+let accountOverlayView = "menu"; // "menu" | "settings"
+
 function renderAccountOverlay(state, extra) {
     const resolvedState = state || (twitchUser ? "logged-in" : "logged-out");
     if (resolvedState === "logged-in") { renderLoggedInAccount(); return; }
+    if (resolvedState === "settings") { renderAccountSettings(); return; }
 
     const box = document.getElementById("account-box");
-    if (!box) return;
+    if (!box) return;;
 
     if (resolvedState === "qr-loading") {
         box.innerHTML = `<h2>Preparando código QR…</h2><p class="account-hint">Un momento.</p>`;
@@ -7512,16 +7607,137 @@ function renderAccountOverlay(state, extra) {
             <button class="account-btn" data-nav-btn data-action="redirect">Iniciar sesión (redirigir)</button>
             <button class="account-btn" data-nav-btn data-action="close">Cerrar</button>`;
     } else {
-        box.innerHTML = `
+                box.innerHTML = `
             <h2>Iniciar sesión con Twitch</h2>
             <p class="account-hint">Necesario para chatear con tu nombre y ver tus canales seguidos que están en vivo. Siempre inicias sesión en la pantalla real de Twitch, nunca acá.</p>
             <button class="account-btn primary" data-nav-btn data-action="redirect">Iniciar sesión</button>
-            <button class="account-btn" data-nav-btn data-action="qr">Iniciar sesión con QR (TV)</button>
+            <button class="account-btn" data-nav-btn data-action="qr">Iniciar con QR (TV)</button>
+            <button class="account-btn" data-nav-btn data-action="settings">⚙️ Ajustes de interfaz</button>
             <button class="account-btn" data-nav-btn data-action="reload-app">🔄 Recargar app</button>
-            <button class="account-btn" data-nav-btn data-action="close">Cancelar</button>`;
+            <button class="account-btn" data-nav-btn data-action="close">Salir</button>`;
     }
     wireAccountButtons();
     focusFirstAccountButton();
+}
+
+// ---- Ajustes de interfaz dentro del cuadro de cuenta ----
+function renderAccountSettings() {
+    const box = document.getElementById("account-box");
+    if (!box) return;
+    accountOverlayView = "settings";
+    box.innerHTML = `
+        <h2>Ajustes de interfaz</h2>
+        <div class="settings-row-account" data-setting="theme">
+            <label>Tema</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="light">Claro</button>
+                <button data-nav-btn data-value="dark">Oscuro</button>
+            </div>
+        </div>
+        <div class="settings-row-account" data-setting="textSize">
+            <label>Tamaño texto</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="x1">x1</button>
+                <button data-nav-btn data-value="x2">x2</button>
+                <button data-nav-btn data-value="x3">x3</button>
+                <button data-nav-btn data-value="x4">x4</button>
+                <button data-nav-btn data-value="x5">x5</button>
+            </div>
+        </div>
+        <div class="settings-row-account" data-setting="textColor">
+            <label>Color de texto</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="white" style="color:#ffffff">Blanco</button>
+                <button data-nav-btn data-value="yellow" style="color:#ffeb3b">Amarillo</button>
+                <button data-nav-btn data-value="green" style="color:#4ade80">Verde</button>
+                <button data-nav-btn data-value="cyan" style="color:#22d3ee">Cian</button>
+            </div>
+        </div>
+        <div class="settings-row-account" data-setting="cardSize">
+            <label>Tamaño tarjetas</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="50">50%</button>
+                <button data-nav-btn data-value="100">100%</button>
+                <button data-nav-btn data-value="200">200%</button>
+                <button data-nav-btn data-value="250">250%</button>
+                <button data-nav-btn data-value="300">300%</button>
+            </div>
+        </div>
+        <div class="settings-row-account" data-setting="quality">
+            <label>Calidad</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="160p30">160</button>
+                <button data-nav-btn data-value="240p30">240</button>
+                <button data-nav-btn data-value="360p30">360</button>
+                <button data-nav-btn data-value="480p30">480</button>
+                <button data-nav-btn data-value="720p60">720</button>
+                <button data-nav-btn data-value="1080p60">1080</button>
+                <button data-nav-btn data-value="auto">Auto</button>
+            </div>
+        </div>
+        <div class="settings-row-account" data-setting="chat">
+            <label>Mostrar chat al iniciar reproducción</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="yes">Sí</button>
+                <button data-nav-btn data-value="no">No</button>
+            </div>
+        </div>
+        <button class="account-btn" data-nav-btn data-action="back-to-menu">← Volver</button>
+    `;
+    document.querySelectorAll("#account-box .settings-options button").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const row = btn.closest(".settings-row-account");
+            if (!row) return;
+            saveInterfaceSetting(row.dataset.setting, btn.dataset.value);
+            applyInterfaceSettings();
+            updateSettingsActiveStates();
+            document.querySelectorAll("#account-box .settings-options button.focused")
+                .forEach(b => b.classList.remove("focused"));
+            btn.classList.add("focused");
+            btn.focus({preventScroll:true});
+        });
+    });
+    wireAccountButtons();
+    updateSettingsActiveStates();
+    setTimeout(() => {
+        const first = document.querySelector("#account-box .settings-options button");
+        if (first) {
+            first.classList.add("focused");
+            try { first.focus({preventScroll:true}); } catch (_) { first.focus(); }
+        }
+    }, 30);
+}
+
+function updateSettingsActiveStates() {
+    const get = (name, fallback) => {
+        try { return localStorage.getItem("osmtwich-settings-" + name) || fallback; }
+        catch (e) { return fallback; }
+    };
+    document.querySelectorAll("#account-box .settings-row-account").forEach(row => {
+        const setting = row.dataset.setting;
+        const current = get(setting, null);
+        row.querySelectorAll("button[data-value]").forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.value === current);
+        });
+    });
+}
+
+function saveInterfaceSetting(name, value) {
+    try { localStorage.setItem("osmtwich-settings-" + name, value); } catch (e) {}
+}
+
+function applyInterfaceSettings() {
+    const root = document.documentElement;
+    const get = (name, fallback) => {
+        try { return localStorage.getItem("osmtwich-settings-" + name) || fallback; }
+        catch (e) { return fallback; }
+    };
+    root.dataset.theme = get("theme", "dark");
+    root.dataset.textSize = get("textSize", "x1");
+    root.dataset.textColor = get("textColor", "white");
+    root.dataset.cardSize = get("cardSize", "100");
+    window.interfaceChatPreference = get("chat", "yes");
+    window.interfaceQualityPreference = get("quality", "auto");
 }
 
 async function renderLoggedInAccount() {
@@ -7530,11 +7746,12 @@ async function renderLoggedInAccount() {
     const u = twitchUser;
     if (!u) { renderAccountOverlay("logged-out"); return; }
 
-    box.innerHTML = `
+        box.innerHTML = `
         ${u.profile_image_url ? `<img class="account-avatar" src="${u.profile_image_url}" alt="">` : ""}
         <div class="account-name">${escapeHtml(u.display_name || u.login || "")}</div>
         <p class="account-hint">Sesión iniciada. Ya podés chatear con tu nombre.</p>
         <button class="account-btn" data-nav-btn data-action="view-profile" data-login="${escapeHtml(u.login || "")}">Ver perfil</button>
+        <button class="account-btn" data-nav-btn data-action="settings">⚙️ Ajustes de interfaz</button>
         <button class="account-btn" data-nav-btn data-action="reload-app">🔄 Recargar app</button>
         <button class="account-btn" data-nav-btn data-action="logout">Cerrar sesión</button>
         <button class="account-btn" data-nav-btn data-action="close">Cerrar</button>`;
@@ -7545,6 +7762,10 @@ async function renderLoggedInAccount() {
 function handleAccountOverlayKeys(keyCode, e) {
     if (keyCode === 27 || keyCode === 461 || keyCode === 10009) {
         e.preventDefault();
+        if (accountOverlayView === "settings") {
+            renderAccountOverlay(twitchUser ? "logged-in" : "logged-out");
+            return;
+        }
         closeAccountOverlay();
         return;
     }
@@ -7553,6 +7774,22 @@ function handleAccountOverlayKeys(keyCode, e) {
     let idx = btns.indexOf(document.activeElement);
     if (idx === -1) idx = btns.findIndex(b => b.classList.contains("focused"));
     if (idx === -1) idx = 0;
+
+    // Dentro de un grupo de opciones (ajustes), izquierda/derecha cambian de valor.
+    if (keyCode === 37 || keyCode === 39) {
+        const group = document.activeElement?.closest?.(".settings-options");
+        if (group) {
+            e.preventDefault();
+            const groupBtns = Array.from(group.querySelectorAll("[data-nav-btn]"));
+            const gIdx = groupBtns.indexOf(document.activeElement);
+            const delta = keyCode === 37 ? -1 : 1;
+            const next = Math.max(0, Math.min(groupBtns.length - 1, (gIdx < 0 ? 0 : gIdx) + delta));
+            groupBtns.forEach(b => b.classList.remove("focused"));
+            groupBtns[next].classList.add("focused");
+            groupBtns[next].focus({preventScroll:true});
+            return;
+        }
+    }
 
     if (keyCode === 38 || keyCode === 40) {
         e.preventDefault();
@@ -8380,12 +8617,20 @@ function goToPlayerScreen() {
     // (además de no mostrarlos al crear el reproductor) para que lo único
     // visible al abrir sea el contenido. El usuario puede volver a mostrarlos
     // con el mando (flecha abajo para los controles, botón de chat para el chat).
-    hideControls();
+        hideControls();
     const chatPanelInit = document.getElementById("chat-panel");
     if (chatPanelInit) {
-        chatPanelInit.classList.add("hidden-chat");
-        chatPanelInit.setAttribute("aria-hidden", "true");
-        chatPanelInit.style.pointerEvents = "none";
+        let chatPref = "yes";
+        try { chatPref = localStorage.getItem("osmtwich-settings-chat") || "yes"; } catch (e) {}
+        if (chatPref === "yes") {
+            chatPanelInit.classList.remove("hidden-chat");
+            chatPanelInit.setAttribute("aria-hidden", "false");
+            chatPanelInit.style.pointerEvents = "auto";
+        } else {
+            chatPanelInit.classList.add("hidden-chat");
+            chatPanelInit.setAttribute("aria-hidden", "true");
+            chatPanelInit.style.pointerEvents = "none";
+        }
     }
     hideQualityPanel();
 
@@ -11093,38 +11338,21 @@ html[data-tv-scaled] #tv-scale-root {
 </script>
 
 <script>
-(function setupInterfaceSettings(){
-  const KEY = "osmtwich-settings-";
-  const defaults = { theme:"dark", cardSize:"medium", quality:"auto", textSize:"normal", chat:"yes" };
-  const get = name => { try { return localStorage.getItem(KEY + name) || defaults[name]; } catch (_) { return defaults[name]; } };
-  const save = (name, value) => { try { localStorage.setItem(KEY + name, value); } catch (_) {} };
-  const overlay = document.getElementById("settings-overlay");
-  const apply = () => {
-    const root = document.documentElement;
-    root.dataset.theme = get("theme");
-    root.dataset.cardSize = get("cardSize");
-    root.dataset.textSize = get("textSize");
-    const chat = document.getElementById("chat-panel");
-    if (chat) chat.classList.toggle("hidden-chat", get("chat") === "no");
-    window.interfaceChatPreference = get("chat");
-    window.interfaceQualityPreference = get("quality");
+(function initInterfaceSettings(){
+  function applyOnLoad(){
+    if (typeof applyInterfaceSettings === "function") applyInterfaceSettings();
+  }
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", applyOnLoad);
+  } else {
+    applyOnLoad();
+  }
+  // Compatibilidad: si algo llama a openInterfaceSettings, abre el overlay en modo ajustes.
+  window.openInterfaceSettings = function () {
+    openAccountOverlay();
+    accountOverlayView = "settings";
+    renderAccountSettings();
   };
-  const open = () => {
-    if (!overlay) return;
-    const map = { "theme":"theme", "card-size":"cardSize", "quality":"quality", "text-size":"textSize", "chat":"chat" };
-    Object.entries(map).forEach(([id, name]) => { const el = document.getElementById("setting-" + id); if (el) el.value = get(name); });
-    overlay.classList.add("visible"); overlay.setAttribute("aria-hidden", "false");
-    document.getElementById("setting-theme")?.focus();
-  };
-  const close = () => { overlay?.classList.remove("visible"); overlay?.setAttribute("aria-hidden", "true"); };
-  window.openInterfaceSettings = open;
-  document.getElementById("settings-nav-btn")?.addEventListener("click", open);
-  document.getElementById("settings-close")?.addEventListener("click", close);
-  overlay?.addEventListener("click", event => { if (event.target === overlay) close(); });
-  const map = { theme:"theme", "card-size":"cardSize", quality:"quality", "text-size":"textSize", chat:"chat" };
-  Object.entries(map).forEach(([id, name]) => document.getElementById("setting-" + id)?.addEventListener("change", event => { save(name, event.target.value); apply(); }));
-  document.addEventListener("keydown", event => { if (event.key === "Escape" && overlay?.classList.contains("visible")) { event.preventDefault(); close(); } });
-  apply();
 })();
 </script>
 </body>
