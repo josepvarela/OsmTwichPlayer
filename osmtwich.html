@@ -11580,6 +11580,154 @@ html[data-tv-scaled] #tv-scale-root {
   };
 })();
 </script>
+
+<!-- ============================================================
+     v67: (1) barra lateral completa en Android/TV, (2) rendimiento.
+     (1) La barra es position:fixed con overflow:visible y 7 ítems de ~56px
+         + 74px de cabecera (~470px). En un teléfono apaisado (~360-410px de
+         alto) los últimos ítems quedaban fuera de pantalla sin scroll. Ahora
+         se escala para caber en la altura real (var --sidebar-fit, calculada
+         por JS) y respeta el notch/recorte lateral (safe-area).
+     (2) En Android/TV ("perf-lite") se quitan las transiciones de layout del
+         contenido, el overlay a pantalla completa y el scroll suave
+         horizontal de las filas.
+     ============================================================ -->
+<style id="sidebar-fit-perf-v67">
+:root { --sidebar-fit: 1; --safe-l: env(safe-area-inset-left, 0px); }
+
+/* ---- 1) Barra lateral: cabe en la altura real ---- */
+html body #main-screen.screen #sidebar#sidebar,
+html body #main-screen.screen #sidebar#sidebar:hover,
+html body #main-screen.screen #sidebar#sidebar:focus-within {
+    transform-origin: top left !important;
+    transform: scale(var(--sidebar-fit, 1)) !important;
+}
+html body #main-screen.screen:not(.sidebar-collapsed) #sidebar#sidebar {
+    left: calc(-24px + var(--safe-l, 0px)) !important;
+}
+html body #main-screen.screen.sidebar-collapsed #sidebar#sidebar {
+    left: var(--safe-l, 0px) !important;
+}
+html body #main-screen.screen #content#content {
+    padding-left: var(--safe-l, 0px) !important;
+}
+html body #main-screen.screen #sidebar#sidebar .nav-label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Si la app corre dentro del contenedor escalado de Tizen, 100vh/100vw miden
+   la ventana real y no el contenedor de 1920x1080. */
+html[data-tv-scaled] body #main-screen.screen #sidebar#sidebar {
+    height: 100% !important; min-height: 0 !important; max-height: 100% !important;
+}
+html[data-tv-scaled] #main-screen.active {
+    width: 100% !important; max-width: 100% !important; height: 100% !important;
+}
+
+/* ---- 2) Rendimiento en Android / TV ---- */
+html.perf-lite * { -webkit-tap-highlight-color: transparent; }
+html.perf-lite .tile-track {
+    scroll-behavior: auto !important;
+    scroll-snap-type: none !important;
+}
+/* Abrir/cerrar la barra animaba width/margin-left del contenido entero
+   (reflow de todas las filas en cada fotograma). Ahora cambia al instante. */
+html.perf-lite #main-screen.screen #content#content {
+    transition: none !important;
+}
+html.perf-lite #main-screen.screen #sidebar#sidebar {
+    transition: none !important;
+}
+html.perf-lite #main-screen.sidebar-active::after {
+    display: none !important;
+}
+</style>
+<script id="sidebar-fit-perf-script-v67">
+(function () {
+    "use strict";
+    var de = document.documentElement;
+    var ua = navigator.userAgent || "";
+    var lite = !!(window.Capacitor || window.tizen ||
+        /Android|Tizen|Web0S|WebOS|SMART-TV|SmartTV|HbbTV|NetCast|BRAVIA/i.test(ua));
+    if (lite) de.classList.add("perf-lite");
+
+    // Scroll horizontal de filas sin animación en Android/TV (cada pulsación
+    // del D-pad lanzaba una animación smooth que se apilaba al mantener la
+    // tecla). El scroll vertical entre secciones conserva su comportamiento.
+    if (lite && typeof Object.assign === "function") {
+        try {
+            ["scrollTo", "scrollBy"].forEach(function (name) {
+                var orig = Element.prototype[name];
+                if (typeof orig !== "function") return;
+                Element.prototype[name] = function (a, b) {
+                    if (a && typeof a === "object" && a.behavior === "smooth" &&
+                        a.left !== undefined && a.top === undefined) {
+                        a = Object.assign({}, a, { behavior: "auto" });
+                    }
+                    return orig.call(this, a, b);
+                };
+            });
+        } catch (e) {}
+    }
+
+    // Escala de la barra lateral para que quepa en la altura disponible.
+    var raf = 0, last = 1;
+    function fit() {
+        raf = 0;
+        try {
+            var sb = document.getElementById("sidebar");
+            var nl = document.getElementById("nav-list");
+            if (!sb || !nl) return;
+            var root = document.getElementById("tv-scale-root");
+            var scaled = de.hasAttribute("data-tv-scaled") && root;
+            var avail = scaled ? root.offsetHeight
+                : (window.innerHeight || de.clientHeight || 0);
+            var natural = nl.offsetTop + nl.offsetHeight; // ignora transform
+            if (!avail || !natural) return;
+            var s = Math.max(0.5, Math.min(1, avail / (natural + 16)));
+            if (Math.abs(s - last) < 0.005) return;
+            last = s;
+            de.style.setProperty("--sidebar-fit", s.toFixed(3));
+        } catch (e) { console.warn("v67 fit:", e); }
+    }
+    function schedule() {
+        if (raf) return;
+        raf = (window.requestAnimationFrame || setTimeout)(fit);
+    }
+
+    function init() {
+        schedule();
+        window.addEventListener("resize", schedule);
+        window.addEventListener("orientationchange", function () { setTimeout(schedule, 250); });
+        if (window.visualViewport) window.visualViewport.addEventListener("resize", schedule);
+        window.addEventListener("load", function () { schedule(); setTimeout(schedule, 600); });
+        if (document.fonts && document.fonts.ready) document.fonts.ready.then(schedule);
+
+        var nl = document.getElementById("nav-list");
+        if (nl && window.MutationObserver) {
+            new MutationObserver(schedule).observe(nl, { childList: true });
+        }
+        // Recalcular solo cuando Inicio pasa de oculto a visible (no en cada
+        // cambio de foco, que también toca la clase de #main-screen).
+        var ms = document.getElementById("main-screen");
+        if (ms && window.MutationObserver) {
+            var wasActive = ms.classList.contains("active");
+            new MutationObserver(function () {
+                var act = ms.classList.contains("active");
+                if (act !== wasActive) { wasActive = act; schedule(); }
+            }).observe(ms, { attributes: true, attributeFilter: ["class"] });
+        }
+    }
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", init);
+    } else {
+        init();
+    }
+})();
+</script>
+
 </body>
 </html>
 
