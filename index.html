@@ -4814,6 +4814,7 @@ html, body {
 }
 </style>
 
+<style id="account-settings-css">
 /* ===== Ajustes de interfaz dentro del cuadro de cuenta ===== */
 .settings-row-account {
     display: flex;
@@ -4914,6 +4915,7 @@ html[data-card-size="100"] #game-screen-grid { grid-template-columns: repeat(5, 
 html[data-card-size="200"] #game-screen-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 html[data-card-size="250"] #game-screen-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 html[data-card-size="300"] #game-screen-grid { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
+</style>
 
 
 <style id="osmtwich-logo-sidebar-v53">
@@ -7587,7 +7589,7 @@ function renderAccountOverlay(state, extra) {
     if (resolvedState === "settings") { renderAccountSettings(); return; }
 
     const box = document.getElementById("account-box");
-    if (!box) return;;
+    if (!box) return;
 
     if (resolvedState === "qr-loading") {
         box.innerHTML = `<h2>Preparando código QR…</h2><p class="account-hint">Un momento.</p>`;
