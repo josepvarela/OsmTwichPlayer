@@ -4952,6 +4952,7 @@ html[data-text-color="white"]  { --app-text-color: #ffffff; }
 html[data-text-color="yellow"] { --app-text-color: #ffeb3b; }
 html[data-text-color="green"]  { --app-text-color: #4ade80; }
 html[data-text-color="cyan"]   { --app-text-color: #22d3ee; }
+html[data-text-color="red"]    { --app-text-color: #ff4d4d; }
  body,
  .section-title,
  .section-stat,
@@ -4975,8 +4976,8 @@ html[data-text-color] .chat-msg .chat-text {
 }
 
 /* Tamaño de tarjetas (perfil + juegos) */
-html[data-card-size="50"]  { --profile-card-size: clamp(88px, 8vw, 125px); }
 html[data-card-size="100"] { --profile-card-size: clamp(175px, 16vw, 250px); }
+html[data-card-size="150"] { --profile-card-size: clamp(263px, 24vw, 375px); }
 html[data-card-size="200"] { --profile-card-size: clamp(350px, 32vw, 500px); }
 html[data-card-size="250"] { --profile-card-size: clamp(438px, 40vw, 625px); }
 html[data-card-size="300"] { --profile-card-size: clamp(525px, 48vw, 750px); }
@@ -4998,8 +4999,8 @@ html[data-card-size="300"] { --profile-card-size: clamp(525px, 48vw, 750px); }
     max-width: calc(var(--profile-card-size, clamp(175px, 16vw, 250px)) * 0.72) !important;
 }
 
-html[data-card-size="50"]  #game-screen-grid { grid-template-columns: repeat(8, minmax(0, 1fr)) !important; }
 html[data-card-size="100"] #game-screen-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
+html[data-card-size="150"] #game-screen-grid { grid-template-columns: repeat(4, minmax(0, 1fr)) !important; }
 html[data-card-size="200"] #game-screen-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
 html[data-card-size="250"] #game-screen-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 html[data-card-size="300"] #game-screen-grid { grid-template-columns: repeat(1, minmax(0, 1fr)) !important; }
@@ -5609,7 +5610,6 @@ let profileAccentPending = 0;
 
 // --- Estado del reproductor ---
 let twitchPlayer = null;
-let autoplayRetryInterval = null;
 let playbackType = null;      // "live" | "vod"
 let currentChannelLogin = null;
 let profileChatOpen = false; // chat abierto desde el perfil (canal offline)
@@ -7759,13 +7759,14 @@ function renderAccountSettings() {
                 <button data-nav-btn data-value="yellow" style="color:#ffeb3b">Amarillo</button>
                 <button data-nav-btn data-value="green" style="color:#4ade80">Verde</button>
                 <button data-nav-btn data-value="cyan" style="color:#22d3ee">Cian</button>
+                <button data-nav-btn data-value="red" style="color:#ff4d4d">Rojo</button>
             </div>
         </div>
         <div class="settings-row-account" data-setting="cardSize">
             <label>Tamaño tarjetas</label>
             <div class="settings-options">
-                <button data-nav-btn data-value="50">50%</button>
                 <button data-nav-btn data-value="100">100%</button>
+                <button data-nav-btn data-value="150">150%</button>
                 <button data-nav-btn data-value="200">200%</button>
                 <button data-nav-btn data-value="250">250%</button>
                 <button data-nav-btn data-value="300">300%</button>
@@ -7843,6 +7844,7 @@ function applyInterfaceSettings() {
     root.dataset.theme = get("theme", "dark");
     root.dataset.textSize = get("textSize", "x1");
     root.dataset.textColor = get("textColor", "white");
+    if (get("cardSize", "100") === "50") saveInterfaceSetting("cardSize", "100"); // 50% ya no existe
     root.dataset.cardSize = get("cardSize", "100");
     window.interfaceChatPreference = get("chat", "yes");
     window.interfaceQualityPreference = get("quality", "auto");
@@ -8204,11 +8206,6 @@ function closeHomeSearch() {
 // iframe simple. Esto permite controlar play/pause, calidad y
 // (para VODs) el avance/retroceso desde el control remoto.
 // ============================================================
-function stopAutoplayRetry() {
-    if (autoplayRetryInterval) clearInterval(autoplayRetryInterval);
-    autoplayRetryInterval = null;
-}
-
 // Destruye por completo el Twitch.Player (y su iframe). Se usa solo al
 // salir de la pantalla del reproductor (Inicio/Atrás) o si algo salió mal
 // al crearlo — NO se llama en cada cambio de canal/VOD (ver createPlayer).
@@ -8224,7 +8221,6 @@ function destroyPlayer() {
     hideQualityPanel();
     updateQualityCtrlLabel();
     stopProgressLoop();
-    stopAutoplayRetry();
     clearStartupQualityTimer();
     clearControlsAutoHide();
 
@@ -8311,18 +8307,13 @@ function ensureTwitchSDK() {
 // Se registran una sola vez por Twitch.Player real (no en cada cambio de
 // canal/VOD, ver más abajo por qué).
 let playerListenersBound = false;
-let playerAutoplayAttempts = 0;
 let playerAutoplayStarted = false;
 let playerUnmuteAttempted = false;
 
-// ===== Calidad de arranque =====
-// Para que el video empiece rápido en TV se arranca en una calidad baja
-// (menos datos antes del primer frame) y, una vez reproduciendo, se pasa a
-// "Auto". Si el usuario elige una calidad a mano, no se toca más.
-// Ajusta aquí: la primera calidad disponible de la lista es la que se usa.
-const STARTUP_QUALITY_PREFS = ["480p30", "360p30", "480p60", "360p60", "160p30"];
-const STARTUP_QUALITY_UPGRADE_MS = 5000; // tiempo reproduciendo antes de subir a Auto
-const STARTUP_QUALITY_FINAL = "auto";
+// ===== Calidad =====
+// Ya no se fuerza ninguna calidad al arrancar (antes: 480p y luego Auto).
+// Solo se aplica la calidad que el usuario eligió en Ajustes; con "Auto"
+// no se toca nada y Twitch decide.
 let qualityUserPicked = false;
 let qualityStartupUpgradeDone = false;
 let qualityUpgradeTimer = null;
@@ -8336,47 +8327,19 @@ function applyStartupQuality() {
   if (!twitchPlayer || qualityUserPicked) return;
   let savedQuality = "auto";
   try { savedQuality = localStorage.getItem("osmtwich-settings-quality") || "auto"; } catch (err) {}
-  if (savedQuality !== "auto") {
-    try {
-      const list = twitchPlayer.getQualities() || [];
-      const groups = list.map(q => q.group);
-      const available = groups.includes(savedQuality);
-      // En READY la lista suele venir vacía: se intenta igual, pero
-      // solo se da por aplicada cuando la calidad existe realmente en
-      // la lista (si no, se reintenta en PLAYING, cuando ya está poblada).
-      if (available || !groups.length) {
-        twitchPlayer.setQuality(savedQuality);
-        qualityStartupUpgradeDone = available;
-      }
-    } catch (err) {}
-    return;
-  }
-  if (qualityStartupUpgradeDone) return;
-    try {
-        const list = twitchPlayer.getQualities() || [];
-        const groups = list.map(q => q.group);
-        // En READY la lista a veces viene vacía: en ese caso se pide la
-        // primera preferida directamente.
-        const target = STARTUP_QUALITY_PREFS.find(g => groups.includes(g)) ||
-            (groups.length ? null : STARTUP_QUALITY_PREFS[0]);
-        if (target) {
-            if (twitchPlayer.getQuality() !== target) twitchPlayer.setQuality(target);
-            // Solo se da por aplicada si la calidad estaba en la lista real;
-            // así no se vuelve a llamar setQuality en cada evento PLAYING.
-            if (groups.includes(target)) qualityStartupUpgradeDone = true;
-        }
-    } catch (err) {}
-}
-
-function scheduleStartupQualityUpgrade() {
-    if (qualityUpgradeTimer || qualityStartupUpgradeDone || qualityUserPicked) return;
-    qualityUpgradeTimer = setTimeout(() => {
-        qualityUpgradeTimer = null;
-        qualityStartupUpgradeDone = true;
-        if (!twitchPlayer || qualityUserPicked) return;
-        try { twitchPlayer.setQuality(STARTUP_QUALITY_FINAL); } catch (err) {}
-        setTimeout(refreshQualities, 500);
-    }, STARTUP_QUALITY_UPGRADE_MS);
+  if (savedQuality === "auto") return;
+  try {
+    const list = twitchPlayer.getQualities() || [];
+    const groups = list.map(q => q.group);
+    const available = groups.includes(savedQuality);
+    // En READY la lista suele venir vacía: se intenta igual, pero
+    // solo se da por aplicada cuando la calidad existe realmente en
+    // la lista (si no, se reintenta en PLAYING, cuando ya está poblada).
+    if (available || !groups.length) {
+      twitchPlayer.setQuality(savedQuality);
+      qualityStartupUpgradeDone = available;
+    }
+  } catch (err) {}
 }
 
 function refreshQualities() {
@@ -8416,26 +8379,15 @@ function requestAutoplay(forceMuted) {
 // está en marcha se intenta activar el sonido si hubo un gesto real del
 // usuario en la app (clic, toque o tecla) al abrir el canal.
 function kickAutoplay() {
-    stopAutoplayRetry();
     clearStartupQualityTimer();
     qualityUserPicked = false;
     qualityStartupUpgradeDone = false;
     applyStartupQuality(); // si el player se reutilizó, ya está listo
-    playerAutoplayAttempts = 0;
     playerAutoplayStarted = false;
     playerUnmuteAttempted = false;
 
-    // El player ya se crea con autoplay:true y muted:true, así que el primer
-    // play() lo hace el propio Twitch en cuanto está listo (evento READY).
-    // Solo se reintenta, de forma espaciada, si pasados unos segundos sigue
-    // sin reproducir. Antes había un play()+setMuted() cada 700 ms (12 veces),
-    // lo que en TV competía con la carga del stream y la hacía más lenta.
-    autoplayRetryInterval = setInterval(() => {
-        if (playerAutoplayStarted) { stopAutoplayRetry(); return; }
-        playerAutoplayAttempts++;
-        requestAutoplay(true);
-        if (playerAutoplayAttempts >= 4) stopAutoplayRetry();
-    }, 2000);
+    // El player ya se crea con autoplay:true y muted:true, y además se llama
+    // a requestAutoplay(true) una sola vez en READY. Sin reintentos periódicos.
 }
 
 // Los listeners del ciclo de vida del reproductor (calidad, foco, mostrar
@@ -8472,7 +8424,6 @@ function bindPlayerLifecycleListeners() {
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, refreshQualities);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, startProgressLoop);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => { if (qualityPanelVisible) hideQualityPanel(); });
-    twitchPlayer.addEventListener(Twitch.Player.PLAYING, stopAutoplayRetry);
     // Los controles arrancan ocultos al abrir el stream/VOD (ver
     // goToPlayerScreen); este listener solo se asegura de que, si el
     // usuario los había mostrado con el mando antes de cambiar de
@@ -8504,7 +8455,6 @@ async function createPlayer(options) {
     chapterList = [];
     hideQualityPanel();
     stopProgressLoop();
-    stopAutoplayRetry();
 
     try {
         await ensureTwitchSDK();
@@ -11610,6 +11560,11 @@ html body #main-screen.screen.sidebar-collapsed #sidebar#sidebar {
 }
 html body #main-screen.screen #content#content {
     padding-left: var(--safe-l, 0px) !important;
+}
+/* Con la barra cerrada se conserva el espacio reservado a la columna de
+   iconos (v52/v53); esta regla lo pisaba y los iconos tapaban las tarjetas. */
+html body #main-screen.screen.sidebar-collapsed #content#content {
+    padding-left: calc(120px + var(--safe-l, 0px)) !important;
 }
 html body #main-screen.screen #sidebar#sidebar .nav-label {
     overflow: hidden;
