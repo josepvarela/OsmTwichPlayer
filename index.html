@@ -7705,10 +7705,10 @@ function renderAccountOverlay(state, extra) {
     } else if (resolvedState === "qr") {
         const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=" + encodeURIComponent(extra.verification_uri);
         box.innerHTML = `
-            <h2>Iniciá sesión desde tu celular</h2>
+            <h2>Inicia sesión desde tu celular</h2>
             <img class="account-qr" src="${qrUrl}" alt="Código QR para iniciar sesión en Twitch">
             <div class="account-code">${escapeHtml(extra.user_code || "")}</div>
-            <p class="account-hint">Escaneá el código con la cámara, o entrá a twitch.tv/activate en cualquier dispositivo y escribí el código. Esta pantalla se actualiza sola.</p>
+            <p class="account-hint">Escanea el código con la cámara, o ve a twitch.tv/activate en cualquier dispositivo y escribe el código de 8 dígitos.</p>
             <button class="account-btn" data-nav-btn data-action="close">Cancelar</button>`;
     } else if (resolvedState === "qr-error") {
         box.innerHTML = `
@@ -7720,7 +7720,7 @@ function renderAccountOverlay(state, extra) {
     } else {
                 box.innerHTML = `
             <h2>Iniciar sesión con Twitch</h2>
-            <p class="account-hint">Necesario para chatear con tu nombre y ver tus canales seguidos que están en vivo. Siempre inicias sesión en la pantalla real de Twitch, nunca acá.</p>
+            <p class="account-hint">Con tu usuario y contraseña o escanea el QR en tu TV</p>
             <button class="account-btn primary" data-nav-btn data-action="redirect">Iniciar sesión</button>
             <button class="account-btn" data-nav-btn data-action="qr">Iniciar con QR (TV)</button>
             <button class="account-btn" data-nav-btn data-action="reload-app"> Recargar app</button>
