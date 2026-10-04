@@ -76,7 +76,7 @@ html[data-theme="gray-dark"] .tile-game { background:#2b2b2f; }
 html[data-theme="light"], html[data-theme="light"] body { background:#f4f4f5; color:#18181b; }
 html[data-theme="light"] #main-screen, html[data-theme="light"] #content, html[data-theme="light"] #results-screen { background:#f4f4f5; }
 html[data-theme="light"] #sidebar { background:#fff; color:#18181b; }
-html[data-theme="light"] #sidebar-logo-text { color:#18181b !important; }
+html[data-theme="light"] #sidebar-logo-text { color:var(--app-text-color-light, #18181b) !important; }
 
 /* Todos los textos de la app en negro al usar tema claro. */
 html[data-theme="light"] #content,
@@ -99,18 +99,18 @@ html[data-theme="light"] #channel-description,
 html[data-theme="light"] .profile-section h2,
 html[data-theme="light"] #game-screen-title,
 html[data-theme="light"] .game-screen-viewers {
-    color:#18181b !important;
+    color:var(--app-text-color-light, #18181b) !important;
 }
 
 /* Los iconos del sidebar también se oscurecen en tema claro. */
 html[data-theme="light"] #nav-list .nav-icon,
 html[data-theme="light"] #nav-list .nav-icon svg {
-    color:#18181b !important;
-    stroke:#18181b !important;
+    color:var(--app-text-color-light, #18181b) !important;
+    stroke:var(--app-text-color-light, #18181b) !important;
     fill:none !important;
 }
 html[data-theme="light"] #nav-list .nav-icon svg[stroke] {
-    stroke:#18181b !important;
+    stroke:var(--app-text-color-light, #18181b) !important;
 }
 
 /* Al recibir foco (o hover), el texto vuelve a blanco para contrastar con
@@ -4953,6 +4953,7 @@ html[data-text-color="yellow"] { --app-text-color: #ffeb3b; }
 html[data-text-color="green"]  { --app-text-color: #4ade80; }
 html[data-text-color="cyan"]   { --app-text-color: #22d3ee; }
 html[data-text-color="red"]    { --app-text-color: #ff4d4d; }
+html[data-text-color="black"]  { --app-text-color: #000000; }
  body,
  .section-title,
  .section-stat,
@@ -7632,6 +7633,7 @@ function openAccountOverlay() {
     overlay?.classList.add("visible");
     overlay?.setAttribute("aria-hidden", "false");
     accountOverlayView = "menu";
+    document.getElementById("account-box")?.classList.remove("is-settings");
     renderAccountOverlay(twitchUser ? "logged-in" : "logged-out");
 }
 
@@ -7641,6 +7643,7 @@ function closeAccountOverlay() {
     overlay?.classList.remove("visible");
     overlay?.setAttribute("aria-hidden", "true");
     accountOverlayView = "menu";
+    document.getElementById("account-box")?.classList.remove("is-settings");
     const accountIndex = NAV_ITEMS.findIndex(item => item.id === accountOverlayOrigin);
     if (currentScreen === "main" && accountIndex >= 0) {
         navIndex = accountIndex;
@@ -7731,6 +7734,7 @@ function renderAccountSettings() {
     const box = document.getElementById("account-box");
     if (!box) return;
     accountOverlayView = "settings";
+    box.classList.add("is-settings");
     box.innerHTML = `
         <h2>Ajustes</h2>
         <div class="settings-row-account" data-setting="theme">
@@ -7760,6 +7764,7 @@ function renderAccountSettings() {
                 <button data-nav-btn data-value="green" style="color:#4ade80">Verde</button>
                 <button data-nav-btn data-value="cyan" style="color:#22d3ee">Cian</button>
                 <button data-nav-btn data-value="red" style="color:#ff4d4d">Rojo</button>
+                <button data-nav-btn data-value="black">Negro</button>
             </div>
         </div>
         <div class="settings-row-account" data-setting="cardSize">
@@ -7906,6 +7911,7 @@ function handleAccountOverlayKeys(keyCode, e) {
                 groupBtns.forEach(b => b.classList.remove("focused"));
                 groupBtns[next].classList.add("focused");
                 groupBtns[next].focus({preventScroll:true});
+                groupBtns[next].scrollIntoView({block:"nearest",inline:"nearest"});
             }
             return;
         }
@@ -7927,6 +7933,7 @@ function handleAccountOverlayKeys(keyCode, e) {
                 // Es el botón "Volver": lo enfoca directo.
                 target.classList.add("focused");
                 target.focus({preventScroll:true});
+                target.scrollIntoView({block:"nearest"});
             } else {
                 // Es una fila de ajustes: enfoca su opción activa (o la primera).
                 const group = target.querySelector(".settings-options");
@@ -7935,6 +7942,7 @@ function handleAccountOverlayKeys(keyCode, e) {
                 if (active) {
                     active.classList.add("focused");
                     active.focus({preventScroll:true});
+                    active.scrollIntoView({block:"nearest"});
                 }
             }
             return;
@@ -11682,6 +11690,114 @@ html.perf-lite #main-screen.sidebar-active::after {
     }
 })();
 </script>
+
+<style id="settings-fit-light-text-v68">
+/* ===== Ajustes: cuadro compacto que cabe completo en 1080p ===== */
+#account-overlay .account-box.is-settings {
+    width: min(900px, 94vw);
+    max-height: 94%;
+    padding: 18px 28px;
+    overflow-y: auto;
+}
+#account-overlay .account-box.is-settings h2 {
+    font-size: 22px;
+    margin-bottom: 4px;
+    text-align: left;
+}
+#account-overlay .account-box.is-settings .settings-row-account {
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+    padding: 8px 0;
+}
+#account-overlay .account-box.is-settings .settings-row-account > label {
+    flex: 0 0 150px;
+}
+#account-overlay .account-box.is-settings .settings-options {
+    flex: 1 1 auto;
+}
+#account-overlay .account-box.is-settings .settings-options button {
+    padding: 7px 8px;
+}
+#account-overlay .account-box.is-settings .account-btn {
+    margin-top: 8px;
+    padding: 10px 18px;
+}
+@media (max-width: 700px) {
+    #account-overlay .account-box.is-settings .settings-row-account { flex-direction: column; align-items: stretch; gap: 6px; }
+    #account-overlay .account-box.is-settings .settings-row-account > label { flex: none; }
+}
+
+/* Botón "Negro": fondo claro para que se lea sobre el cuadro oscuro */
+.settings-row-account[data-setting="textColor"] .settings-options button[data-value="black"] {
+    background: #d4d4d8;
+    color: #000;
+}
+.settings-row-account[data-setting="textColor"] .settings-options button[data-value="black"].active {
+    background: #9146FF;
+    color: #fff;
+}
+
+/* ===== Tema claro: el color de texto elegido también se aplica =====
+   En fondo claro, cada color usa una variante oscura legible
+   (el blanco equivale al negro-grisáceo por defecto). */
+html[data-text-color="white"]  { --app-text-color-light: #18181b; }
+html[data-text-color="yellow"] { --app-text-color-light: #a16207; }
+html[data-text-color="green"]  { --app-text-color-light: #15803d; }
+html[data-text-color="cyan"]   { --app-text-color-light: #0e7490; }
+html[data-text-color="red"]    { --app-text-color-light: #dc2626; }
+html[data-text-color="black"]  { --app-text-color-light: #000000; }
+
+/* Se repite la lista aquí (al final del documento) para ganar los empates
+   de especificidad contra la regla global html[data-text-color] ... */
+html[data-theme="light"] #sidebar-logo-text,
+html[data-theme="light"] #content,
+html[data-theme="light"] #content .section-title,
+html[data-theme="light"] #content .section-stat,
+html[data-theme="light"] #content .stream-title,
+html[data-theme="light"] #content .stream-meta,
+html[data-theme="light"] #content .game-name,
+html[data-theme="light"] #content .game-viewers,
+html[data-theme="light"] #nav-list li,
+html[data-theme="light"] #nav-list .nav-label,
+html[data-theme="light"] .followed-name,
+html[data-theme="light"] .followed-meta,
+html[data-theme="light"] .followed-heading,
+html[data-theme="light"] .section-note,
+html[data-theme="light"] #channel-name,
+html[data-theme="light"] #channel-substat,
+html[data-theme="light"] #channel-followers,
+html[data-theme="light"] #channel-description,
+html[data-theme="light"] .profile-section h2,
+html[data-theme="light"] #game-screen-title,
+html[data-theme="light"] .game-screen-viewers {
+    color: var(--app-text-color-light, #18181b) !important;
+}
+html[data-theme="light"] #nav-list .nav-icon,
+html[data-theme="light"] #nav-list .nav-icon svg,
+html[data-theme="light"] #nav-list .nav-icon svg[stroke] {
+    color: var(--app-text-color-light, #18181b) !important;
+    stroke: var(--app-text-color-light, #18181b) !important;
+}
+/* Con foco/hover el texto vuelve a blanco (fondo destacado), como antes */
+html[data-theme="light"] #nav-list li.focused,
+html[data-theme="light"] #nav-list li.focused .nav-label,
+html[data-theme="light"] #nav-list li:focus,
+html[data-theme="light"] #nav-list li:focus .nav-label,
+html[data-theme="light"] #nav-list li:hover,
+html[data-theme="light"] #nav-list li:hover .nav-label {
+    color: #ffffff !important;
+}
+html[data-theme="light"] #nav-list li.focused .nav-icon,
+html[data-theme="light"] #nav-list li.focused .nav-icon svg,
+html[data-theme="light"] #nav-list li:focus .nav-icon,
+html[data-theme="light"] #nav-list li:focus .nav-icon svg,
+html[data-theme="light"] #nav-list li:hover .nav-icon,
+html[data-theme="light"] #nav-list li:hover .nav-icon svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+}
+</style>
 
 </body>
 </html>
