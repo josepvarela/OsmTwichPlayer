@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "tizen/**"
+      - "osmtwich.html"
       - ".github/workflows/build-wgt.yml"
   workflow_dispatch: {}
 
@@ -23,6 +24,8 @@ jobs:
       # automatizar sin exponer credenciales personales tuyas en el repo.
       - name: Empaquetar .wgt (sin firmar)
         run: |
+          # La app va DENTRO del .wgt: index.html = osmtwich.html (sin abrir la web)
+          cp osmtwich.html tizen/index.html
           cd tizen
           zip -r ../OsmTwich.wgt . -x ".*"
           cd ..
