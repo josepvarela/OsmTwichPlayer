@@ -821,9 +821,13 @@ html body #main-screen.screen #content#content { padding-left: var(--safe-l, 0px
 html body #main-screen.screen.sidebar-collapsed #content#content { padding-left: calc(120px + var(--safe-l, 0px)) !important; }
 html body #main-screen.screen #sidebar#sidebar .nav-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 html[data-tv-scaled] body #main-screen.screen #sidebar#sidebar { height: 100% !important; min-height: 0 !important; max-height: 100% !important; }
-html[data-tv-scaled] #main-screen.active { width: 100% !important; max-width: 100% !important; height: 100% !important; }
+html[data-tv-scaled] #main-screen.active { width: 100% !important; max-width: 100% !important; height: 100% !important; min-height: 0 !important; }
+/* En 4K "100vh" vale 2160px, el doble del alto lógico (1080) del contenedor escalado:
+   el contenido de abajo quedaba fuera de pantalla. Se fija a la altura lógica. */
+html[data-tv-scaled] #account-overlay .account-box { max-height: 885px; }
 html.perf-lite * { -webkit-tap-highlight-color: transparent; }
 html.perf-lite .tile-track { scroll-behavior: auto !important; scroll-snap-type: none !important; }
+html.perf-lite .section-row { content-visibility: visible !important; contain: none !important; }
 html.perf-lite #main-screen.screen #content#content { transition: none !important; }
 html.perf-lite #main-screen.screen #sidebar#sidebar { transition: none !important; }
 html.perf-lite #main-screen.sidebar-active::after { display: none !important; }
@@ -851,7 +855,226 @@ html[data-theme="light"] #nav-list .nav-icon, html[data-theme="light"] #nav-list
 html[data-theme="light"] #nav-list li.focused, html[data-theme="light"] #nav-list li.focused .nav-label, html[data-theme="light"] #nav-list li:focus, html[data-theme="light"] #nav-list li:focus .nav-label, html[data-theme="light"] #nav-list li:hover, html[data-theme="light"] #nav-list li:hover .nav-label { color: #ffffff !important; }
 html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"] #nav-list li.focused .nav-icon svg, html[data-theme="light"] #nav-list li:focus .nav-icon, html[data-theme="light"] #nav-list li:focus .nav-icon svg, html[data-theme="light"] #nav-list li:hover .nav-icon, html[data-theme="light"] #nav-list li:hover .nav-icon svg { color: #ffffff !important; stroke: #ffffff !important; }
 </style>
-    <script async src="https://embed.twitch.tv/embed/v1.js"></script>
+    <!-- ===== .wgt (file://): reproductor HLS propio =====
+         Twitch.Player (embed.twitch.tv) NO se puede incrustar desde file://
+         (el servidor responde ERR_BLOCKED_BY_RESPONSE). Cuando la app corre
+         empaquetada en el .wgt se define un reemplazo con la misma API que
+         usa la app (play/pause/seek/calidades/eventos), basado en <video> +
+         HLS directo de Twitch. En la web normal NO se activa. -->
+    <script id="wgt-local-hls-player">
+    (function () {
+        "use strict";
+        if (location.protocol !== "file:") return;
+
+        var GQL = "https://gql.twitch.tv/gql";
+        var CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko";
+        var USHER = "https://usher.ttvnw.net";
+
+        var TOKEN_Q = 'query PlaybackAccessToken_Template($login: String!, $isLive: Boolean!, $vodID: ID!, $isVod: Boolean!, $playerType: String!) { streamPlaybackAccessToken(channelName: $login, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isLive) { value signature __typename } videoPlaybackAccessToken(id: $vodID, params: {platform: "web", playerBackend: "mediaplayer", playerType: $playerType}) @include(if: $isVod) { value signature __typename } }';
+        var CLIP_Q = 'query ClipAccess($slug: ID!) { clip(slug: $slug) { playbackAccessToken(params: {platform: "web", playerType: "site", playerBackend: "mediaplayer"}) { signature value } videoQualities { frameRate quality sourceURL } } }';
+
+        function gql(query, variables) {
+            return fetch(GQL, {
+                method: "POST",
+                headers: { "Client-ID": CLIENT_ID, "Content-Type": "application/json" },
+                body: JSON.stringify({ query: query, variables: variables })
+            }).then(function (r) {
+                if (!r.ok) throw new Error("GQL " + r.status);
+                return r.json();
+            });
+        }
+
+        function qs(o) {
+            return Object.keys(o).map(function (k) {
+                return encodeURIComponent(k) + "=" + encodeURIComponent(o[k]);
+            }).join("&");
+        }
+
+        // Master .m3u8 -> lista de calidades [{name, group, url}] (Auto primero).
+        function parseMaster(text, masterUrl) {
+            var lines = text.split(/\r?\n/);
+            var list = [{ name: "Auto", group: "auto", url: masterUrl }];
+            for (var i = 0; i < lines.length; i++) {
+                if (lines[i].indexOf("#EXT-X-MEDIA") !== 0) continue;
+                var n = /NAME="([^"]*)"/.exec(lines[i]);
+                var g = /GROUP-ID="([^"]*)"/.exec(lines[i]);
+                var url = null;
+                for (var j = i + 1; j < lines.length && j < i + 4; j++) {
+                    if (lines[j] && lines[j].charAt(0) !== "#") { url = lines[j]; break; }
+                }
+                if (url) list.push({ name: n ? n[1] : (g ? g[1] : "?"), group: g ? g[1] : (n ? n[1] : "?"), url: url });
+            }
+            return list;
+        }
+
+        function fetchMaster(url) {
+            return fetch(url).then(function (r) {
+                if (!r.ok) throw new Error("HLS " + r.status);
+                return r.text();
+            }).then(function (t) { return parseMaster(t, url); });
+        }
+
+        function resolveSource(kind, id) {
+            var rnd = Math.floor(Math.random() * 1e7);
+            if (kind === "channel") {
+                var login = String(id || "").toLowerCase();
+                return gql(TOKEN_Q, { login: login, isLive: true, vodID: "", isVod: false, playerType: "site" }).then(function (j) {
+                    var t = j && j.data && j.data.streamPlaybackAccessToken;
+                    if (!t) throw new Error("sin token");
+                    return fetchMaster(USHER + "/api/channel/hls/" + encodeURIComponent(login) + ".m3u8?" + qs({
+                        player: "twitchweb", p: rnd, type: "any", allow_source: "true",
+                        allow_audio_only: "true", allow_spectre: "false", fast_bread: "true",
+                        supported_codecs: "avc1", sig: t.signature, token: t.value
+                    }));
+                });
+            }
+            if (kind === "video") {
+                var vid = String(id || "").replace(/^v/i, "");
+                return gql(TOKEN_Q, { login: "", isLive: false, vodID: vid, isVod: true, playerType: "site" }).then(function (j) {
+                    var t = j && j.data && j.data.videoPlaybackAccessToken;
+                    if (!t) throw new Error("sin token VOD");
+                    return fetchMaster(USHER + "/vod/" + encodeURIComponent(vid) + ".m3u8?" + qs({
+                        player: "twitchweb", p: rnd, allow_source: "true", allow_audio_only: "true",
+                        allow_spectre: "true", playlist_include_framerate: "true",
+                        supported_codecs: "avc1", nauth: t.value, nauthsig: t.signature
+                    }));
+                });
+            }
+            // clip: MP4 directos, sin Auto
+            return gql(CLIP_Q, { slug: String(id || "") }).then(function (j) {
+                var c = j && j.data && j.data.clip;
+                if (!c || !c.playbackAccessToken || !c.videoQualities || !c.videoQualities.length) throw new Error("clip no disponible");
+                var tk = c.playbackAccessToken;
+                return c.videoQualities.map(function (q) {
+                    var fps = parseInt(q.frameRate, 10) || 30;
+                    return {
+                        name: q.quality + "p" + (fps > 30 ? fps : ""),
+                        group: q.quality + "p",
+                        url: q.sourceURL + "?" + qs({ sig: tk.signature, token: tk.value })
+                    };
+                });
+            });
+        }
+
+        function Player(target, opts) {
+            opts = opts || {};
+            this._l = {};
+            this._q = [];
+            this._cur = "auto";
+            this._gen = 0;
+            this._isClip = false;
+            var c = typeof target === "string" ? document.getElementById(target) : target;
+            var v = document.createElement("video");
+            v.setAttribute("playsinline", "");
+            v.setAttribute("webkit-playsinline", "");
+            v.style.cssText = "width:100%;height:100%;background:#000;object-fit:contain;display:block;";
+            v.muted = !!opts.muted;
+            v.autoplay = opts.autoplay !== false;
+            v.controls = false;
+            if (c) c.appendChild(v);
+            this._v = v;
+            var self = this;
+            v.addEventListener("playing", function () { self._emit("playing"); });
+            v.addEventListener("pause", function () { self._emit("pause"); });
+            v.addEventListener("ended", function () { self._emit("ended"); });
+            v.addEventListener("error", function () { self._emit("offline"); });
+            if (opts.channel) this._load("channel", opts.channel, 0);
+            else if (opts.video) this._load("video", opts.video, 0);
+            else if (opts.clip) this._load("clip", opts.clip, 0);
+        }
+        Player.READY = "ready";
+        Player.PLAYING = "playing";
+        Player.PAUSE = "pause";
+        Player.ENDED = "ended";
+        Player.OFFLINE = "offline";
+        Player.ONLINE = "online";
+        Player.PLAYBACK_BLOCKED = "playbackBlocked";
+
+        var P = Player.prototype;
+        P._emit = function (ev) {
+            var arr = (this._l[ev] || []).slice();
+            for (var i = 0; i < arr.length; i++) { try { arr[i](); } catch (e) { console.warn(e); } }
+        };
+        P.addEventListener = function (ev, cb) { (this._l[ev] = this._l[ev] || []).push(cb); };
+        P.removeEventListener = function (ev, cb) {
+            var a = this._l[ev]; if (!a) return;
+            var i = a.indexOf(cb); if (i >= 0) a.splice(i, 1);
+        };
+        P._load = function (kind, id, startAt) {
+            var self = this, gen = ++this._gen;
+            this._isClip = kind === "clip";
+            this._q = [];
+            this._cur = this._isClip ? "" : "auto";
+            resolveSource(kind, id).then(function (list) {
+                if (gen !== self._gen) return;
+                self._q = list;
+                if (self._isClip) self._cur = list[0].group;
+                self._emit("ready");
+                self._setSrc(list[0].url, startAt);
+            }).catch(function (e) {
+                if (gen !== self._gen) return;
+                console.warn("Reproductor local:", e);
+                self._emit("offline");
+            });
+        };
+        P._setSrc = function (url, startAt) {
+            var v = this._v;
+            if (startAt > 0) {
+                var onMeta = function () {
+                    v.removeEventListener("loadedmetadata", onMeta);
+                    try { v.currentTime = startAt; } catch (e) {}
+                };
+                v.addEventListener("loadedmetadata", onMeta);
+            }
+            v.src = url;
+            try { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {}
+        };
+        P.setChannel = function (c) { this._load("channel", c, 0); };
+        P.setVideo = function (id, t) { this._load("video", id, t || 0); };
+        P.getQualities = function () { return this._q.map(function (q) { return { name: q.name, group: q.group }; }); };
+        P.getQuality = function () { return this._cur; };
+        P.setQuality = function (g) {
+            for (var i = 0; i < this._q.length; i++) {
+                if (this._q[i].group === g) {
+                    var v = this._v, t = v.currentTime, vod = isFinite(v.duration) && v.duration > 0;
+                    this._cur = g;
+                    this._setSrc(this._q[i].url, vod ? t : 0);
+                    return;
+                }
+            }
+        };
+        P.play = function () { try { var p = this._v.play(); if (p && p.catch) p.catch(function () {}); } catch (e) {} };
+        P.pause = function () { try { this._v.pause(); } catch (e) {} };
+        P.isPaused = function () { return !!this._v.paused; };
+        P.setMuted = function (m) { this._v.muted = !!m; };
+        P.getMuted = function () { return !!this._v.muted; };
+        P.setVolume = function (x) { try { this._v.volume = Math.max(0, Math.min(1, x)); } catch (e) {} };
+        P.getVolume = function () { return this._v.volume; };
+        P.getCurrentTime = function () { return this._v.currentTime || 0; };
+        P.getDuration = function () { var d = this._v.duration; return isFinite(d) ? d : 0; };
+        P.seek = function (t) { try { this._v.currentTime = t; } catch (e) {} };
+        P.destroy = function () {
+            this._gen++;
+            var v = this._v;
+            try { v.pause(); v.removeAttribute("src"); v.load(); } catch (e) {}
+            if (v.parentNode) v.parentNode.removeChild(v);
+        };
+
+        var shim = { Embed: Player, __local: true };
+        Object.defineProperty(shim, "Player", { value: Player, writable: false, enumerable: true });
+        try {
+            Object.defineProperty(window, "Twitch", { configurable: true, get: function () { return shim; }, set: function () {} });
+        } catch (e) { window.Twitch = shim; }
+    })();
+    </script>
+    <script>
+    // Embed oficial de Twitch: solo fuera del .wgt (en file:// lo reemplaza el reproductor local).
+    if (location.protocol !== "file:") {
+        var __tw = document.createElement("script");
+        __tw.async = true; __tw.src = "https://embed.twitch.tv/embed/v1.js";
+        document.head.appendChild(__tw);
+    }
+    </script>
 
 </head>
 <body>
@@ -1799,10 +2022,11 @@ function focusContentTile(rowId, tileIndex) {
         const rr = row.getBoundingClientRect();
         const tr = tile.getBoundingClientRect();
         const margin = 12;
+        const k2 = (row.offsetWidth ? rr.width / row.offsetWidth : 1) || 1;
         if (tr.right > rr.right - margin) {
-            row.scrollBy({left: tr.right - (rr.right - margin), behavior: "smooth"});
+            row.scrollBy({left: (tr.right - (rr.right - margin)) / k2, behavior: "smooth"});
         } else if (tr.left < rr.left + margin) {
-            row.scrollBy({left: -((rr.left + margin) - tr.left), behavior: "smooth"});
+            row.scrollBy({left: -((rr.left + margin) - tr.left) / k2, behavior: "smooth"});
         }
     }
     tile.focus({ preventScroll: true });
@@ -1836,7 +2060,13 @@ function focusFirstAvailableRow(preferredRowId = "seguidosChannels") {
 function moveContentRow(delta) {
     const rows = getVisibleRowIds();
     const pos = rows.indexOf(contentRowId);
-    const newPos = Math.max(0, Math.min(rows.length - 1, pos + delta));
+    // Avanza hasta la siguiente fila que tenga tarjetas: una fila vacía o aún
+    // "Cargando…" ya no bloquea el paso a las secciones de más abajo.
+    let newPos = pos;
+    for (let p = pos + delta; p >= 0 && p < rows.length; p += delta) {
+        if (getRowTileCount(rows[p]) > 0) { newPos = p; break; }
+    }
+    if (newPos === pos) return;
     const newRowId = rows[newPos];
     const tileCount = getRowTileCount(newRowId);
     const idx = tileCount ? Math.min(contentTileIndex, tileCount - 1) : 0;
@@ -1908,7 +2138,10 @@ function alignSectionAsSecond(id, behavior) {
 
         // Delta para mover la fila de referencia al borde superior + margen
         // (funciona con barra cerrada/abierta).
-        const delta = rowRect.top - contentRect.top - topSafeMargin;
+        // En el .wgt el body va dentro de #tv-scale-root con transform:scale: los
+        // rects salen en px escalados y scrollTop en px de layout -> se divide.
+        const k = (content.offsetHeight ? contentRect.height / content.offsetHeight : 1) || 1;
+        const delta = (rowRect.top - contentRect.top) / k - topSafeMargin;
         const targetScrollTop = Math.max(0, Math.min(
             content.scrollHeight - content.clientHeight,
             content.scrollTop + delta
@@ -1932,7 +2165,8 @@ function scrollIntoViewGuarded(el, opts, scrollTopOverride, behavior) {
     const effectiveBehavior = behavior || "smooth";
     suppressHoverUntil = Date.now() + (effectiveBehavior === "auto" ? 0 : 800);
     if (scrollTopOverride !== undefined) {
-        el.scrollTo({ top: scrollTopOverride, behavior: effectiveBehavior });
+        try { el.scrollTo({ top: scrollTopOverride, behavior: effectiveBehavior }); }
+        catch (_) { el.scrollTop = scrollTopOverride; }
     } else {
         el.scrollIntoView(opts);
     }
@@ -3693,6 +3927,7 @@ function closeHomeSearch() {
 // al crearlo — NO se llama en cada cambio de canal/VOD (ver createPlayer).
 function destroyPlayer() {
     playerPlaybackStarted = false;
+    try { if (twitchPlayer && typeof twitchPlayer.destroy === "function") twitchPlayer.destroy(); } catch (_) {}
     const target = document.getElementById("twitch-player-target");
     if (target) target.innerHTML = "";
     twitchPlayer = null;
@@ -6350,8 +6585,12 @@ function goBack() {
     if (!isTizenApp) return;
 
     function getViewportSize(){
-        var w = (window.screen && window.screen.width) || window.innerWidth || document.documentElement.clientWidth;
-        var h = (window.screen && window.screen.height) || window.innerHeight || document.documentElement.clientHeight;
+        // Se usa el tamaño real de la ventana: en algunos Samsung screen.width
+        // (resolución del panel) no coincide con el viewport de la app y el
+        // contenedor fijo de 1920x1080 quedaba cortado (controles a la derecha
+        // y filas de abajo fuera de pantalla).
+        var w = window.innerWidth || document.documentElement.clientWidth || (window.screen && window.screen.width);
+        var h = window.innerHeight || document.documentElement.clientHeight || (window.screen && window.screen.height);
         return { w: w, h: h };
     }
 
@@ -6373,16 +6612,11 @@ function goBack() {
         var scaleX = size.w / BASELINE_WIDTH;
         var scaleY = size.h / BASELINE_HEIGHT;
         var scale = Math.min(scaleX, scaleY);
-        // Si la pantalla es más pequeña que el baseline, no forzar escala
-        // menor a 1 aquí: dejamos que el resto de media queries responsive
-        // sigan gobernando en pantallas chicas.
-        if (size.w >= BASELINE_WIDTH) {
-            root.style.transform = 'scale(' + scale + ')';
-            document.documentElement.setAttribute('data-tv-scaled', '1');
-        } else {
-            root.style.transform = '';
-            document.documentElement.removeAttribute('data-tv-scaled');
-        }
+        // Siempre se escala el contenedor fijo de 1920x1080 al tamaño REAL de la
+        // ventana (hacia arriba en 4K, hacia abajo si la ventana es menor), así
+        // todo el layout se ve igual que en un TV Full HD y nada queda cortado.
+        root.style.transform = 'scale(' + scale + ')';
+        document.documentElement.setAttribute('data-tv-scaled', '1');
     }
 
     if (document.readyState === 'loading') {
@@ -6392,6 +6626,10 @@ function goBack() {
     }
     window.addEventListener('resize', applyTvScale);
     window.addEventListener('orientationchange', applyTvScale);
+    // Algunos TV reportan un tamaño de ventana provisional al arrancar.
+    window.addEventListener('load', applyTvScale);
+    setTimeout(applyTvScale, 400);
+    setTimeout(applyTvScale, 1500);
 })();
 </script>
 
@@ -6711,12 +6949,16 @@ function goBack() {
             ["scrollTo", "scrollBy"].forEach(function (name) {
                 var orig = Element.prototype[name];
                 if (typeof orig !== "function") return;
-                Element.prototype[name] = function (a, b) {
+                Element.prototype[name] = function (a) {
                     if (a && typeof a === "object" && a.behavior === "smooth" &&
                         a.left !== undefined && a.top === undefined) {
                         a = Object.assign({}, a, { behavior: "auto" });
                     }
-                    return orig.call(this, a, b);
+                    // IMPORTANTE: no reenviar un 2º argumento "undefined". Con 2
+                    // argumentos el navegador usa la forma antigua scrollTo(x, y),
+                    // convierte el objeto en NaN y NO desplaza nada (bug que
+                    // impedía llegar a las secciones de abajo en el TV).
+                    return arguments.length > 1 ? orig.call(this, a, arguments[1]) : orig.call(this, a);
                 };
             });
         } catch (e) {}
