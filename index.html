@@ -39,8 +39,6 @@ html[data-theme="light"] #nav-list li.focused, html[data-theme="light"] #nav-lis
 html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"] #nav-list li.focused .nav-icon svg, html[data-theme="light"] #nav-list li:focus .nav-icon, html[data-theme="light"] #nav-list li:focus .nav-icon svg, html[data-theme="light"] #nav-list li:hover .nav-icon, html[data-theme="light"] #nav-list li:hover .nav-icon svg { filter: drop-shadow(0 0 4px rgba(0,0,0,.9)) drop-shadow(0 0 10px rgba(0,0,0,.6)) !important; }
 html[data-card-size="small"] #main-screen .tile-stream { flex-basis: 220px !important; width: 220px !important; }
 html[data-card-size="large"] #main-screen .tile-stream { flex-basis: 340px !important; width: 340px !important; }
-html[data-text-size="small"] #main-screen { font-size: 90%; }
-html[data-text-size="large"] #main-screen { font-size: 112%; }
 @media (max-width:900px) {
   .settings-row { align-items: flex-start; flex-direction: column; gap: 8px; }
   .settings-row select { width: 100%; }
@@ -717,10 +715,6 @@ html, body { overflow-x: hidden !important; }
 .settings-options button:hover { background: #3a3a3f; }
 .settings-options button.active { background: #9146FF; border-color: #fff; }
 .settings-options button.focused { outline: 3px solid #fff; outline-offset: 2px; }
-html[data-text-size="x2"] body { zoom: 1.10; }
-html[data-text-size="x3"] body { zoom: 1.20; }
-html[data-text-size="x4"] body { zoom: 1.30; }
-html[data-text-size="x5"] body { zoom: 1.40; }
 html[data-text-color="white"] { --app-text-color: #ffffff; }
 html[data-text-color="yellow"] { --app-text-color: #ffeb3b; }
 html[data-text-color="green"] { --app-text-color: #4ade80; }
@@ -825,6 +819,34 @@ html[data-tv-scaled] #main-screen.active { width: 100% !important; max-width: 10
 /* En 4K "100vh" vale 2160px, el doble del alto lógico (1080) del contenedor escalado:
    el contenido de abajo quedaba fuera de pantalla. Se fija a la altura lógica. */
 html[data-tv-scaled] #account-overlay .account-box { max-height: 885px; }
+/* ===== Barra de controles del reproductor (TV): más alta y botones x2 =====
+   Todo en px fijos y excluida del escalado de texto (app y chat). */
+html[data-tv-scaled] #player-controls-bar { gap: 16px !important; padding: 28px 36px 40px !important; }
+html[data-tv-scaled] .progress-row { gap: 22px; }
+html[data-tv-scaled] .progress-track { height: 12px; border-radius: 6px; }
+html[data-tv-scaled] .progress-fill { border-radius: 6px; }
+html[data-tv-scaled] .progress-fill::after { width: 24px; height: 24px; right: -12px; }
+html[data-tv-scaled] .progress-label { font-size: 28px; min-width: 110px; }
+html[data-tv-scaled] .live-dot { width: 14px; height: 14px; flex: 0 0 14px; }
+html[data-tv-scaled] .player-title-row { font-size: 26px; }
+html[data-tv-scaled] .ctrl-row { gap: 16px !important; }
+html[data-tv-scaled] .ctrl-side { gap: 12px; }
+html[data-tv-scaled] .ctrl-center { gap: 16px; padding: 0 12px; }
+html[data-tv-scaled] .ctrl-btn { width: 104px !important; height: 104px !important; border-radius: 20px; font-size: 52px; }
+html[data-tv-scaled] .ctrl-btn svg { width: 52px !important; height: 52px !important; }
+html[data-tv-scaled] .ctrl-btn-main { width: 128px !important; height: 128px !important; font-size: 72px; border-radius: 50%; }
+html[data-tv-scaled] .ctrl-btn-main svg { width: 64px !important; height: 64px !important; }
+html[data-tv-scaled] .ctrl-btn { flex: 0 0 auto; }
+html[data-tv-scaled] .ctrl-btn-quality { flex: 0 1 auto; width: auto !important; min-width: 104px !important; padding: 0 20px !important; font-size: 30px !important; }
+html[data-tv-scaled] #player-info { max-width: 620px; }
+html[data-tv-scaled] .player-profile-btn { width: 72px; height: 72px; flex-basis: 72px; }
+html[data-tv-scaled] #player-channel-name { font-size: 30px; max-width: 380px; }
+html[data-tv-scaled] .player-info-line, html[data-tv-scaled] #player-game-name, html[data-tv-scaled] #player-game-viewers { font-size: 24px; }
+html[data-tv-scaled] #quality-panel { width: 400px; right: 560px; bottom: 300px; padding: 24px; }
+html[data-tv-scaled] #quality-panel h3 { font-size: 30px; }
+html[data-tv-scaled] .quality-item { font-size: 28px; padding: 14px 18px; }
+html[data-tv-scaled] #chat-panel.chat-medium, html[data-tv-scaled] #chat-panel.chat-small { bottom: 300px; }
+html[data-tv-scaled] #chat-composer { bottom: 300px; }
 html.perf-lite * { -webkit-tap-highlight-color: transparent; }
 html.perf-lite .tile-track { scroll-behavior: auto !important; scroll-snap-type: none !important; }
 html.perf-lite .section-row { content-visibility: visible !important; contain: none !important; }
@@ -3456,13 +3478,25 @@ function renderAccountSettings() {
     </div>
 </div>
         <div class="settings-row-account" data-setting="textSize">
-            <label>Tamaño texto</label>
+            <label>Tamaño texto app</label>
             <div class="settings-options">
                 <button data-nav-btn data-value="x1">x1</button>
-                <button data-nav-btn data-value="x2">x2</button>
-                <button data-nav-btn data-value="x3">x3</button>
-                <button data-nav-btn data-value="x4">x4</button>
-                <button data-nav-btn data-value="x5">x5</button>
+                <button data-nav-btn data-value="x1.2">x1.2</button>
+                <button data-nav-btn data-value="x1.4">x1.4</button>
+                <button data-nav-btn data-value="x1.6">x1.6</button>
+                <button data-nav-btn data-value="x1.8">x1.8</button>
+                <button data-nav-btn data-value="x2.0">x2.0</button>
+            </div>
+        </div>
+        <div class="settings-row-account" data-setting="chatTextSize">
+            <label>Tamaño texto chat</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="x1">x1</button>
+                <button data-nav-btn data-value="x1.2">x1.2</button>
+                <button data-nav-btn data-value="x1.4">x1.4</button>
+                <button data-nav-btn data-value="x1.6">x1.6</button>
+                <button data-nav-btn data-value="x1.8">x1.8</button>
+                <button data-nav-btn data-value="x2.0">x2.0</button>
             </div>
         </div>
         <div class="settings-row-account" data-setting="textColor">
@@ -3556,12 +3590,98 @@ function applyInterfaceSettings() {
         catch (e) { return fallback; }
     };
     root.dataset.theme = get("theme", "dark");
-    root.dataset.textSize = get("textSize", "x1");
+    // Compatibilidad: valores antiguos x2..x5 -> escala nueva
+    var legacyText = { "x2": "x1.2", "x3": "x1.4", "x4": "x1.6", "x5": "x1.8" };
+    var savedText = get("textSize", "x1");
+    if (legacyText[savedText]) { savedText = legacyText[savedText]; saveInterfaceSetting("textSize", savedText); }
+    root.dataset.textSize = savedText;
+    root.dataset.chatTextSize = get("chatTextSize", "x1");
     root.dataset.textColor = get("textColor", "white");
     if (get("cardSize", "100") === "50") saveInterfaceSetting("cardSize", "100"); // 50% ya no existe
     root.dataset.cardSize = get("cardSize", "100");
     window.interfaceChatPreference = get("chat", "yes");
     window.interfaceQualityPreference = get("quality", "auto");
+    applyTextScales();
+}
+
+// ---- Escala de TEXTO (app y chat), sin zoom ----
+// Genera una hoja de estilos con una copia de cada regla que fija font-size en px,
+// multiplicada por --app-fs / --chat-fs. La barra de controles del reproductor
+// queda excluida (no la afecta ningún tamaño de texto).
+var fontScaleSheetBuilt = false;
+function parseTextScale(v) {
+    var n = parseFloat(String(v || "").replace(/^x/, ""));
+    return (isFinite(n) && n >= 1 && n <= 2) ? n : 1;
+}
+function buildFontScaleSheet() {
+    if (fontScaleSheetBuilt) return;
+    fontScaleSheetBuilt = true;
+    var CHAT = /#chat-panel|#chat-messages|\.chat-|#chat-composer|#profile-chat/;
+    var CONTROLS = /#player-controls-bar|\.ctrl-|#player-info|\.player-info|\.player-profile|\.player-game|#player-game|#player-channel-name|#player-stream-title|\.player-title-row|\.progress-|#progress-|\.live-label|\.live-dot|#quality-panel|\.quality-|\.info-focus-btn/;
+    var groups = [
+        { attr: "data-fs-app", v: "--app-fs", test: function (s) { return !CHAT.test(s) && !CONTROLS.test(s); } },
+        { attr: "data-fs-chat", v: "--chat-fs", test: function (s) { return CHAT.test(s) && !CONTROLS.test(s); } }
+    ];
+    function splitSel(t) {
+        var out = [], d = 0, cur = "";
+        for (var i = 0; i < t.length; i++) {
+            var c = t.charAt(i);
+            if (c === "(" || c === "[") d++; else if (c === ")" || c === "]") d--;
+            if (c === "," && d === 0) { out.push(cur.trim()); cur = ""; } else cur += c;
+        }
+        if (cur.trim()) out.push(cur.trim());
+        return out;
+    }
+    function scopeSel(sel, attr) {
+        if (/^html\b/.test(sel)) return sel.replace(/^html/, "html[" + attr + "]");
+        if (/^:root\b/.test(sel)) return sel.replace(/^:root/, ":root[" + attr + "]");
+        return "html[" + attr + "] " + sel;
+    }
+    function walk(rules) {
+        var css = "";
+        for (var i = 0; i < rules.length; i++) {
+            var r = rules[i];
+            if (r.type === 1) {
+                var fs = r.style.getPropertyValue("font-size");
+                if (!fs || !/\dpx/.test(fs) || /%|\dem|rem/.test(fs)) continue;
+                var imp = r.style.getPropertyPriority("font-size") ? " !important" : "";
+                var sels = splitSel(r.selectorText);
+                for (var g = 0; g < groups.length; g++) {
+                    var keep = sels.filter(groups[g].test);
+                    if (!keep.length) continue;
+                    css += keep.map(function (x) { return scopeSel(x, groups[g].attr); }).join(",") +
+                        "{font-size:calc(" + fs + " * var(" + groups[g].v + ",1))" + imp + "}\n";
+                }
+            } else if (r.type === 4) {
+                var inner = walk(r.cssRules);
+                if (inner) css += "@media " + r.media.mediaText + "{" + inner + "}\n";
+            } else if (r.type === 12) {
+                var inner2 = walk(r.cssRules);
+                if (inner2) css += "@supports " + r.conditionText + "{" + inner2 + "}\n";
+            }
+        }
+        return css;
+    }
+    var out = "";
+    for (var i = 0; i < document.styleSheets.length; i++) {
+        var sh = document.styleSheets[i], rules = null;
+        try { rules = sh.cssRules; } catch (e) { rules = null; }
+        if (rules) out += walk(rules);
+    }
+    var st = document.createElement("style");
+    st.id = "font-scale-generated";
+    st.textContent = out;
+    document.head.appendChild(st);
+}
+function applyTextScales() {
+    var root = document.documentElement;
+    var app = parseTextScale(root.dataset.textSize);
+    var chat = parseTextScale(root.dataset.chatTextSize);
+    if ((app !== 1 || chat !== 1)) buildFontScaleSheet();
+    root.style.setProperty("--app-fs", String(app));
+    root.style.setProperty("--chat-fs", String(chat));
+    if (app !== 1) root.setAttribute("data-fs-app", "1"); else root.removeAttribute("data-fs-app");
+    if (chat !== 1) root.setAttribute("data-fs-chat", "1"); else root.removeAttribute("data-fs-chat");
 }
 
 async function renderLoggedInAccount() {
