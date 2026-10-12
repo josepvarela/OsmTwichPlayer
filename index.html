@@ -1029,7 +1029,10 @@ const TWITCH_PARENT = window.location.hostname || "localhost";
 // TWITCH_CLIENT_SECRET de las variables de entorno del servidor.
 // TWITCH_CLIENT_ID se rellena en tiempo de ejecución con la respuesta del endpoint.
 let TWITCH_CLIENT_ID = "";
-const TWITCH_TOKEN_ENDPOINT = "/api/twitch-token";
+// En el .wgt de Samsung TV la app corre desde file:// (sin backend propio):
+// las funciones serverless se piden a Vercel con URL absoluta.
+const API_BASE = (location.protocol === "file:" || !location.hostname) ? "https://osmtwich.vercel.app" : "";
+const TWITCH_TOKEN_ENDPOINT = API_BASE + "/api/twitch-token";
 
 let twitchAppToken = null;   // token de la app (sin usuario) — para datos públicos
 let twitchTokenExpiresAt = 0;
@@ -3001,7 +3004,7 @@ async function startRedirectLogin() {
     // sessionStorage (no cookie): sobrevive la ida y vuelta a id.twitch.tv sin
     // depender de las reglas de SameSite en redirecciones cross-site.
     try { sessionStorage.setItem("tw_oauth_state", state); } catch (e) {}
-    const redirectUri = `${location.origin}/api/twitch-auth-callback`;
+    const redirectUri = `${API_BASE || location.origin}/api/twitch-auth-callback`;
     const params = new URLSearchParams({
         client_id: TWITCH_CLIENT_ID,
         redirect_uri: redirectUri,
@@ -3023,7 +3026,7 @@ async function startDeviceLogin() {
     renderAccountOverlay("qr-loading");
     await getAppToken();
     try {
-        const res = await fetch(`/api/twitch-device-start?scopes=${encodeURIComponent(TWITCH_SCOPES)}`, { cache: "no-store" });
+        const res = await fetch(`${API_BASE}/api/twitch-device-start?scopes=${encodeURIComponent(TWITCH_SCOPES)}`, { cache: "no-store" });
         const data = await res.json();
         if (!res.ok || !data.device_code) {
             renderAccountOverlay("qr-error", data.message || "No se pudo iniciar el login por QR.");
@@ -3051,7 +3054,7 @@ async function pollDeviceLogin() {
     }
     const current = deviceFlowState;
     try {
-        const res = await fetch(`/api/twitch-device-poll?device_code=${encodeURIComponent(current.device_code)}`, { cache: "no-store" });
+        const res = await fetch(`${API_BASE}/api/twitch-device-poll?device_code=${encodeURIComponent(current.device_code)}`, { cache: "no-store" });
         const data = await res.json();
 
         if (res.ok && data.access_token) {
@@ -5549,7 +5552,7 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken) {
         // porque esa API no manda cabeceras CORS para sitios de terceros y
         // el fetch directo fallaba siempre (era la causa real del error
         // "No se pudo cargar la repetición del chat").
-        let url = `/api/vod-comments?videoId=${encodeURIComponent(videoId)}&offset=${Math.max(0, Math.floor(offsetSeconds))}`;
+        let url = `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&offset=${Math.max(0, Math.floor(offsetSeconds))}`;
         let cursor = null;
         let fetchedAny = false;
         let hadError = false;
@@ -5586,7 +5589,7 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken) {
             const lastOffset = vodChatComments.length ? vodChatComments[vodChatComments.length - 1].offset : offsetSeconds;
             if (!cursor) { vodChatEnded = true; break; }
             if (lastOffset - offsetSeconds > 120) break; // ya tenemos suficiente margen
-            url = `/api/vod-comments?videoId=${encodeURIComponent(videoId)}&cursor=${encodeURIComponent(cursor)}`;
+            url = `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&cursor=${encodeURIComponent(cursor)}`;
         }
         vodChatComments.sort((a, b) => a.offset - b.offset);
         vodChatNextCursor = cursor;
