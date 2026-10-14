@@ -1,4 +1,4 @@
-name: Build Tizen .wgt
+name: Buildname: Build Tizen .wgt
 
 on:
   push:
@@ -8,6 +8,9 @@ on:
       - "index.html"
       - ".github/workflows/build-wgt.yml"
   workflow_dispatch: {}
+
+permissions:
+  contents: write
 
 jobs:
   build-wgt:
@@ -28,3 +31,20 @@ jobs:
         with:
           name: OsmTwich-wgt
           path: OsmTwich.wgt
+
+      - name: Crear Release (solo en push a main)
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: wgt-${{ github.run_number }}
+          name: OsmTwich TV ${{ github.run_number }} (sin firmar)
+          files: OsmTwich.wgt
+          body: |
+            Paquete .wgt sin firmar, generado automáticamente desde tizen/.
+            Para instalar en un Samsung TV real: abrí este proyecto en Tizen
+            Studio, generá tu certificado de autor/distribuidor (Certificate
+            Manager) y usá "Build Signed Package" antes de instalar, o
+            "Run As > Tizen Web Application" con el TV en modo desarrollador
+            conectado por IP, que firma y despliega en un solo paso.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
