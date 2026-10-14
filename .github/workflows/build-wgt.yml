@@ -37,7 +37,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: wgt-${{ github.run_number }}
-          name: OsmTwich TV ${{ github.run_number }} (sin firmar)
+          name: OsmTwich TV ${{ github.run_number }} (unsigned)
           files: OsmTwich.wgt
           body: |
             Unsigned .wgt package, automatically generated from tizen/. To install on a real Samsung TV: open this project in Tizen Studio, generate your author/distributor certificate (Certificate Manager) and use "Build Signed Package" before installing, or "Run As > Tizen Web Application" with the TV in developer mode connected via IP, which signs and deploys in a single step.
