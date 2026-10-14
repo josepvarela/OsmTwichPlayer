@@ -886,15 +886,15 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     <script id="wgt-local-hls-player">
     (function () {
         "use strict";
-        // En file:// (.wgt) siempre. En el navegador es opt-in:
-        //   ?player=local   (o localStorage.localPlayer = "1") para activarlo
-        //   ?player=embed   (o localStorage.localPlayer = "0") para desactivarlo
-        var useLocal = location.protocol === "file:";
-        if (!useLocal) {
+        // En file:// (.wgt) siempre. En el navegador también, por defecto;
+        // para volver al embed oficial: ?player=embed (queda guardado),
+        // y ?player=local lo reactiva.
+        var useLocal = true;
+        if (location.protocol !== "file:") {
             try {
                 var m = /[?&]player=(local|embed)\b/.exec(location.search);
                 if (m) localStorage.setItem("localPlayer", m[1] === "local" ? "1" : "0");
-                useLocal = localStorage.getItem("localPlayer") === "1";
+                useLocal = localStorage.getItem("localPlayer") !== "0";
             } catch (e) {}
         }
         if (!useLocal) return;
@@ -1077,9 +1077,21 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             }
             var self = this, tok = ++this._srcTok;
             if (this._hls) { try { this._hls.destroy(); } catch (e) {} this._hls = null; }
-            var playNow = function () { try { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} };
+            var inBrowser = location.protocol !== "file:";
+            var playNow = function () {
+                try {
+                    var pr = v.play();
+                    if (pr && pr.catch) pr.catch(function () {
+                        // Navegador: si bloquea el autoplay con sonido, reintenta en silencio.
+                        if (inBrowser && !v.muted) {
+                            v.muted = true;
+                            try { var p2 = v.play(); if (p2 && p2.catch) p2.catch(function () {}); } catch (e2) {}
+                        }
+                    });
+                } catch (e) {}
+            };
             var isHls = /\.m3u8(\?|$)/.test(url);
-            if (!isHls || v.canPlayType("application/vnd.apple.mpegurl")) {
+            if (!inBrowser || !isHls || v.canPlayType("application/vnd.apple.mpegurl")) {
                 v.src = url;
                 playNow();
                 return;
