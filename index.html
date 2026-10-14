@@ -1356,12 +1356,9 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                         <div class="ctrl-btn ctrl-btn-main" data-action="play" id="ctrl-play" tabindex="0" role="button" aria-label="Pausar"></div>
                         <div class="ctrl-btn" data-action="forward" id="ctrl-forward" tabindex="0" role="button" aria-label="Adelantar 10 segundos"></div>
                     </div>
-                    <div class="ctrl-side ctrl-right">
+                        <div class="ctrl-side ctrl-right">
                         <div class="ctrl-btn" data-action="mute" id="ctrl-mute" tabindex="0" role="button" aria-label="Silenciar o activar sonido"></div>
-                        <div class="ctrl-btn" data-action="quality" id="ctrl-quality" tabindex="0" role="button" aria-label="Calidad de video"></div> 
                         <div class="ctrl-btn" data-action="settings" id="ctrl-settings" tabindex="0" role="button" aria-label="Ajustes de reproducción"></div>
-                        <div class="ctrl-btn" data-action="chat" id="ctrl-chat" tabindex="0" role="button" aria-label="Mostrar u ocultar chat"></div>
-                        <div class="ctrl-btn" data-action="chat-layout" id="ctrl-chat-layout" tabindex="0" role="button" aria-label="Cambiar tamaño y posición del chat"></div>
                         <div class="ctrl-btn" data-action="chat-send" id="ctrl-chat-send" tabindex="0" role="button" aria-label="Enviar mensaje al chat"></div>
                         <div class="ctrl-btn" data-action="refresh" id="ctrl-refresh" tabindex="0" role="button" aria-label="Actualizar reproductor"></div>
                     </div>
@@ -1487,7 +1484,7 @@ function isControlsClickSuppressed() {
 let controlFocusIndex = 0;
 let availableQualities = [];
 let qualityIndex = 0;
-const CONTROL_ACTIONS = ["rewind", "play", "forward", "mute", "quality", "settings", "chat", "chat-layout", "chat-send", "refresh"];
+const CONTROL_ACTIONS = ["rewind", "play", "forward", "mute", "settings", "chat-send", "refresh"];
 let playerInfoFocusIndex = 0;
 let playerInfoHasGame = false;
 let playerReturnScreen = "main";
@@ -1527,10 +1524,7 @@ function initControlIcons() {
     setCtrlIcon("rewind", "rewind");
     setCtrlIcon("forward", "forward");
     setCtrlIcon("mute", isMuted ? "volumeOff" : "volumeOn");
-    updateQualityCtrlLabel(); // texto ("Auto"/"1080p"/...) en vez del engranaje fijo
     setCtrlIcon("settings", "settings");
-    setCtrlIcon("chat", "chat");
-    setCtrlIcon("chat-layout", "chatLayout");
     setCtrlIcon("chat-send", "chatSend");
     setCtrlIcon("refresh", "refresh");
     // Al abrir el reproductor se asume reproduciendo, así que se muestra
@@ -4920,21 +4914,7 @@ function setupPlayerControls() {
     initControlIcons();
     setupProgressBarSeek();
 
-    // En algunos mandos Tizen el OK llega al documento y el foco visual
-    // permanece sobre el control. Capturamos ese caso explícitamente.
-    const chatLayoutBtn = document.getElementById("ctrl-chat-layout");
-    if (chatLayoutBtn) {
-        chatLayoutBtn.addEventListener("keydown", (e) => {
-            const code = e.keyCode || e.which;
-            if (code === 13 || code === 23 || e.key === "Enter" || e.key === "OK") {
-                e.preventDefault();
-                e.stopPropagation();
-                if (isControlsActionSuppressed()) return;
-                if (twitchPlayer) cycleChatLayout();
-            }
-        }, true);
-    }
-    CONTROL_ACTIONS.forEach((action) => {
+        CONTROL_ACTIONS.forEach((action) => {
         const btn = document.getElementById(`ctrl-${action}`);
         btn.addEventListener("click", () => {
             if (isControlsClickSuppressed()) return;
@@ -5052,13 +5032,6 @@ function handlePlayerScreenKeys(keyCode, e) {
     // Cualquier tecla manejada acá mientras los controles están visibles
     // reinicia la cuenta para el auto-ocultado: el usuario sigue interactuando.
     if (controlsVisible) scheduleControlsAutoHide();
-    if ((keyCode === 13 || keyCode === 23) &&
-        activeEl?.id === "ctrl-chat-layout") {
-        e.preventDefault();
-        e.stopPropagation();
-        if (twitchPlayer) cycleChatLayout();
-        return;
-    }
 
     const targetTag = e.target.tagName;
     if (document.getElementById("chat-composer")) {
@@ -5070,14 +5043,6 @@ function handlePlayerScreenKeys(keyCode, e) {
         return;
     }
 
-    if (keyCode === 13) {
-        const active = document.activeElement;
-        if (active?.id === "ctrl-chat") {
-            e.preventDefault(); e.stopPropagation();
-            if (isControlsActionSuppressed()) return;
-            runControlAction("chat"); return;
-        }
-    }
 
         if (qualityPanelVisible) {
         if (keyCode === 38) { qualityPanelFocusIndex = Math.max(0, qualityPanelFocusIndex - 1); updateQualityPanelFocus(); return; }
@@ -5187,10 +5152,6 @@ function handlePlayerScreenKeys(keyCode, e) {
 
 function runControlAction(action) {
     const btn = document.getElementById(`ctrl-${action}`);
-    if (action === "chat-layout") {
-        cycleChatLayout();
-        return;
-    }
     if (!twitchPlayer) return;
     if (btn && btn.classList.contains("disabled")) return;
 
@@ -5198,10 +5159,7 @@ function runControlAction(action) {
         case "play": togglePlayPause(true); break;
         case "rewind": seekBy(-10); break;
         case "forward": seekBy(10); break;
-        case "quality": toggleQualityPanel(); break;
         case "settings": togglePlayerSettingsPanel(); break;
-        case "chat": toggleChat(); break;
-        case "chat-layout": cycleChatLayout(); break;
         case "chat-send": openChatComposer(); break;
         case "refresh": refreshPlayer(); break;
         case "mute": toggleMute(); break;
@@ -5525,16 +5483,6 @@ function applyChatSizeAndPosFromSettings() {
     });
 })();
 
-function toggleChat() {
-    const panel = document.getElementById("chat-panel");
-    if (!panel) return;
-    const hidden = !panel.classList.contains("hidden-chat");
-    panel.classList.toggle("hidden-chat", hidden);
-    panel.setAttribute("aria-hidden", hidden ? "true" : "false");
-    panel.style.pointerEvents = hidden ? "none" : "auto";
-    const btn = document.getElementById("ctrl-chat");
-    if (btn) btn.setAttribute("aria-label", hidden ? "Mostrar chat" : "Ocultar chat");
-}
 
 function refreshPlayer() {
     if (playbackType === "live" && currentChannelLogin) openChannel(currentChannelLogin);
