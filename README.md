@@ -1,22 +1,24 @@
 # OsmTwich
 
-OsmTwich es una aplicación de entretenimiento para TV y dispositivos con control remoto, diseñada para ofrecer una experiencia cómoda para descubrir y disfrutar contenido de Twitch desde una interfaz optimizada para pantalla grande.
+Cliente no oficial de Twitch para Samsung Tizen TV, Android TV y navegador. Optimizado para control remoto.
 
-## Características
+## ✨ Qué tiene
 
-- Explorar transmisiones en vivo y categorías de Twitch.
-- Buscar canales y contenido.
-- Consultar perfiles de canales.
-- Acceder a transmisiones, VODs y clips.
-- Gestionar canales seguidos mediante la cuenta de Twitch.
-- Navegación optimizada para mando a distancia y teclado.
-- Interfaz adaptada para televisores y pantallas grandes.
-- Compatibilidad con diferentes plataformas de TV y dispositivos basados en navegador.
+- Sidebar navegable con D-pad
+- Canales seguidos, destacados, top streamers y juegos top
+- Reproductor con autoplay, calidades y seek en VODs
+- Chat propio con emotes de Twitch y 7TV, badges reales y repetición en VODs
+- Login con Twitch (redirección o QR)
+- Ajustes de tema, tamaño de texto, color y tarjetas
+- Panel de ajustes del reproductor: calidad, tamaño/posición del chat
+- Modo `perf-lite` para TVs de gama baja
 
-## Plataformas
+Samsung TV: descargá el .wgt desde Releases e instalalo con Tizen Studio.
 
-OsmTwich está pensado principalmente para televisores y dispositivos de entretenimiento con navegador, incluyendo entornos como Samsung TV, Android TV y otras plataformas compatibles.
+El .wgt viene sin firmar. Para instalarlo en un TV real hay que firmarlo con tu certificado (Certificate Manager).
 
-## Desarrollo
+🛠 Desarrollo
+Todo vive en index.html (HTML + CSS + JS, sin frameworks). El backend serverless está en Vercel (/api/*) y maneja el token de Twitch y el proxy de comentarios de VODs.
 
-El proyecto utiliza una arquitectura web con funciones serverless para integrar los servicios necesarios de Twitch.
+⚖️ Aviso
+No está afiliado ni respaldado por Twitch ni Samsung. Twitch, sus emotes y su logo son marcas de Twitch Interactive, Inc.
