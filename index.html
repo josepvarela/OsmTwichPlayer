@@ -47,7 +47,7 @@
         "No hay transmisiones en vivo de este juego ahora.": "There are no live streams for this game right now.",
         "No se pudieron cargar juegos.": "Could not load games.",
         "No se pudieron cargar streamers.": "Could not load streamers.",
-        "No se pudieron cargar transmisiones en español.": "Could not load Spanish-language streams.",
+        "No se pudieron cargar transmisiones en español.": "Could not load English-language streams.",
         "Este canal no tiene VODs recientes.": "This channel has no recent VODs.",
         "Este canal no tiene clips destacados.": "This channel has no featured clips.",
         "Ver en vivo": "Watch live", "Seguir": "Follow", "Siguiendo ✓": "Following ✓",
@@ -2815,8 +2815,9 @@ function buildClipTile(c) {
 async function loadFeatured() {
     const track = document.getElementById("track-featured");
     // Twitch no tiene una API de "destacados" oficiales — mostramos los
-    // streams en español más vistos ahora mismo como destacados.
-    const streams = await fetchTopStreams(8, "es");
+    // streams más vistos ahora mismo (en el idioma elegido en Ajustes) como destacados.
+    const featuredLang = (window.OsmI18n && window.OsmI18n.lang() === "en") ? "en" : "es";
+    const streams = await fetchTopStreams(8, featuredLang);
     track.innerHTML = "";
     if (!streams.length) { track.innerHTML = '<div class="tile-loading">No se pudieron cargar transmisiones en español.</div>'; return; }
     const profileMap = await getStreamerProfileMap(streams);
@@ -2826,6 +2827,10 @@ async function loadFeatured() {
     });
     if (focusZone === "content" && contentRowId === "featured") focusContentTile("featured", contentTileIndex);
 }
+// Al cambiar el idioma, recargar los destacados en el nuevo idioma.
+window.addEventListener("osmtwich:languagechange", function () {
+    if (document.getElementById("track-featured")) loadFeatured();
+});
 
 async function loadTopGames() {
     const track = document.getElementById("track-topGames");
