@@ -2,7 +2,27 @@
 
 Cliente no oficial de Twitch para Samsung Tizen TV, Android TV y navegador. Optimizado para control remoto.
 
-## ✨ Qué tiene
+## 📸 Capturas
+
+| Inicio | Reproductor |
+|--------|-------------|
+| ![Inicio](<img width="1919" height="910" alt="image" src="https://github.com/user-attachments/assets/5abc6494-e44d-4c9a-b469-108c2488b219" />
+) | ![Reproductor](<img width="1902" height="909" alt="image" src="https://github.com/user-attachments/assets/761bbb9f-f90a-4432-9ccf-76555ffe6a1d" />
+) |
+
+| Perfil de canal | Ajustes |
+|-----------------|---------|
+| ![Perfil](<img width="1902" height="909" alt="image" src="https://github.com/user-attachments/assets/57213eb4-232b-47f0-b80b-7523b481610e" />
+) | ![Ajustes](<img width="1915" height="903" alt="image" src="https://github.com/user-attachments/assets/c461a425-8817-4543-adcd-469b1f3b3350" />
+) |
+
+| Chat | Búsqueda |
+|------|----------|
+| ![Chato ffline](<img width="1900" height="904" alt="image" src="https://github.com/user-attachments/assets/502d4d6f-0840-41a3-9f94-aa27c1c2ee46" />
+) | ![Búsqueda](<img width="1915" height="906" alt="image" src="https://github.com/user-attachments/assets/f5acab12-00ad-43b4-954d-7efa91fe7d0e" />
+) |
+
+## ✨ Características
 
 - Sidebar navegable con D-pad
 - Canales seguidos, destacados, top streamers y juegos top
