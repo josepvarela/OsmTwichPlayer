@@ -222,6 +222,62 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 #player-stream-title { display: block; width: 100%; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; word-break: break-word; }
 #quality-panel { position: absolute; right: 340px; bottom: 110px; width: 240px; max-height: 50%; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; background: rgba(14,14,16,0.82); border-radius: 10px; padding: 20px; z-index: 11; }
 #quality-panel.hidden { display: none; }
+
+#player-settings-panel {
+    position: absolute;
+    right: 340px;
+    bottom: 110px;
+    width: 320px;
+    max-height: 70%;
+    overflow-y: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    background: rgba(14,14,16,0.92);
+    border-radius: 10px;
+    padding: 20px;
+    z-index: 11;
+    box-shadow: 0 12px 30px rgba(0,0,0,.5);
+}
+#player-settings-panel::-webkit-scrollbar { display: none; }
+#player-settings-panel.hidden { display: none; }
+#player-settings-panel h3 { font-size: 20px; margin-bottom: 12px; color: #adadb8; }
+#player-settings-panel .settings-row-account {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 0;
+    border-bottom: 1px solid rgba(255,255,255,.1);
+}
+#player-settings-panel .settings-row-account:last-of-type { border-bottom: none; }
+#player-settings-panel .settings-row-account > label {
+    font-size: 12px;
+    color: #adadb8;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 700;
+}
+#player-settings-panel .settings-options {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+}
+#player-settings-panel .settings-options button {
+    flex: 1 1 auto;
+    min-width: 40px;
+    padding: 7px 8px;
+    border: 2px solid transparent;
+    border-radius: 7px;
+    background: #2a2a2e;
+    color: #fff;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    outline: none;
+}
+#player-settings-panel .settings-options button:hover { background: #3a3a3f; }
+#player-settings-panel .settings-options button.active { background: #9146FF; border-color: #fff; }
+#player-settings-panel .settings-options button.focused { outline: 3px solid #fff; outline-offset: 2px; }
 #quality-panel h3 { font-size: 20px; margin-bottom: 12px; color: #adadb8; }
 .quality-item { padding: 10px 12px; border-radius: 6px; font-size: 16px; cursor: pointer; border: 3px solid transparent; display: flex; justify-content: space-between; }
 .quality-item.focused { border-color: transparent; background: #2a2a2e; box-shadow: none; }
@@ -1211,9 +1267,58 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             </div>
 
             <div id="quality-panel" class="hidden">
-                <h3>Calidad</h3>
-                <div id="quality-list"></div>
-            </div>
+    <h3>Calidad</h3>
+    <div id="quality-list"></div>
+</div>
+
+<div id="player-settings-panel" class="hidden">
+    <h3>Ajustes de reproducción</h3>
+    <div class="settings-row-account" data-psetting="chatTextSize">
+        <label>Tamaño texto chat</label>
+        <div class="settings-options">
+            <button data-psetting-btn data-value="x1">x1</button>
+            <button data-psetting-btn data-value="x1.2">x1.2</button>
+            <button data-psetting-btn data-value="x1.4">x1.4</button>
+            <button data-psetting-btn data-value="x1.6">x1.6</button>
+            <button data-psetting-btn data-value="x1.8">x1.8</button>
+            <button data-psetting-btn data-value="x2.0">x2.0</button>
+        </div>
+    </div>
+    <div class="settings-row-account" data-psetting="quality">
+        <label>Calidad</label>
+        <div class="settings-options">
+            <button data-psetting-btn data-value="160p30">160</button>
+            <button data-psetting-btn data-value="240p30">240</button>
+            <button data-psetting-btn data-value="360p30">360</button>
+            <button data-psetting-btn data-value="480p30">480</button>
+            <button data-psetting-btn data-value="720p60">720</button>
+            <button data-psetting-btn data-value="1080p60">1080</button>
+            <button data-psetting-btn data-value="auto">Auto</button>
+        </div>
+    </div>
+    <div class="settings-row-account" data-psetting="chat">
+        <label>Mostrar chat al iniciar</label>
+        <div class="settings-options">
+            <button data-psetting-btn data-value="yes">Sí</button>
+            <button data-psetting-btn data-value="no">No</button>
+        </div>
+    </div>
+    <div class="settings-row-account" data-psetting="chatSize">
+        <label>Tamaño del chat</label>
+        <div class="settings-options">
+            <button data-psetting-btn data-value="large">Grande</button>
+            <button data-psetting-btn data-value="medium">Mediano</button>
+            <button data-psetting-btn data-value="small">Pequeño</button>
+        </div>
+    </div>
+    <div class="settings-row-account" data-psetting="chatPos">
+        <label>Posición del chat</label>
+        <div class="settings-options">
+            <button data-psetting-btn data-value="right">Derecha</button>
+            <button data-psetting-btn data-value="left">Izquierda</button>
+        </div>
+    </div>
+</div>
 
             <div id="player-controls-bar">
                 <div class="progress-row">
@@ -1253,7 +1358,8 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                     </div>
                     <div class="ctrl-side ctrl-right">
                         <div class="ctrl-btn" data-action="mute" id="ctrl-mute" tabindex="0" role="button" aria-label="Silenciar o activar sonido"></div>
-                        <div class="ctrl-btn" data-action="quality" id="ctrl-quality" tabindex="0" role="button" aria-label="Calidad de video"></div>
+                        <div class="ctrl-btn" data-action="quality" id="ctrl-quality" tabindex="0" role="button" aria-label="Calidad de video"></div> 
+                        <div class="ctrl-btn" data-action="settings" id="ctrl-settings" tabindex="0" role="button" aria-label="Ajustes de reproducción"></div>
                         <div class="ctrl-btn" data-action="chat" id="ctrl-chat" tabindex="0" role="button" aria-label="Mostrar u ocultar chat"></div>
                         <div class="ctrl-btn" data-action="chat-layout" id="ctrl-chat-layout" tabindex="0" role="button" aria-label="Cambiar tamaño y posición del chat"></div>
                         <div class="ctrl-btn" data-action="chat-send" id="ctrl-chat-send" tabindex="0" role="button" aria-label="Enviar mensaje al chat"></div>
@@ -1381,7 +1487,7 @@ function isControlsClickSuppressed() {
 let controlFocusIndex = 0;
 let availableQualities = [];
 let qualityIndex = 0;
-const CONTROL_ACTIONS = ["rewind", "play", "forward", "mute", "quality", "chat", "chat-layout", "chat-send", "refresh"];
+const CONTROL_ACTIONS = ["rewind", "play", "forward", "mute", "quality", "settings", "chat", "chat-layout", "chat-send", "refresh"];
 let playerInfoFocusIndex = 0;
 let playerInfoHasGame = false;
 let playerReturnScreen = "main";
@@ -1406,6 +1512,7 @@ const ICON_SVG = {
     volumeOn:  '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v8.06c1.48-.74 2.5-2.26 2.5-4.03z"/><path d="M14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>',
     volumeOff: '<svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3z"/><path d="M19.73 12 22 9.73l-1.41-1.41L18.32 10.6l-2.27-2.28-1.41 1.41L16.9 12l-2.26 2.27 1.41 1.41 2.27-2.27 2.27 2.27L22 14.27z"/></svg>',
     quality:   '<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.3 7.3 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.41h-3.84a.5.5 0 0 0-.5.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.05.3-.08.63-.08.94s.02.64.07.94L2.78 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.12.22.37.29.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.25.41.5.41h3.84c.25 0 .45-.17.5-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.23.08.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>',
+    settings:  '<svg viewBox="0 0 24 24"><path d="M19.14 12.94c.04-.3.06-.61.06-.94s-.02-.64-.07-.94l2.03-1.58a.5.5 0 0 0 .12-.64l-1.92-3.32a.5.5 0 0 0-.6-.22l-2.39.96a7.3 7.3 0 0 0-1.62-.94l-.36-2.54a.5.5 0 0 0-.5-.41h-3.84a.5.5 0 0 0-.5.41l-.36 2.54c-.59.24-1.13.56-1.62.94l-2.39-.96a.5.5 0 0 0-.6.22L2.66 8.84a.5.5 0 0 0 .12.64l2.03 1.58c-.05.3-.08.63-.08.94s.02.64.07.94L2.78 14.5a.5.5 0 0 0-.12.64l1.92 3.32c.12.22.37.29.6.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.25.41.5.41h3.84c.25 0 .45-.17.5-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.23.08.48 0 .6-.22l1.92-3.32a.5.5 0 0 0-.12-.64zM12 15.6a3.6 3.6 0 1 1 0-7.2 3.6 3.6 0 0 1 0 7.2z"/></svg>',
     chat:      '<svg viewBox="0 0 24 24"><path d="M20 2H4a2 2 0 0 0-2 2v18l4-4h14a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2zM6 8h12v2H6zm0-3h12v2H6zm0 6h8v2H6z"/></svg>',
     chatLayout: '<svg viewBox="0 0 24 24"><path d="M4 5a1 1 0 0 1 1-1h6v2H6v4H4V5zm10-1h5a1 1 0 0 1 1 1v5h-2V6h-4V4zM4 14h2v4h5v2H5a1 1 0 0 1-1-1v-5zm14 0h2v5a1 1 0 0 1 1 1h-5v-2h4v-4zM9 9h6v6H9z"/></svg>',
     chatSend:  '<svg viewBox="0 0 24 24"><path d="M2 21 23 12 2 3v7l15 2-15 2v7z"/></svg>'
@@ -1421,6 +1528,7 @@ function initControlIcons() {
     setCtrlIcon("forward", "forward");
     setCtrlIcon("mute", isMuted ? "volumeOff" : "volumeOn");
     updateQualityCtrlLabel(); // texto ("Auto"/"1080p"/...) en vez del engranaje fijo
+    setCtrlIcon("settings", "settings");
     setCtrlIcon("chat", "chat");
     setCtrlIcon("chat-layout", "chatLayout");
     setCtrlIcon("chat-send", "chatSend");
@@ -3502,18 +3610,7 @@ function renderAccountSettings() {
                 <button data-nav-btn data-value="x2.0">x2.0</button>
             </div>
         </div>
-        <div class="settings-row-account" data-setting="chatTextSize">
-            <label>Tamaño texto chat</label>
-            <div class="settings-options">
-                <button data-nav-btn data-value="x1">x1</button>
-                <button data-nav-btn data-value="x1.2">x1.2</button>
-                <button data-nav-btn data-value="x1.4">x1.4</button>
-                <button data-nav-btn data-value="x1.6">x1.6</button>
-                <button data-nav-btn data-value="x1.8">x1.8</button>
-                <button data-nav-btn data-value="x2.0">x2.0</button>
-            </div>
-        </div>
-        <div class="settings-row-account" data-setting="textColor">
+                <div class="settings-row-account" data-setting="textColor">
             <label>Color de texto</label>
             <div class="settings-options">
                 <button data-nav-btn data-value="white" style="color:#ffffff">Blanco</button>
@@ -3532,25 +3629,6 @@ function renderAccountSettings() {
                 <button data-nav-btn data-value="200">200%</button>
                 <button data-nav-btn data-value="250">250%</button>
                 <button data-nav-btn data-value="300">300%</button>
-            </div>
-        </div>
-        <div class="settings-row-account" data-setting="quality">
-            <label>Calidad</label>
-            <div class="settings-options">
-                <button data-nav-btn data-value="160p30">160</button>
-                <button data-nav-btn data-value="240p30">240</button>
-                <button data-nav-btn data-value="360p30">360</button>
-                <button data-nav-btn data-value="480p30">480</button>
-                <button data-nav-btn data-value="720p60">720</button>
-                <button data-nav-btn data-value="1080p60">1080</button>
-                <button data-nav-btn data-value="auto">Auto</button>
-            </div>
-        </div>
-        <div class="settings-row-account" data-setting="chat">
-            <label>Mostrar chat al iniciar reproducción</label>
-            <div class="settings-options">
-                <button data-nav-btn data-value="yes">Sí</button>
-                <button data-nav-btn data-value="no">No</button>
             </div>
         </div>
         <button class="account-btn" data-nav-btn data-action="close">← Volver</button>
@@ -3615,6 +3693,8 @@ function applyInterfaceSettings() {
     root.dataset.cardSize = get("cardSize", "100");
     window.interfaceChatPreference = get("chat", "yes");
     window.interfaceQualityPreference = get("quality", "auto");
+    window.interfaceChatSizePreference = get("chatSize", "large");
+    window.interfaceChatPosPreference = get("chatPos", "right");
     applyTextScales();
 }
 
@@ -4305,6 +4385,7 @@ async function createPlayer(options) {
     qualityIndex = 0;
     chapterList = [];
     hideQualityPanel();
+    hidePlayerSettingsPanel();
     stopProgressLoop();
 
     try {
@@ -4644,6 +4725,7 @@ function goToPlayerScreen() {
         }
     }
       hideQualityPanel();
+      hidePlayerSettingsPanel();
 
     // Asegura que el foco NO quede en el chat ni en ningún input al abrir
     // el stream: si el chat se muestra automáticamente (ajuste "Sí"),
@@ -4997,11 +5079,57 @@ function handlePlayerScreenKeys(keyCode, e) {
         }
     }
 
-    if (qualityPanelVisible) {
+        if (qualityPanelVisible) {
         if (keyCode === 38) { qualityPanelFocusIndex = Math.max(0, qualityPanelFocusIndex - 1); updateQualityPanelFocus(); return; }
         if (keyCode === 40) { qualityPanelFocusIndex = Math.min(availableQualities.length - 1, qualityPanelFocusIndex + 1); updateQualityPanelFocus(); return; }
         if (keyCode === 13) { selectQuality(qualityPanelFocusIndex); return; }
         if (keyCode === 10009 || keyCode === 27) { e.preventDefault(); hideQualityPanel(); return; }
+        return;
+    }
+    if (playerSettingsPanelVisible) {
+        const rows = Array.from(document.querySelectorAll("#player-settings-panel .settings-row-account"));
+        if (keyCode === 27 || keyCode === 10009) {
+            e.preventDefault();
+            hidePlayerSettingsPanel();
+            return;
+        }
+        if (keyCode === 38 || keyCode === 40) {
+            const active = document.activeElement;
+            const currentRow = active?.closest?.(".settings-row-account");
+            let idx = currentRow ? rows.indexOf(currentRow) : 0;
+            const delta = keyCode === 38 ? -1 : 1;
+            idx = Math.max(0, Math.min(rows.length - 1, idx + delta));
+            const targetRow = rows[idx];
+            const targetBtn = targetRow.querySelector("button.active") || targetRow.querySelector("button");
+            if (targetBtn) {
+                document.querySelectorAll("#player-settings-panel .settings-options button")
+                    .forEach(b => b.classList.remove("focused"));
+                targetBtn.classList.add("focused");
+                targetBtn.focus({preventScroll: true});
+            }
+            return;
+        }
+        if (keyCode === 37 || keyCode === 39) {
+            const active = document.activeElement;
+            const row = active?.closest?.(".settings-row-account");
+            if (!row) return;
+            const rowBtns = Array.from(row.querySelectorAll("button"));
+            const idx = rowBtns.indexOf(active);
+            const delta = keyCode === 37 ? -1 : 1;
+            const next = Math.max(0, Math.min(rowBtns.length - 1, (idx < 0 ? 0 : idx) + delta));
+            rowBtns.forEach(b => b.classList.remove("focused"));
+            rowBtns[next].classList.add("focused");
+            rowBtns[next].focus({preventScroll: true});
+            return;
+        }
+        if (keyCode === 13) {
+            e.preventDefault();
+            const active = document.activeElement;
+            if (active && active.dataset && active.dataset.value !== undefined) {
+                active.click();
+            }
+            return;
+        }
         return;
     }
     // Izquierda/derecha recorren una única secuencia: foto de perfil, juego y controles.
@@ -5071,6 +5199,7 @@ function runControlAction(action) {
         case "rewind": seekBy(-10); break;
         case "forward": seekBy(10); break;
         case "quality": toggleQualityPanel(); break;
+        case "settings": togglePlayerSettingsPanel(); break;
         case "chat": toggleChat(); break;
         case "chat-layout": cycleChatLayout(); break;
         case "chat-send": openChatComposer(); break;
@@ -5209,6 +5338,7 @@ function toggleQualityPanel() {
 
 function showQualityPanel() {
     if (!twitchPlayer) return;
+    if (playerSettingsPanelVisible) hidePlayerSettingsPanel();
     try { availableQualities = twitchPlayer.getQualities() || availableQualities; } catch (e) { /* no-op */ }
     if (!availableQualities.length) return;
 
@@ -5281,6 +5411,119 @@ function updateQualityCtrlLabel() {
     el.textContent = qualityShortLabel(q);
     el.classList.add("ctrl-btn-quality");
 }
+
+// ---- Panel de ajustes del reproductor ----
+let playerSettingsPanelVisible = false;
+let playerSettingsFocusIndex = 0;
+
+function togglePlayerSettingsPanel() {
+    if (playerSettingsPanelVisible) hidePlayerSettingsPanel();
+    else showPlayerSettingsPanel();
+}
+
+function showPlayerSettingsPanel() {
+    updatePlayerSettingsActiveStates();
+    document.getElementById("player-settings-panel").classList.remove("hidden");
+    playerSettingsPanelVisible = true;
+    playerSettingsFocusIndex = 0;
+    updatePlayerSettingsPanelFocus();
+    if (qualityPanelVisible) hideQualityPanel();
+}
+
+function hidePlayerSettingsPanel() {
+    const panel = document.getElementById("player-settings-panel");
+    if (panel) panel.classList.add("hidden");
+    playerSettingsPanelVisible = false;
+}
+
+function updatePlayerSettingsPanelFocus() {
+    document.querySelectorAll("#player-settings-panel .settings-options button")
+        .forEach(b => b.classList.remove("focused"));
+    const active = document.querySelector("#player-settings-panel .settings-options button.active")
+        || document.querySelector("#player-settings-panel .settings-options button");
+    if (active) {
+        active.classList.add("focused");
+        active.focus({preventScroll: true});
+        active.scrollIntoView({block: "nearest"});
+    }
+}
+
+function updatePlayerSettingsActiveStates() {
+    const get = (name, fallback) => {
+        try { return localStorage.getItem("osmtwich-settings-" + name) || fallback; }
+        catch (e) { return fallback; }
+    };
+    document.querySelectorAll("#player-settings-panel .settings-row-account").forEach(row => {
+        const setting = row.dataset.psetting;
+        const current = get(setting, null);
+        row.querySelectorAll("button[data-value]").forEach(btn => {
+            btn.classList.toggle("active", btn.dataset.value === current);
+        });
+    });
+}
+
+function savePlayerSetting(name, value) {
+    saveInterfaceSetting(name, value);
+    applyInterfaceSettings();
+
+    if (name === "quality") {
+        qualityUserPicked = true;
+        clearStartupQualityTimer();
+        if (twitchPlayer) {
+            try { twitchPlayer.setQuality(value); } catch (e) {}
+        }
+        refreshQualities();
+    }
+    if (name === "chat") {
+        const chatPanel = document.getElementById("chat-panel");
+        if (chatPanel) {
+            if (value === "yes") {
+                chatPanel.classList.remove("hidden-chat");
+                chatPanel.setAttribute("aria-hidden", "false");
+                chatPanel.style.pointerEvents = "auto";
+            } else {
+                chatPanel.classList.add("hidden-chat");
+                chatPanel.setAttribute("aria-hidden", "true");
+                chatPanel.style.pointerEvents = "none";
+            }
+        }
+    }
+    if (name === "chatSize" || name === "chatPos") {
+        applyChatSizeAndPosFromSettings();
+    }
+    updatePlayerSettingsActiveStates();
+}
+
+function applyChatSizeAndPosFromSettings() {
+    const get = (n, d) => {
+        try { return localStorage.getItem("osmtwich-settings-" + n) || d; }
+        catch (e) { return d; }
+    };
+    const size = get("chatSize", "large");
+    const pos = get("chatPos", "right");
+    const idx = CHAT_LAYOUTS.findIndex(l =>
+        l.cls.includes(size) && (pos === "left" ? l.cls.includes("chat-left") : !l.cls.includes("chat-left"))
+    );
+    chatLayoutIndex = idx >= 0 ? idx : 0;
+    applyChatLayout();
+}
+
+(function setupPlayerSettingsPanel() {
+    const panel = document.getElementById("player-settings-panel");
+    if (!panel) return;
+    panel.querySelectorAll("button[data-psetting-btn]").forEach(btn => {
+        btn.tabIndex = 0;
+        btn.addEventListener("click", () => {
+            const row = btn.closest(".settings-row-account");
+            if (!row) return;
+            savePlayerSetting(row.dataset.psetting, btn.dataset.value);
+            panel.querySelectorAll(".settings-options button.focused")
+                .forEach(b => b.classList.remove("focused"));
+            btn.classList.add("focused");
+            btn.focus({preventScroll: true});
+        });
+    });
+})();
 
 function toggleChat() {
     const panel = document.getElementById("chat-panel");
