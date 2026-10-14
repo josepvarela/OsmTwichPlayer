@@ -941,10 +941,25 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         }
 
         function fetchMaster(url) {
-            return fetch(url).then(function (r) {
+            // Navegador: usher.ttvnw.net no envía CORS -> se pide vía /api/twitch-hls.
+            // .wgt (file://): igual que siempre, directo.
+            var inBrowser = location.protocol !== "file:";
+            var target = url;
+            if (inBrowser) {
+                var base = (typeof API_BASE !== "undefined" && API_BASE) ? API_BASE : "";
+                target = base + "/api/twitch-hls?u=" + encodeURIComponent(url);
+            }
+            return fetch(target).then(function (r) {
                 if (!r.ok) throw new Error("HLS " + r.status);
                 return r.text();
-            }).then(function (t) { return parseMaster(t, url); });
+            }).then(function (t) {
+                var list = parseMaster(t, url);
+                // hls.js no puede pedir el maestro directo (CORS): se le da el texto como blob.
+                if (inBrowser && window.URL && URL.createObjectURL) {
+                    try { list[0].alt = URL.createObjectURL(new Blob([t], { type: "application/vnd.apple.mpegurl" })); } catch (e) {}
+                }
+                return list;
+            });
         }
 
         function resolveSource(kind, id) {
@@ -1104,7 +1119,11 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                 self._hls = h;
                 h.on(Hls.Events.ERROR, function (_, d) { if (d && d.fatal) self._emit("offline"); });
                 h.on(Hls.Events.MANIFEST_PARSED, playNow);
-                h.loadSource(url);
+                var src = url;
+                for (var qi = 0; qi < self._q.length; qi++) {
+                    if (self._q[qi].url === url && self._q[qi].alt) { src = self._q[qi].alt; break; }
+                }
+                h.loadSource(src);
                 h.attachMedia(v);
             }).catch(function (e) {
                 if (tok !== self._srcTok) return;
