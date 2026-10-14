@@ -56,7 +56,7 @@ html[data-card-size="large"] #main-screen .tile-stream { flex-basis: 340px !impo
 #main-screen.sidebar-collapsed .followed-name, #main-screen.sidebar-collapsed .followed-meta, #main-screen.sidebar-collapsed .followed-empty-hint { display: none; }
 #content { flex: 1; min-width: 0; padding: clamp(20px, 3vw, 40px) clamp(20px, 4vw, 50px); overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; height: 100%; }
 .sections { display: flex; flex-direction: column; gap: 46px; }
-.section-row { position: relative; border-radius: 14px; padding: 10px; margin: -10px; transition: opacity .25s ease; content-visibility: auto; contain: layout paint style; contain-intrinsic-size: 360px; }
+.section-row { position: relative; border-radius: 14px; padding: 10px; margin: -10px; transition: opacity .1s linear; content-visibility: auto; contain: layout paint style; contain-intrinsic-size: 360px; }
 .section-row.dimmed { opacity: .32; }
 .section-row.active-section { opacity: 1; }
 .section-header { display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
@@ -1647,7 +1647,10 @@ function handleKeyDown(e) {
     }
 
     if (currentScreen === "main") {
-        if (!document.activeElement || document.activeElement === document.body) restoreMainFocus(focusZone === "content" ? navIndexForRow(contentRowId) : navIndex);
+        if (!document.activeElement || document.activeElement === document.body) {
+            if (focusZone === "content" && getRowTileCount(contentRowId) > 0) focusContentTile(contentRowId, contentTileIndex);
+            else restoreMainFocus(focusZone === "content" ? navIndexForRow(contentRowId) : navIndex);
+        }
         handleMainScreenKeys(keyCode, e);
     } else if (currentScreen === "game" || currentScreen === "results") {
         handleGridScreenKeys(keyCode);
@@ -1765,6 +1768,7 @@ function focusResultsAction(preferred) {
     if (!target) return false;
     target.focus({preventScroll:true});
     target.classList.add("focused");
+    fastScrollTop(document.getElementById("results-screen"), 0, 90);
     return true;
 }
 
@@ -1868,23 +1872,7 @@ function handleGridScreenKeys(keyCode) {
         // Solo movemos horizontalmente la fila de tarjetas.
         target.focus({preventScroll:true});
         const profileTrack = target.closest(".profile-track");
-        if (profileTrack) {
-            const tr = target.getBoundingClientRect();
-            const rr = profileTrack.getBoundingClientRect();
-            const margin = 18;
-
-            if (tr.right > rr.right - margin) {
-                profileTrack.scrollBy({
-                    left: tr.right - (rr.right - margin),
-                    behavior: "smooth"
-                });
-            } else if (tr.left < rr.left + margin) {
-                profileTrack.scrollBy({
-                    left: -((rr.left + margin) - tr.left),
-                    behavior: "smooth"
-                });
-            }
-        }
+        if (profileTrack) ensureTileVisibleX(profileTrack, target, document.getElementById("results-screen"), 28);
         return;
     }
 
@@ -1906,6 +1894,11 @@ function handleGridScreenKeys(keyCode) {
     target.classList.add("focused");
     if (window.updateFocusBackground) window.updateFocusBackground(target);
     target.focus({preventScroll:true});
+    // El header del juego es sticky: se deja libre su alto para que la
+    // tarjeta enfocada no quede tapada ni fuera de pantalla.
+    const gameScr = document.getElementById("game-screen");
+    const gameHdr = gameScr && gameScr.querySelector(".game-screen-header");
+    ensureVisibleY(gameScr, target, (gameHdr ? gameHdr.getBoundingClientRect().height : 0) + 18, 28, 90);
 }
 
 function focusProfileSection(section, index=0) {
@@ -1936,31 +1929,9 @@ function focusProfileSection(section, index=0) {
     // del perfil. Solo se desplaza horizontalmente el carrusel.
     tile.focus({preventScroll:true});
 
+    profileScrollFor(section);
     const track = tile.closest("#results-grid, #clips-grid");
-    if (!track) return;
-
-    const visibleLeft = track.scrollLeft;
-    const visibleRight = visibleLeft + track.clientWidth;
-    const tileLeft = tile.offsetLeft;
-    const tileRight = tileLeft + tile.offsetWidth;
-
-    // La primera tarjeta permanece visible mientras haya espacio.
-    // Solo avanzamos cuando el foco llega al último elemento visible.
-    const edge = 10;
-
-    if (tileRight > visibleRight - edge) {
-        const amount = tileRight - (visibleRight - edge);
-        track.scrollBy({
-            left: amount,
-            behavior: "smooth"
-        });
-    } else if (tileLeft < visibleLeft + edge) {
-        const amount = tileLeft - (visibleLeft + edge);
-        track.scrollBy({
-            left: amount,
-            behavior: "smooth"
-        });
-    }
+    if (track) ensureTileVisibleX(track, tile, document.getElementById("results-screen"), 28);
 }
 
 // Calcula el número real de columnas de un grid responsivo contando
@@ -2023,6 +1994,90 @@ function setFocus(zone, index) {
 // ============================================================
 // Foco visual — contenido (filas deslizables)
 // ============================================================
+// ============================================================
+// Scroll rápido y "mantener visible" (TV)
+// Todo se calcula con getBoundingClientRect dividido por el factor de
+// escala (en TV el body va dentro de #tv-scale-root con transform:scale,
+// así que los rects salen escalados y scrollLeft/scrollTop no).
+// ============================================================
+let _vScrollRaf = 0;
+function rectScaleY(el) {
+    const r = el.getBoundingClientRect();
+    return (el.offsetHeight ? r.height / el.offsetHeight : 1) || 1;
+}
+function rectScaleX(el) {
+    const r = el.getBoundingClientRect();
+    return (el.offsetWidth ? r.width / el.offsetWidth : 1) || 1;
+}
+// Vertical: instantáneo en TV/Android (perf-lite); en PC, animación corta.
+function fastScrollTop(el, target, ms) {
+    if (!el) return;
+    cancelAnimationFrame(_vScrollRaf);
+    const start = el.scrollTop;
+    const delta = target - start;
+    if (Math.abs(delta) < 2) return;
+    const lite = document.documentElement.classList.contains("perf-lite");
+    if (lite || !(ms > 0) || Math.abs(delta) < 6) { el.scrollTop = target; return; }
+    const t0 = performance.now();
+    const step = (now) => {
+        const p = Math.min(1, (now - t0) / ms);
+        el.scrollTop = start + delta * (1 - Math.pow(1 - p, 3));
+        if (p < 1) _vScrollRaf = requestAnimationFrame(step);
+    };
+    _vScrollRaf = requestAnimationFrame(step);
+}
+// Horizontal: mueve la fila solo lo necesario y SIEMPRE contra el área
+// realmente visible (la fila tiene márgenes negativos y se extiende por
+// debajo de la barra lateral y fuera del borde derecho, así que usar solo
+// el rect de la fila dejaba la tarjeta enfocada cortada/fuera de pantalla).
+function ensureTileVisibleX(track, tile, clipEl, safe) {
+    if (!track || !tile) return;
+    const k = rectScaleX(track);
+    const tr = tile.getBoundingClientRect();
+    const rr = track.getBoundingClientRect();
+    let left = rr.left, right = rr.right;
+    if (clipEl) {
+        const cr = clipEl.getBoundingClientRect();
+        left = Math.max(left, cr.left);
+        right = Math.min(right, cr.right);
+    }
+    safe = safe == null ? 40 : safe;
+    left += safe; right -= safe;
+    let d = 0;
+    if (tr.right > right) d = tr.right - right;
+    if (tr.left - d < left) d = tr.left - left;
+    if (Math.abs(d) >= 1) track.scrollLeft += d / k;
+}
+// Vertical: deja el elemento dentro del área visible del contenedor con
+// scroll (insets en px de pantalla, p. ej. alto de un header fijo).
+function ensureVisibleY(scroller, el, topInset, bottomInset, ms) {
+    if (!scroller || !el) return;
+    const k = rectScaleY(scroller);
+    const sr = scroller.getBoundingClientRect();
+    const er = el.getBoundingClientRect();
+    const top = sr.top + (topInset || 0);
+    const bottom = sr.bottom - (bottomInset || 0);
+    let d = 0;
+    if (er.bottom > bottom) d = er.bottom - bottom;
+    if (er.top - d < top) d = er.top - top;   // la parte de arriba tiene prioridad
+    if (Math.abs(d) >= 1) fastScrollTop(scroller, scroller.scrollTop + d / k, ms == null ? 90 : ms);
+}
+// Perfil: al bajar a "Clips" o volver a "VODs" desplaza la pantalla para que
+// la sección (título + tarjetas) quede a la vista.
+function profileScrollFor(section) {
+    const scr = document.getElementById("results-screen");
+    const sec = document.getElementById(section === "clips" ? "profile-section-clips" : "profile-section-vods");
+    if (!scr || !sec) return;
+    if (section !== "clips") {
+        const k = rectScaleY(scr);
+        const sr = scr.getBoundingClientRect();
+        const er = sec.getBoundingClientRect();
+        const bottomAtTop = (er.bottom - sr.top) / k + scr.scrollTop;
+        if (bottomAtTop <= scr.clientHeight - 16) { fastScrollTop(scr, 0, 90); return; }
+    }
+    ensureVisibleY(scr, sec, 12, 16, 90);
+}
+
 function focusContentZone(rowId, tileIndex) {
     document.querySelectorAll("#nav-list li.focused, #search-nav-item.focused").forEach(el => el.classList.remove("focused"));
     document.querySelectorAll("#nav-list li.selected").forEach(el => el.classList.remove("selected"));
@@ -2038,29 +2093,11 @@ function focusContentTile(rowId, tileIndex) {
     const tile = tiles[idx];
     tile.classList.add("focused");
     if (window.updateFocusBackground) window.updateFocusBackground(tile);
-    // Solo desplaza la fila cuando la tarjeta ya no es visible.
-    const row = tile.closest(".row, .carousel-row, .content-row, #results-grid, #clips-grid, #home-content");
-    if (row) {
-        const rr = row.getBoundingClientRect();
-        const tr = tile.getBoundingClientRect();
-        const margin = 12;
-        const k2 = (row.offsetWidth ? rr.width / row.offsetWidth : 1) || 1;
-        if (tr.right > rr.right - margin) {
-            row.scrollBy({left: (tr.right - (rr.right - margin)) / k2, behavior: "smooth"});
-        } else if (tr.left < rr.left + margin) {
-            row.scrollBy({left: -((rr.left + margin) - tr.left) / k2, behavior: "smooth"});
-        }
-    }
     tile.focus({ preventScroll: true });
+    // Solo desplaza la fila cuando la tarjeta ya no es visible (instantáneo),
+    // midiendo contra el área visible de #content, no contra la fila completa.
     const track = tile.closest(".tile-track");
-    if (track) {
-        const tileLeft = tile.offsetLeft;
-        const tileRight = tileLeft + tile.offsetWidth;
-        const viewLeft = track.scrollLeft;
-        const viewRight = viewLeft + track.clientWidth;
-        if (tileLeft < viewLeft) track.scrollTo({ left: Math.max(0, tileLeft - 24), behavior: "smooth" });
-        else if (tileRight > viewRight) track.scrollTo({ left: Math.min(track.scrollWidth - track.clientWidth, tileRight - track.clientWidth + 24), behavior: "smooth" });
-    }
+    if (track) ensureTileVisibleX(track, tile, document.getElementById("content"), 48);
     contentRowId = rowId;
     contentTileIndex = idx;
     setActiveSection(rowId, true);
@@ -2168,7 +2205,11 @@ function alignSectionAsSecond(id, behavior) {
             content.scrollHeight - content.clientHeight,
             content.scrollTop + delta
         ));
-        scrollIntoViewGuarded(content, null, targetScrollTop, behavior || "smooth");
+        // Ya alineado (p. ej. al moverse izquierda/derecha dentro de la misma
+        // fila): no tocar el scroll vertical.
+        if (Math.abs(targetScrollTop - content.scrollTop) < 2) return;
+        suppressHoverUntil = Date.now() + 150;
+        fastScrollTop(content, targetScrollTop, 110);
     });
 }
 
@@ -6148,7 +6189,7 @@ function goBack() {
             } else if (tiles[gridFocusIndex]) {
                 tiles[gridFocusIndex].focus({preventScroll:true});
                 tiles[gridFocusIndex].classList.add("focused");
-                tiles[gridFocusIndex].scrollIntoView({behavior:"smooth", inline:"center", block:"nearest"});
+                tiles[gridFocusIndex].scrollIntoView({behavior:"auto", inline:"nearest", block:"nearest"});
             }
         } else if (previous === "game") {
             focusGrid("game-screen-grid");
@@ -7140,6 +7181,16 @@ function goBack() {
 })();
 </script>
 
+
+<style id="tv-speed-fixes">
+/* Scroll horizontal de filas sin animación ni imanes de snap (más rápido y
+   la tarjeta enfocada no se re-ajusta a otra posición). */
+.tile-track, .profile-track { scroll-behavior: auto !important; scroll-snap-type: none !important; }
+.section-row { transition: opacity .1s linear !important; }
+html.perf-lite .section-row { transition: none !important; }
+html.perf-lite .tile-stream, html.perf-lite .tile-game, html.perf-lite .tile-clip,
+html.perf-lite .game-card, html.perf-lite .stream-card { transition: none !important; }
+</style>
 </body>
 </html>
 
