@@ -4924,7 +4924,6 @@ function setupPlayerControls() {
                     }
                     const chatBtn = document.getElementById("ctrl-chat");
                     if (chatBtn) chatBtn.setAttribute("aria-label", value === "no" ? "Mostrar chat" : "Ocultar chat");
-                }
                 } else if (setting === "chatLayout") {
                     chatLayoutIndex = Math.min(CHAT_LAYOUTS.length - 1, Number(value) || 0);
                     applyChatLayout();
