@@ -853,6 +853,9 @@ html.perf-lite .section-row { content-visibility: visible !important; contain: n
 html.perf-lite #main-screen.screen #content#content { transition: none !important; }
 html.perf-lite #main-screen.screen #sidebar#sidebar { transition: none !important; }
 html.perf-lite #main-screen.sidebar-active::after { display: none !important; }
+html.perf-lite .section-row { transition: none !important; }
+html.perf-lite .tile-stream, html.perf-lite .tile-game, html.perf-lite .tile-clip, html.perf-lite .game-card, html.perf-lite .stream-card { transition: none !important; }
+html.perf-lite #results-screen #results-grid, html.perf-lite #results-screen #clips-grid, html.perf-lite .profile-track { scroll-behavior: auto !important; }
 #account-overlay .account-box.is-settings { width: min(900px, 94vw); max-height: 94%; padding: 18px 28px; overflow-y: auto; }
 #account-overlay .account-box.is-settings h2 { font-size: 22px; margin-bottom: 4px; text-align: left; }
 #account-overlay .account-box.is-settings .settings-row-account { flex-direction: row; align-items: center; gap: 16px; padding: 8px 0; }
@@ -1763,6 +1766,8 @@ function focusResultsAction(preferred) {
     const targets = { watch: watchBtn, follow: followBtn, chat: chatBtn };
     const target = targets[preferred];
     if (!target) return false;
+    const resScroller = document.getElementById("results-screen");
+    if (resScroller) animateScrollTop(resScroller, 0, 120);
     target.focus({preventScroll:true});
     target.classList.add("focused");
     return true;
@@ -1868,23 +1873,8 @@ function handleGridScreenKeys(keyCode) {
         // Solo movemos horizontalmente la fila de tarjetas.
         target.focus({preventScroll:true});
         const profileTrack = target.closest(".profile-track");
-        if (profileTrack) {
-            const tr = target.getBoundingClientRect();
-            const rr = profileTrack.getBoundingClientRect();
-            const margin = 18;
-
-            if (tr.right > rr.right - margin) {
-                profileTrack.scrollBy({
-                    left: tr.right - (rr.right - margin),
-                    behavior: "smooth"
-                });
-            } else if (tr.left < rr.left + margin) {
-                profileTrack.scrollBy({
-                    left: -((rr.left + margin) - tr.left),
-                    behavior: "smooth"
-                });
-            }
-        }
+        if (profileTrack) revealInTrack(target, profileTrack, 18);
+        revealInScreen(target, document.getElementById("results-screen"), 12, 28);
         return;
     }
 
@@ -1906,6 +1896,18 @@ function handleGridScreenKeys(keyCode) {
     target.classList.add("focused");
     if (window.updateFocusBackground) window.updateFocusBackground(target);
     target.focus({preventScroll:true});
+    // Scroll vertical de la pantalla de juego (la cabecera es sticky y tapa la parte de arriba).
+    const gameScroller = document.getElementById("game-screen");
+    if (gameScroller) {
+        if (gridFocusIndex < cols) {
+            animateScrollTop(gameScroller, 0, 120);
+        } else {
+            const hdr = gameScroller.querySelector(".game-screen-header");
+            const k = (gameScroller.offsetHeight ? gameScroller.getBoundingClientRect().height / gameScroller.offsetHeight : 1) || 1;
+            const hdrH = hdr ? hdr.getBoundingClientRect().height / k : 0;
+            revealInScreen(target, gameScroller, hdrH + 14, 28);
+        }
+    }
 }
 
 function focusProfileSection(section, index=0) {
@@ -1937,30 +1939,10 @@ function focusProfileSection(section, index=0) {
     tile.focus({preventScroll:true});
 
     const track = tile.closest("#results-grid, #clips-grid");
-    if (!track) return;
-
-    const visibleLeft = track.scrollLeft;
-    const visibleRight = visibleLeft + track.clientWidth;
-    const tileLeft = tile.offsetLeft;
-    const tileRight = tileLeft + tile.offsetWidth;
-
-    // La primera tarjeta permanece visible mientras haya espacio.
-    // Solo avanzamos cuando el foco llega al último elemento visible.
-    const edge = 10;
-
-    if (tileRight > visibleRight - edge) {
-        const amount = tileRight - (visibleRight - edge);
-        track.scrollBy({
-            left: amount,
-            behavior: "smooth"
-        });
-    } else if (tileLeft < visibleLeft + edge) {
-        const amount = tileLeft - (visibleLeft + edge);
-        track.scrollBy({
-            left: amount,
-            behavior: "smooth"
-        });
-    }
+    if (track) revealInTrack(tile, track, 18);
+    // Scroll vertical de la pantalla de perfil para que la fila enfocada
+    // (VODs / Clips) no quede fuera de pantalla al bajar.
+    revealInScreen(tile, document.getElementById("results-screen"), 12, 28);
 }
 
 // Calcula el número real de columnas de un grid responsivo contando
@@ -2038,29 +2020,10 @@ function focusContentTile(rowId, tileIndex) {
     const tile = tiles[idx];
     tile.classList.add("focused");
     if (window.updateFocusBackground) window.updateFocusBackground(tile);
-    // Solo desplaza la fila cuando la tarjeta ya no es visible.
-    const row = tile.closest(".row, .carousel-row, .content-row, #results-grid, #clips-grid, #home-content");
-    if (row) {
-        const rr = row.getBoundingClientRect();
-        const tr = tile.getBoundingClientRect();
-        const margin = 12;
-        const k2 = (row.offsetWidth ? rr.width / row.offsetWidth : 1) || 1;
-        if (tr.right > rr.right - margin) {
-            row.scrollBy({left: (tr.right - (rr.right - margin)) / k2, behavior: "smooth"});
-        } else if (tr.left < rr.left + margin) {
-            row.scrollBy({left: -((rr.left + margin) - tr.left) / k2, behavior: "smooth"});
-        }
-    }
     tile.focus({ preventScroll: true });
+    // Solo desplaza la fila cuando la tarjeta ya no es visible.
     const track = tile.closest(".tile-track");
-    if (track) {
-        const tileLeft = tile.offsetLeft;
-        const tileRight = tileLeft + tile.offsetWidth;
-        const viewLeft = track.scrollLeft;
-        const viewRight = viewLeft + track.clientWidth;
-        if (tileLeft < viewLeft) track.scrollTo({ left: Math.max(0, tileLeft - 24), behavior: "smooth" });
-        else if (tileRight > viewRight) track.scrollTo({ left: Math.min(track.scrollWidth - track.clientWidth, tileRight - track.clientWidth + 24), behavior: "smooth" });
-    }
+    if (track) revealInTrack(tile, track, 24);
     contentRowId = rowId;
     contentTileIndex = idx;
     setActiveSection(rowId, true);
@@ -2180,15 +2143,66 @@ function hoverSelectSection(id) {
     setActiveSection(id);
 }
 
+// ------------------------------------------------------------
+// Scroll rápido para TV
+// En TV (html.perf-lite) el scroll es instantáneo: la animación nativa
+// "smooth" repinta toda la pantalla durante cientos de ms y se siente lenta.
+// En otros dispositivos se usa una animación corta (140 ms) en vez de la nativa.
+// ------------------------------------------------------------
+function isLiteDevice() { return document.documentElement.classList.contains("perf-lite"); }
+
+function animateScrollTop(el, target, ms) {
+    if (el.__scrollAnim) { cancelAnimationFrame(el.__scrollAnim); el.__scrollAnim = 0; }
+    if (isLiteDevice() || !ms || ms <= 0) { el.scrollTop = target; return; }
+    const from = el.scrollTop, delta = target - from;
+    if (Math.abs(delta) < 1) return;
+    const t0 = performance.now();
+    const step = (now) => {
+        const p = Math.min(1, (now - t0) / ms);
+        el.scrollTop = from + delta * (1 - Math.pow(1 - p, 3));
+        el.__scrollAnim = p < 1 ? requestAnimationFrame(step) : 0;
+    };
+    el.__scrollAnim = requestAnimationFrame(step);
+}
+
+// Mantiene visible la tarjeta dentro de una fila horizontal (carrusel).
+// Usa getBoundingClientRect (corrige la escala del .wgt) en vez de offsetLeft,
+// que dependía del offsetParent y dejaba el foco fuera de pantalla.
+function revealInTrack(tile, track, margin) {
+    if (!tile || !track) return;
+    margin = margin == null ? 24 : margin;
+    const tr = tile.getBoundingClientRect();
+    const rr = track.getBoundingClientRect();
+    const k = (track.offsetWidth ? rr.width / track.offsetWidth : 1) || 1;
+    let d = 0;
+    if (tr.right > rr.right - margin * k) d = (tr.right - (rr.right - margin * k)) / k;
+    else if (tr.left < rr.left + margin * k) d = -((rr.left + margin * k) - tr.left) / k;
+    if (Math.abs(d) >= 1) track.scrollLeft = Math.max(0, track.scrollLeft + d);
+}
+
+// Mantiene visible la tarjeta en una pantalla con scroll vertical
+// (perfil y juegos). topInset reserva espacio para cabeceras fijas.
+function revealInScreen(tile, scroller, topInset, bottomInset) {
+    if (!tile || !scroller) return;
+    topInset = topInset || 0;
+    bottomInset = bottomInset == null ? 28 : bottomInset;
+    const sr = scroller.getBoundingClientRect();
+    const tr = tile.getBoundingClientRect();
+    const k = (scroller.offsetHeight ? sr.height / scroller.offsetHeight : 1) || 1;
+    const top = sr.top + topInset * k;
+    const bottom = sr.bottom - bottomInset * k;
+    let d = 0;
+    if (tr.top < top) d = (tr.top - top) / k;
+    else if (tr.bottom > bottom) d = (tr.bottom - bottom) / k;
+    if (Math.abs(d) >= 1) animateScrollTop(scroller, Math.max(0, scroller.scrollTop + d), 120);
+}
+
 function scrollIntoViewGuarded(el, opts, scrollTopOverride, behavior) {
-    // El guard de hover solo hace falta tras un salto animado (desde el
-    // sidebar); un salto instantáneo no necesita bloquear el hover porque
-    // no hay animación en curso que el mouse pueda pisar.
-    const effectiveBehavior = behavior || "smooth";
-    suppressHoverUntil = Date.now() + (effectiveBehavior === "auto" ? 0 : 800);
+    // El guard de hover solo hace falta tras un salto animado.
+    const instant = isLiteDevice() || behavior === "auto";
+    suppressHoverUntil = Date.now() + (instant ? 0 : 300);
     if (scrollTopOverride !== undefined) {
-        try { el.scrollTo({ top: scrollTopOverride, behavior: effectiveBehavior }); }
-        catch (_) { el.scrollTop = scrollTopOverride; }
+        animateScrollTop(el, scrollTopOverride, instant ? 0 : 140);
     } else {
         el.scrollIntoView(opts);
     }
