@@ -1,4 +1,4 @@
-name: Buildname: Build Tizen .wgt
+name: Build Tizen .wgt
 
 on:
   push:
