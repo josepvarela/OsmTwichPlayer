@@ -15,17 +15,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # El .wgt es, en el fondo, un .zip con otra extensión. Este workflow
-      # arma ese paquete SIN FIRMAR (ver nota más abajo) — para instalarlo
-      # en un Samsung TV real hace falta abrirlo una vez en Tizen Studio
-      # (Package Manager → tu certificado de autor) y generar el paquete
-      # firmado desde ahí, porque firmar de verdad requiere el certificado
-      # de distribuidor de Samsung ligado a tu cuenta, que no se puede
-      # automatizar sin exponer credenciales personales tuyas en el repo.
       - name: Empaquetar .wgt (sin firmar)
         run: |
-          # La app va DENTRO del .wgt: index.html raíz -> tizen/app.html
-          # (tizen/index.html es un lanzador fijo que abre app.html, no se toca)
           cp index.html tizen/app.html
           cd tizen
           zip -r ../OsmTwich.wgt . -x ".*"
@@ -37,20 +28,3 @@ jobs:
         with:
           name: OsmTwich-wgt
           path: OsmTwich.wgt
-
-      - name: Crear Release (solo en push a main)
-        if: github.event_name == 'push'
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: wgt-${{ github.run_number }}
-          name: OsmTwich TV ${{ github.run_number }} (sin firmar)
-          files: OsmTwich.wgt
-          body: |
-            Paquete .wgt sin firmar, generado automáticamente desde tizen/.
-            Para instalar en un Samsung TV real: abrí este proyecto en Tizen
-            Studio, generá tu certificado de autor/distribuidor (Certificate
-            Manager) y usá "Build Signed Package" antes de instalar, o
-            "Run As > Tizen Web Application" con el TV en modo desarrollador
-            conectado por IP, que firma y despliega en un solo paso.
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
