@@ -312,8 +312,8 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 }
 #player-settings-overlay .account-btn.focused { outline: 3px solid #fff; outline-offset: 2px; }
 #chat-panel.chat-resizable {
-    top: 0;
-    bottom: auto;
+    top: auto;
+    bottom: 0;
     border-radius: 0;
     max-width: none;
 }
@@ -1337,11 +1337,12 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             <button data-psetting-btn data-value="no">No</button>
         </div>
     </div>
-    <div class="settings-row-account" data-psetting="chatWidth">
+        <div class="settings-row-account" data-psetting="chatWidth">
         <label>Ancho del chat</label>
         <div class="settings-options">
-            <button data-psetting-btn data-value="15">15%</button>
-            <button data-psetting-btn data-value="25">25%</button>
+            <button data-psetting-btn data-value="20">20%</button>
+            <button data-psetting-btn data-value="30">30%</button>
+            <button data-psetting-btn data-value="40">40%</button>
             <button data-psetting-btn data-value="50">50%</button>
         </div>
     </div>
@@ -1405,7 +1406,6 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                         <div class="ctrl-btn" data-action="mute" id="ctrl-mute" tabindex="0" role="button" aria-label="Silenciar o activar sonido"></div>
                         <div class="ctrl-btn" data-action="settings" id="ctrl-settings" tabindex="0" role="button" aria-label="Ajustes de reproducción"></div>
                         <div class="ctrl-btn" data-action="chat-send" id="ctrl-chat-send" tabindex="0" role="button" aria-label="Enviar mensaje al chat"></div>
-                        <div class="ctrl-btn" data-action="refresh" id="ctrl-refresh" tabindex="0" role="button" aria-label="Actualizar reproductor"></div>
                     </div>
                 </div>
             </div>
@@ -1529,7 +1529,7 @@ function isControlsClickSuppressed() {
 let controlFocusIndex = 0;
 let availableQualities = [];
 let qualityIndex = 0;
-const CONTROL_ACTIONS = ["rewind", "play", "forward", "mute", "settings", "chat-send", "refresh"];
+const CONTROL_ACTIONS = ["rewind", "play", "forward", "mute", "settings", "chat-send"];
 let playerInfoFocusIndex = 0;
 let playerInfoHasGame = false;
 let playerReturnScreen = "main";
@@ -1571,7 +1571,6 @@ function initControlIcons() {
     setCtrlIcon("mute", isMuted ? "volumeOff" : "volumeOn");
     setCtrlIcon("settings", "settings");
     setCtrlIcon("chat-send", "chatSend");
-    setCtrlIcon("refresh", "refresh");
     // Al abrir el reproductor se asume reproduciendo, así que se muestra
     // el botón de pausa y se oculta el de play.
     updatePlayPauseVisibility(true);
@@ -3732,7 +3731,7 @@ function applyInterfaceSettings() {
     root.dataset.cardSize = get("cardSize", "100");
     window.interfaceChatPreference = get("chat", "yes");
     window.interfaceQualityPreference = get("quality", "auto");
-    window.interfaceChatWidthPreference = get("chatWidth", "25");
+    window.interfaceChatWidthPreference = get("chatWidth", "20");
     window.interfaceChatHeightPreference = get("chatHeight", "100");
     window.interfaceChatPosPreference = get("chatPos", "right");
     applyTextScales();
@@ -4295,22 +4294,10 @@ function clearStartupQualityTimer() {
 }
 
 function applyStartupQuality() {
-  if (!twitchPlayer || qualityUserPicked) return;
-  let savedQuality = "auto";
-  try { savedQuality = localStorage.getItem("osmtwich-settings-quality") || "auto"; } catch (err) {}
-  if (savedQuality === "auto") return;
-  try {
-    const list = twitchPlayer.getQualities() || [];
-    const groups = list.map(q => q.group);
-    const available = groups.includes(savedQuality);
-    // En READY la lista suele venir vacía: se intenta igual, pero
-    // solo se da por aplicada cuando la calidad existe realmente en
-    // la lista (si no, se reintenta en PLAYING, cuando ya está poblada).
-    if (available || !groups.length) {
-      twitchPlayer.setQuality(savedQuality);
-      qualityStartupUpgradeDone = available;
-    }
-  } catch (err) {}
+  // Ahora siempre arranca en Auto: no se aplica ninguna preferencia guardada.
+  // El usuario puede cambiarla manualmente desde el panel de ajustes una vez
+  // que el stream esté corriendo.
+  return;
 }
 
 function refreshQualities() {
@@ -4353,12 +4340,16 @@ function kickAutoplay() {
     clearStartupQualityTimer();
     qualityUserPicked = false;
     qualityStartupUpgradeDone = false;
-    applyStartupQuality(); // si el player se reutilizó, ya está listo
+    // Siempre arrancamos en Auto (auto = no llamar setQuality, el propio
+    // reproductor de Twitch decide la mejor calidad automáticamente).
+    try {
+        if (twitchPlayer && typeof twitchPlayer.setQuality === "function") {
+            twitchPlayer.setQuality("auto");
+        }
+    } catch (_) {}
     playerAutoplayStarted = false;
     playerUnmuteAttempted = false;
-
-    // El player ya se crea con autoplay:true y muted:true, y además se llama
-    // a requestAutoplay(true) una sola vez en READY. Sin reintentos periódicos.
+    ...
 }
 
 // Los listeners del ciclo de vida del reproductor (calidad, foco, mostrar
@@ -4372,7 +4363,6 @@ function bindPlayerLifecycleListeners() {
     // getQualities() suele venir vacío justo en READY — se reintenta en PLAYING también.
     twitchPlayer.addEventListener(Twitch.Player.READY, refreshQualities);
     twitchPlayer.addEventListener(Twitch.Player.READY, syncMuteIcon);
-    twitchPlayer.addEventListener(Twitch.Player.READY, applyStartupQuality);
     twitchPlayer.addEventListener(Twitch.Player.READY, () => requestAutoplay(true));
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => {
         playerAutoplayStarted = true;
@@ -4390,8 +4380,6 @@ function bindPlayerLifecycleListeners() {
             } catch (err) {}
         }
     });
-    twitchPlayer.addEventListener(Twitch.Player.PLAYING, applyStartupQuality);
-    // Sin subida automática a Auto (provocaba play/pause repetidos): el usuario lo elige a mano en el panel de calidad.
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, refreshQualities);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, startProgressLoop);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => { if (qualityPanelVisible) hideQualityPanel(); });
@@ -5231,7 +5219,6 @@ function runControlAction(action) {
         case "forward": seekBy(10); break;
         case "settings": togglePlayerSettingsPanel(); break;
         case "chat-send": openChatComposer(); break;
-        case "refresh": refreshPlayer(); break;
         case "mute": toggleMute(); break;
     }
 }
@@ -5528,13 +5515,21 @@ function updatePlayerSettingsPanelFocus() {
 }
 
 function updatePlayerSettingsActiveStates() {
-    const get = (name, fallback) => {
-        try { return localStorage.getItem("osmtwich-settings-" + name) || fallback; }
-        catch (e) { return fallback; }
+    const defaults = {
+        chatTextSize: "x1",
+        quality: "auto",
+        chat: "yes",
+        chatWidth: "20",
+        chatHeight: "100",
+        chatPos: "right"
     };
-    document.querySelectorAll("#player-settings-panel .settings-row-account").forEach(row => {
+    const get = (name) => {
+        try { return localStorage.getItem("osmtwich-settings-" + name) || defaults[name] || null; }
+        catch (e) { return defaults[name] || null; }
+    };
+    document.querySelectorAll("#player-settings-overlay .settings-row-account").forEach(row => {
         const setting = row.dataset.psetting;
-        const current = get(setting, null);
+        const current = get(setting);
         row.querySelectorAll("button[data-value]").forEach(btn => {
             btn.classList.toggle("active", btn.dataset.value === current);
         });
@@ -5578,7 +5573,7 @@ function applyChatSizeAndPosFromSettings() {
         try { return localStorage.getItem("osmtwich-settings-" + n) || d; }
         catch (e) { return d; }
     };
-    const widthPct  = Number(get("chatWidth", "25")) || 25;
+    const widthPct  = Number(get("chatWidth", "20")) || 20;
     const heightPct = Number(get("chatHeight", "100")) || 100;
     const pos = get("chatPos", "right");
 
@@ -5592,6 +5587,9 @@ function applyChatSizeAndPosFromSettings() {
     panel.style.width = widthPct + "vw";
     // Altura en % de la pantalla
     panel.style.height = heightPct + "%";
+    // El chat se ancla ABAJO: al crecer en altura, se expande hacia arriba.
+    panel.style.bottom = "0";
+    panel.style.top = "auto";
     // Posición horizontal
     if (pos === "left") {
         panel.style.left = "0";
@@ -5600,9 +5598,6 @@ function applyChatSizeAndPosFromSettings() {
         panel.style.right = "0";
         panel.style.left = "auto";
     }
-    // Posición vertical: arriba (pegado al borde superior)
-    panel.style.top = "0";
-    panel.style.bottom = "auto";
     panel.style.maxWidth = "none";
     panel.classList.add("chat-resizable");
 }
