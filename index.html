@@ -223,61 +223,100 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 #quality-panel { position: absolute; right: 340px; bottom: 110px; width: 240px; max-height: 50%; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; background: rgba(14,14,16,0.82); border-radius: 10px; padding: 20px; z-index: 11; }
 #quality-panel.hidden { display: none; }
 
-#player-settings-panel {
-    position: absolute;
-    right: 340px;
-    bottom: 110px;
-    width: 320px;
-    max-height: 70%;
-    overflow-y: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    background: rgba(14,14,16,0.92);
-    border-radius: 10px;
-    padding: 20px;
-    z-index: 11;
-    box-shadow: 0 12px 30px rgba(0,0,0,.5);
+#player-settings-overlay {
+  position: fixed;
+  inset: 0;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0,0,0,.72);
+  z-index: 220;
 }
-#player-settings-panel::-webkit-scrollbar { display: none; }
-#player-settings-panel.hidden { display: none; }
-#player-settings-panel h3 { font-size: 20px; margin-bottom: 12px; color: #adadb8; }
-#player-settings-panel .settings-row-account {
+#player-settings-overlay.visible { display: flex; }
+#player-settings-overlay.hidden { display: none !important; }
+#player-settings-overlay .player-settings-box {
+  background: rgba(24,24,27,.98);
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 16px;
+  padding: 28px 34px;
+  width: min(760px, 92vw);
+  max-height: 88vh;
+  overflow-y: auto;
+  text-align: left;
+  box-shadow: 0 20px 50px rgba(0,0,0,.55);
+  scrollbar-width: none;
+}
+#player-settings-overlay .player-settings-box::-webkit-scrollbar { display: none; }
+#player-settings-overlay h2 {
+  font-size: 22px;
+  margin-bottom: 14px;
+  text-align: left;
+  color: #fff;
+}
+#player-settings-overlay .settings-row-account {
     display: flex;
-    flex-direction: column;
-    gap: 6px;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
     padding: 10px 0;
     border-bottom: 1px solid rgba(255,255,255,.1);
+    text-align: left;
 }
-#player-settings-panel .settings-row-account:last-of-type { border-bottom: none; }
-#player-settings-panel .settings-row-account > label {
-    font-size: 12px;
+#player-settings-overlay .settings-row-account:last-of-type { border-bottom: none; }
+#player-settings-overlay .settings-row-account > label {
+    flex: 0 0 150px;
+    font-size: 13px;
     color: #adadb8;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     font-weight: 700;
 }
-#player-settings-panel .settings-options {
+#player-settings-overlay .settings-options {
+    flex: 1 1 auto;
     display: flex;
-    gap: 5px;
+    gap: 6px;
     flex-wrap: wrap;
 }
-#player-settings-panel .settings-options button {
+#player-settings-overlay .settings-options button {
     flex: 1 1 auto;
-    min-width: 40px;
-    padding: 7px 8px;
+    min-width: 46px;
+    padding: 9px 10px;
     border: 2px solid transparent;
-    border-radius: 7px;
+    border-radius: 8px;
     background: #2a2a2e;
     color: #fff;
     font: inherit;
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
     outline: none;
+    transition: background .12s ease;
 }
-#player-settings-panel .settings-options button:hover { background: #3a3a3f; }
-#player-settings-panel .settings-options button.active { background: #9146FF; border-color: #fff; }
-#player-settings-panel .settings-options button.focused { outline: 3px solid #fff; outline-offset: 2px; }
+#player-settings-overlay .settings-options button:hover { background: #3a3a3f; }
+#player-settings-overlay .settings-options button.active { background: #9146FF; border-color: #fff; }
+#player-settings-overlay .settings-options button.focused { outline: 3px solid #fff; outline-offset: 2px; }
+#player-settings-overlay .account-btn {
+    display: block;
+    width: 100%;
+    border: none;
+    border-radius: 10px;
+    background: #2a2a2e;
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    padding: 12px 18px;
+    margin-top: 16px;
+    cursor: pointer;
+    outline: none;
+    font-family: inherit;
+}
+#player-settings-overlay .account-btn.focused { outline: 3px solid #fff; outline-offset: 2px; }
+#chat-panel.chat-resizable {
+    top: 0;
+    bottom: auto;
+    border-radius: 0;
+    max-width: none;
+}
 #quality-panel h3 { font-size: 20px; margin-bottom: 12px; color: #adadb8; }
 .quality-item { padding: 10px 12px; border-radius: 6px; font-size: 16px; cursor: pointer; border: 3px solid transparent; display: flex; justify-content: space-between; }
 .quality-item.focused { border-color: transparent; background: #2a2a2e; box-shadow: none; }
@@ -1271,8 +1310,9 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     <div id="quality-list"></div>
 </div>
 
-<div id="player-settings-panel" class="hidden">
-    <h3>Ajustes de reproducción</h3>
+<div id="player-settings-overlay" class="hidden">
+  <div class="player-settings-box">
+    <h2>Ajustes de reproducción</h2>
     <div class="settings-row-account" data-psetting="chatTextSize">
         <label>Tamaño texto chat</label>
         <div class="settings-options">
@@ -1286,13 +1326,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     </div>
     <div class="settings-row-account" data-psetting="quality">
         <label>Calidad</label>
-        <div class="settings-options">
-            <button data-psetting-btn data-value="160p30">160</button>
-            <button data-psetting-btn data-value="240p30">240</button>
-            <button data-psetting-btn data-value="360p30">360</button>
-            <button data-psetting-btn data-value="480p30">480</button>
-            <button data-psetting-btn data-value="720p60">720</button>
-            <button data-psetting-btn data-value="1080p60">1080</button>
+        <div class="settings-options" id="player-quality-options">
             <button data-psetting-btn data-value="auto">Auto</button>
         </div>
     </div>
@@ -1303,21 +1337,32 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             <button data-psetting-btn data-value="no">No</button>
         </div>
     </div>
-    <div class="settings-row-account" data-psetting="chatSize">
-        <label>Tamaño del chat</label>
+    <div class="settings-row-account" data-psetting="chatWidth">
+        <label>Ancho del chat</label>
         <div class="settings-options">
-            <button data-psetting-btn data-value="large">Grande</button>
-            <button data-psetting-btn data-value="medium">Mediano</button>
-            <button data-psetting-btn data-value="small">Pequeño</button>
+            <button data-psetting-btn data-value="15">15%</button>
+            <button data-psetting-btn data-value="25">25%</button>
+            <button data-psetting-btn data-value="50">50%</button>
+        </div>
+    </div>
+    <div class="settings-row-account" data-psetting="chatHeight">
+        <label>Altura del chat</label>
+        <div class="settings-options">
+            <button data-psetting-btn data-value="25">25%</button>
+            <button data-psetting-btn data-value="50">50%</button>
+            <button data-psetting-btn data-value="75">75%</button>
+            <button data-psetting-btn data-value="100">100%</button>
         </div>
     </div>
     <div class="settings-row-account" data-psetting="chatPos">
         <label>Posición del chat</label>
         <div class="settings-options">
-            <button data-psetting-btn data-value="right">Derecha</button>
             <button data-psetting-btn data-value="left">Izquierda</button>
+            <button data-psetting-btn data-value="right">Derecha</button>
         </div>
     </div>
+    <button class="account-btn" data-psetting-btn data-action="close-settings">← Volver</button>
+  </div>
 </div>
 
             <div id="player-controls-bar">
@@ -3687,7 +3732,8 @@ function applyInterfaceSettings() {
     root.dataset.cardSize = get("cardSize", "100");
     window.interfaceChatPreference = get("chat", "yes");
     window.interfaceQualityPreference = get("quality", "auto");
-    window.interfaceChatSizePreference = get("chatSize", "large");
+    window.interfaceChatWidthPreference = get("chatWidth", "25");
+    window.interfaceChatHeightPreference = get("chatHeight", "100");
     window.interfaceChatPosPreference = get("chatPos", "right");
     applyTextScales();
 }
@@ -4718,6 +4764,7 @@ function goToPlayerScreen() {
             chatPanelInit.style.pointerEvents = "none";
         }
     }
+    applyChatSizeAndPosFromSettings();
       hideQualityPanel();
       hidePlayerSettingsPanel();
 
@@ -5051,8 +5098,12 @@ function handlePlayerScreenKeys(keyCode, e) {
         if (keyCode === 10009 || keyCode === 27) { e.preventDefault(); hideQualityPanel(); return; }
         return;
     }
-    if (playerSettingsPanelVisible) {
-        const rows = Array.from(document.querySelectorAll("#player-settings-panel .settings-row-account"));
+        if (playerSettingsPanelVisible) {
+        const overlay = document.getElementById("player-settings-overlay");
+        const rows = Array.from(overlay.querySelectorAll(".settings-row-account"));
+        const backBtn = overlay.querySelector('button[data-action="close-settings"]');
+        const items = rows.concat(backBtn ? [backBtn] : []);
+
         if (keyCode === 27 || keyCode === 10009) {
             e.preventDefault();
             hidePlayerSettingsPanel();
@@ -5060,17 +5111,34 @@ function handlePlayerScreenKeys(keyCode, e) {
         }
         if (keyCode === 38 || keyCode === 40) {
             const active = document.activeElement;
-            const currentRow = active?.closest?.(".settings-row-account");
-            let idx = currentRow ? rows.indexOf(currentRow) : 0;
+            let currentIdx = items.findIndex(el =>
+                el === active || el.contains(active)
+            );
+            if (currentIdx === -1) currentIdx = items.findIndex(el => el.classList.contains("focused"));
+            if (currentIdx === -1) currentIdx = 0;
+
             const delta = keyCode === 38 ? -1 : 1;
-            idx = Math.max(0, Math.min(rows.length - 1, idx + delta));
-            const targetRow = rows[idx];
-            const targetBtn = targetRow.querySelector("button.active") || targetRow.querySelector("button");
-            if (targetBtn) {
-                document.querySelectorAll("#player-settings-panel .settings-options button")
-                    .forEach(b => b.classList.remove("focused"));
-                targetBtn.classList.add("focused");
-                targetBtn.focus({preventScroll: true});
+            const next = (currentIdx + delta + items.length) % items.length;
+            const target = items[next];
+
+            overlay.querySelectorAll(".settings-options button.focused")
+                .forEach(b => b.classList.remove("focused"));
+            overlay.querySelectorAll(".account-btn.focused")
+                .forEach(b => b.classList.remove("focused"));
+
+            if (target.classList.contains("account-btn")) {
+                target.classList.add("focused");
+                target.focus({preventScroll: true});
+                target.scrollIntoView({block: "nearest"});
+            } else {
+                const group = target.querySelector(".settings-options");
+                const buttons = group ? Array.from(group.querySelectorAll("button")) : [];
+                const activeBtn = buttons.find(b => b.classList.contains("active")) || buttons[0];
+                if (activeBtn) {
+                    activeBtn.classList.add("focused");
+                    activeBtn.focus({preventScroll: true});
+                    activeBtn.scrollIntoView({block: "nearest"});
+                }
             }
             return;
         }
@@ -5091,6 +5159,8 @@ function handlePlayerScreenKeys(keyCode, e) {
             e.preventDefault();
             const active = document.activeElement;
             if (active && active.dataset && active.dataset.value !== undefined) {
+                active.click();
+            } else if (active && active.dataset && active.dataset.action === "close-settings") {
                 active.click();
             }
             return;
@@ -5378,19 +5448,70 @@ function togglePlayerSettingsPanel() {
     if (playerSettingsPanelVisible) hidePlayerSettingsPanel();
     else showPlayerSettingsPanel();
 }
+// Rellena el bloque de calidad del panel de ajustes con las calidades
+// REALES del stream actual (las que devuelve el reproductor de Twitch).
+function refreshPlayerQualityOptions() {
+    const container = document.getElementById("player-quality-options");
+    if (!container) return;
 
+    let list = [];
+    try { list = (twitchPlayer && twitchPlayer.getQualities()) || []; } catch (e) { list = []; }
+
+    // Si el reproductor todavía no expone calidades, al menos dejamos "Auto".
+    if (!list.length) {
+        list = [{ name: "Auto", group: "auto" }];
+    }
+
+    // Guardamos las calidades disponibles para usarlas al guardar.
+    availableQualities = list;
+
+    // Cual es la activa
+    let currentGroup = "";
+    try { currentGroup = twitchPlayer ? twitchPlayer.getQuality() : ""; } catch (e) {}
+
+    let savedQuality = "auto";
+    try { savedQuality = localStorage.getItem("osmtwich-settings-quality") || "auto"; } catch (e) {}
+
+    // HTML de botones: usamos group como value (Twitch setQuality acepta group)
+    container.innerHTML = list.map(q => {
+        const value = q.group || q.quality || q.name;
+        const label = q.name || q.group || "Calidad";
+        return `<button data-psetting-btn data-value="${escapeHtml(value)}">${escapeHtml(label)}</button>`;
+    }).join("");
+
+    // Marcamos activo: el currentGroup del player si lo tenemos, si no lo guardado.
+    container.querySelectorAll("button").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.value === (currentGroup || savedQuality));
+        // Reengancha listener porque reemplazamos el HTML
+        btn.tabIndex = 0;
+        btn.addEventListener("click", () => {
+            const row = btn.closest(".settings-row-account");
+            if (!row) return;
+            savePlayerSetting(row.dataset.psetting, btn.dataset.value);
+            container.querySelectorAll("button.focused").forEach(b => b.classList.remove("focused"));
+            btn.classList.add("focused");
+            btn.focus({preventScroll: true});
+        });
+    });
+}
 function showPlayerSettingsPanel() {
+    if (qualityPanelVisible) hideQualityPanel();
+    refreshPlayerQualityOptions();   // <-- carga calidades reales del stream
     updatePlayerSettingsActiveStates();
-    document.getElementById("player-settings-panel").classList.remove("hidden");
+    const overlay = document.getElementById("player-settings-overlay");
+    overlay.classList.remove("hidden");
+    overlay.classList.add("visible");
     playerSettingsPanelVisible = true;
     playerSettingsFocusIndex = 0;
     updatePlayerSettingsPanelFocus();
-    if (qualityPanelVisible) hideQualityPanel();
 }
 
 function hidePlayerSettingsPanel() {
-    const panel = document.getElementById("player-settings-panel");
-    if (panel) panel.classList.add("hidden");
+    const overlay = document.getElementById("player-settings-overlay");
+    if (overlay) {
+        overlay.classList.add("hidden");
+        overlay.classList.remove("visible");
+    }
     playerSettingsPanelVisible = false;
 }
 
@@ -5446,7 +5567,7 @@ function savePlayerSetting(name, value) {
             }
         }
     }
-    if (name === "chatSize" || name === "chatPos") {
+    if (name === "chatWidth" || name === "chatHeight" || name === "chatPos") {
         applyChatSizeAndPosFromSettings();
     }
     updatePlayerSettingsActiveStates();
@@ -5457,25 +5578,49 @@ function applyChatSizeAndPosFromSettings() {
         try { return localStorage.getItem("osmtwich-settings-" + n) || d; }
         catch (e) { return d; }
     };
-    const size = get("chatSize", "large");
+    const widthPct  = Number(get("chatWidth", "25")) || 25;
+    const heightPct = Number(get("chatHeight", "100")) || 100;
     const pos = get("chatPos", "right");
-    const idx = CHAT_LAYOUTS.findIndex(l =>
-        l.cls.includes(size) && (pos === "left" ? l.cls.includes("chat-left") : !l.cls.includes("chat-left"))
-    );
-    chatLayoutIndex = idx >= 0 ? idx : 0;
-    applyChatLayout();
+
+    const panel = document.getElementById("chat-panel");
+    if (!panel) return;
+
+    // Limpiamos clases de layout antiguas
+    panel.classList.remove("chat-large", "chat-medium", "chat-small", "chat-left");
+
+    // Ancho en % de la pantalla
+    panel.style.width = widthPct + "vw";
+    // Altura en % de la pantalla
+    panel.style.height = heightPct + "%";
+    // Posición horizontal
+    if (pos === "left") {
+        panel.style.left = "0";
+        panel.style.right = "auto";
+    } else {
+        panel.style.right = "0";
+        panel.style.left = "auto";
+    }
+    // Posición vertical: arriba (pegado al borde superior)
+    panel.style.top = "0";
+    panel.style.bottom = "auto";
+    panel.style.maxWidth = "none";
+    panel.classList.add("chat-resizable");
 }
 
 (function setupPlayerSettingsPanel() {
-    const panel = document.getElementById("player-settings-panel");
-    if (!panel) return;
-    panel.querySelectorAll("button[data-psetting-btn]").forEach(btn => {
+    const overlay = document.getElementById("player-settings-overlay");
+    if (!overlay) return;
+    overlay.querySelectorAll("button[data-psetting-btn]").forEach(btn => {
         btn.tabIndex = 0;
         btn.addEventListener("click", () => {
+            if (btn.dataset.action === "close-settings") {
+                hidePlayerSettingsPanel();
+                return;
+            }
             const row = btn.closest(".settings-row-account");
             if (!row) return;
             savePlayerSetting(row.dataset.psetting, btn.dataset.value);
-            panel.querySelectorAll(".settings-options button.focused")
+            overlay.querySelectorAll(".settings-options button.focused")
                 .forEach(b => b.classList.remove("focused"));
             btn.classList.add("focused");
             btn.focus({preventScroll: true});
