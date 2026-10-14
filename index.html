@@ -886,7 +886,18 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     <script id="wgt-local-hls-player">
     (function () {
         "use strict";
-        if (location.protocol !== "file:") return;
+        // En file:// (.wgt) siempre. En el navegador es opt-in:
+        //   ?player=local   (o localStorage.localPlayer = "1") para activarlo
+        //   ?player=embed   (o localStorage.localPlayer = "0") para desactivarlo
+        var useLocal = location.protocol === "file:";
+        if (!useLocal) {
+            try {
+                var m = /[?&]player=(local|embed)\b/.exec(location.search);
+                if (m) localStorage.setItem("localPlayer", m[1] === "local" ? "1" : "0");
+                useLocal = localStorage.getItem("localPlayer") === "1";
+            } catch (e) {}
+        }
+        if (!useLocal) return;
 
         var GQL = "https://gql.twitch.tv/gql";
         var CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko";
@@ -978,8 +989,24 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             });
         }
 
+        var hlsPromise = null;
+        function loadHls() {
+            if (window.Hls) return Promise.resolve(window.Hls);
+            if (hlsPromise) return hlsPromise;
+            hlsPromise = new Promise(function (res, rej) {
+                var sc = document.createElement("script");
+                sc.src = "https://cdn.jsdelivr.net/npm/hls.js@1.5.17/dist/hls.min.js";
+                sc.onload = function () { window.Hls ? res(window.Hls) : rej(new Error("hls.js")); };
+                sc.onerror = function () { hlsPromise = null; rej(new Error("hls.js no cargó")); };
+                document.head.appendChild(sc);
+            });
+            return hlsPromise;
+        }
+
         function Player(target, opts) {
             opts = opts || {};
+            this._srcTok = 0;
+            this._hls = null;
             this._l = {};
             this._q = [];
             this._cur = "auto";
@@ -1048,8 +1075,30 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                 };
                 v.addEventListener("loadedmetadata", onMeta);
             }
-            v.src = url;
-            try { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {}
+            var self = this, tok = ++this._srcTok;
+            if (this._hls) { try { this._hls.destroy(); } catch (e) {} this._hls = null; }
+            var playNow = function () { try { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {} };
+            var isHls = /\.m3u8(\?|$)/.test(url);
+            if (!isHls || v.canPlayType("application/vnd.apple.mpegurl")) {
+                v.src = url;
+                playNow();
+                return;
+            }
+            // Navegador sin HLS nativo: hls.js
+            loadHls().then(function (Hls) {
+                if (tok !== self._srcTok) return;
+                if (!Hls.isSupported()) { v.src = url; playNow(); return; }
+                var h = new Hls({ lowLatencyMode: true });
+                self._hls = h;
+                h.on(Hls.Events.ERROR, function (_, d) { if (d && d.fatal) self._emit("offline"); });
+                h.on(Hls.Events.MANIFEST_PARSED, playNow);
+                h.loadSource(url);
+                h.attachMedia(v);
+            }).catch(function (e) {
+                if (tok !== self._srcTok) return;
+                console.warn("Reproductor local:", e);
+                self._emit("offline");
+            });
         };
         P.setChannel = function (c) { this._load("channel", c, 0); };
         P.setVideo = function (id, t) { this._load("video", id, t || 0); };
@@ -1077,6 +1126,8 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         P.seek = function (t) { try { this._v.currentTime = t; } catch (e) {} };
         P.destroy = function () {
             this._gen++;
+            this._srcTok++;
+            if (this._hls) { try { this._hls.destroy(); } catch (e) {} this._hls = null; }
             var v = this._v;
             try { v.pause(); v.removeAttribute("src"); v.load(); } catch (e) {}
             if (v.parentNode) v.parentNode.removeChild(v);
@@ -1091,7 +1142,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     </script>
     <script>
     // Embed oficial de Twitch: solo fuera del .wgt (en file:// lo reemplaza el reproductor local).
-    if (location.protocol !== "file:") {
+    if (location.protocol !== "file:" && !(window.Twitch && window.Twitch.__local)) {
         var __tw = document.createElement("script");
         __tw.async = true; __tw.src = "https://embed.twitch.tv/embed/v1.js";
         document.head.appendChild(__tw);
