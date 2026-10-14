@@ -11,6 +11,288 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>OsmTwich</title>
+<script id="i18n-v1">
+/* ============================================================
+   Idioma / Language: Auto | English | Español
+   - Texto fuente de la app: español. En inglés se traduce el DOM en vivo
+     (texto, aria-label, placeholder, title, alt) con un diccionario ES -> EN.
+   - Auto: usa el primer idioma del navegador/dispositivo que esté en la
+     lista (en, es); si ninguno está en la lista, inglés.
+   - En español no se instala ningún observer (cero costo).
+   ============================================================ */
+(function () {
+    "use strict";
+    var SUPPORTED = ["en", "es"];
+    var KEY = "osmtwich-settings-language";
+    var ATTRS = ["aria-label", "placeholder", "title", "alt"];
+    var SKIP_SEL = ".chat-msg, .stream-title, #player-stream-title, #channel-description";
+
+    var EN = {
+        // Barra lateral y secciones
+        "Buscar": "Search", "Canales seguidos": "Followed channels", "Destacados": "Featured",
+        "Streamers top": "Top streamers", "Juegos top": "Top games", "Ajustes": "Settings", "Cuenta": "Account",
+        "Transmisiones destacadas": "Featured streams", "Streamers más vistos ahora": "Top streamers right now",
+        "Juegos más vistos": "Most watched games", "En vivo ahora": "Live now",
+        "Clips destacados": "Featured clips", "VODs recientes": "Recent VODs",
+        // Búsqueda
+        "Buscar canal": "Search channel", "Buscar canal…": "Search channel…", "Cerrar búsqueda": "Close search",
+        "Sugerencias de canales": "Channel suggestions", "Nombre del canal de Twitch...": "Twitch channel name...",
+        "Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.": "Type with your keyboard (PC) or use the TV remote to open the on-screen keyboard.",
+        "Buscando…": "Searching…", "CANAL NO ENCONTRADO": "CHANNEL NOT FOUND",
+        // Estados / tarjetas
+        "Cargando…": "Loading…", "EN VIVO": "LIVE", "OFFLINE": "OFFLINE", "(sin título)": "(untitled)",
+        "Sin transmisiones recientes": "No recent streams", "ayer": "yesterday",
+        "Inicia sesión para ver canales seguidos": "Log in to see followed channels",
+        "Todavía no seguís ningún canal.": "You don't follow any channels yet.",
+        "No hay transmisiones en vivo de este juego ahora.": "There are no live streams for this game right now.",
+        "No se pudieron cargar juegos.": "Could not load games.",
+        "No se pudieron cargar streamers.": "Could not load streamers.",
+        "No se pudieron cargar transmisiones en español.": "Could not load Spanish-language streams.",
+        "Este canal no tiene VODs recientes.": "This channel has no recent VODs.",
+        "Este canal no tiene clips destacados.": "This channel has no featured clips.",
+        "Ver en vivo": "Watch live", "Seguir": "Follow", "Siguiendo ✓": "Following ✓",
+        "Foto de perfil": "Profile picture",
+        // Reproductor
+        "Ajustes de reproducción": "Playback settings", "Información del stream": "Stream info",
+        "Abrir canal del streamer": "Open streamer channel", "Abrir streams de este juego": "Open this game's streams",
+        "Adelantar 10 segundos": "Forward 10 seconds", "Retroceder 10 segundos": "Rewind 10 seconds",
+        "Pausar": "Pause", "Reproducir": "Play", "Progreso del video": "Video progress",
+        "Silenciar o activar sonido": "Mute or unmute", "Calidad": "Quality", "Auto": "Auto",
+        "Tamaño texto chat": "Chat text size", "Mostrar chat": "Show chat", "Sí": "Yes",
+        "Ancho del chat": "Chat width", "Altura del chat": "Chat height", "Posición del chat": "Chat position",
+        "Izquierda": "Left", "Derecha": "Right", "Volver": "Back",
+        "No se pudo cargar Twitch Embed": "Could not load Twitch Embed",
+        "Twitch Embed no está disponible": "Twitch Embed is not available",
+        "No se pudo cargar el reproductor de Twitch.": "Could not load the Twitch player.",
+        "Comprueba la conexión a Internet y vuelve a pulsar Actualizar.": "Check your Internet connection and press Refresh again.",
+        // Chat
+        "Chatear": "Chat", "Chatea": "Chat", "Chatea...": "Chat...", "Cerrar chat": "Close chat",
+        "Enviar mensaje al chat": "Send chat message",
+        "Conectando al chat…": "Connecting to chat…", "Cargando repetición del chat…": "Loading chat replay…",
+        "Este video no tiene chat guardado o Twitch no permite verlo desde acá.": "This video has no saved chat, or Twitch doesn't allow viewing it from here.",
+        "No se pudo cargar la repetición del chat.": "Could not load the chat replay.",
+        "No se pudo enviar: el chat no está conectado en este momento.": "Could not send: chat is not connected right now.",
+        "Para enviar mensajes al chat necesitas iniciar sesión con Twitch.": "To send chat messages you need to log in with Twitch.",
+        "Tu sesión de Twitch venció. Volvés a modo solo lectura — iniciá sesión de nuevo desde \"Cuenta\".": "Your Twitch session expired. You're back in read-only mode — log in again from \"Account\".",
+        "Chat grande derecha": "Large chat, right", "Chat mediano derecha": "Medium chat, right", "Chat pequeño derecha": "Small chat, right",
+        "Chat grande izquierda": "Large chat, left", "Chat mediano izquierda": "Medium chat, left", "Chat pequeño izquierda": "Small chat, left",
+        // Ajustes
+        "Idioma": "Language", "Automático": "Automatic", "Tema": "Theme", "Claro": "Light", "Oscuro": "Dark",
+        "Tamaño texto app": "App text size", "Color de texto": "Text color", "Blanco": "White", "Amarillo": "Yellow",
+        "Verde": "Green", "Cian": "Cyan", "Rojo": "Red", "Negro": "Black", "Tamaño tarjetas": "Card size",
+        // Cuenta / login
+        "Iniciar sesión": "Log in", "Iniciar con QR (TV)": "Log in with QR (TV)", "Recargar app": "Reload app",
+        "Salir": "Exit", "Cerrar": "Close", "Cerrar sesión": "Log out", "Ver perfil": "View profile", "Cancelar": "Cancel",
+        "Sesión iniciada. Ya podés chatear con tu nombre.": "Logged in. You can now chat with your name.",
+        "Preparando código QR…": "Preparing QR code…", "Un momento.": "One moment.",
+        "Inicia sesión desde tu celular": "Log in from your phone",
+        "Escanea el código con la cámara, o ve a twitch.tv/activate en cualquier dispositivo y escribe el código de 8 dígitos.": "Scan the code with your camera, or go to twitch.tv/activate on any device and enter the 8-digit code.",
+        "Código QR para iniciar sesión en Twitch": "QR code to log in to Twitch",
+        "No se pudo iniciar sesión": "Could not log in", "Reintentar con QR": "Retry with QR",
+        "Iniciar sesión (redirigir)": "Log in (redirect)",
+        "No se pudo preparar el login (sin conexión con Twitch).": "Could not prepare the login (no connection to Twitch).",
+        "No se pudo iniciar el login por QR.": "Could not start QR login.",
+        "No se pudo conectar con Twitch.": "Could not connect to Twitch.",
+        "El código QR expiró. Probá de nuevo.": "The QR code expired. Try again.",
+        // Salir de la app
+        "Pulsa atrás de nuevo para salir": "Press back again to exit",
+        "Presiona atrás de nuevo para salir": "Press back again to exit",
+        "¿Deseas salir? Pulsa atrás de nuevo para salir de la app": "Do you want to exit? Press back again to exit the app."
+    };
+
+    function numEn(s) { return Number(String(s).replace(/[^\d]/g, "")).toLocaleString("en"); }
+    function plural(n, one, many) { return Number(n) === 1 ? one : many; }
+
+    var PATTERNS = [
+        [/^hace (\d+) min$/, function (m) { return m[1] + " min ago"; }],
+        [/^hace (\d+) h$/, function (m) { return m[1] + " h ago"; }],
+        [/^hace (\d+) días?$/, function (m) { return m[1] + plural(m[1], " day ago", " days ago"); }],
+        [/^hace (\d+) (?:mes|meses)$/, function (m) { return m[1] + plural(m[1], " month ago", " months ago"); }],
+        [/^hace (\d+) (?:año|años)$/, function (m) { return m[1] + plural(m[1], " year ago", " years ago"); }],
+        [/^Última vez en vivo: ([\s\S]+)$/, function (m) { return "Last live: " + tr(m[1]); }],
+        [/^(\d[\d.\s\u00a0]*) espectadores$/, function (m) { return numEn(m[1]) + " viewers"; }],
+        [/^(\d[\d.\s\u00a0]*) visualizaciones$/, function (m) { return numEn(m[1]) + " views"; }],
+        [/^(\d[\d.\s\u00a0]*) seguidores$/, function (m) { return numEn(m[1]) + " followers"; }],
+        [/^\d{1,3}(?:\.\d{3})+$/, function (m) { return numEn(m[0]); }],
+        [/^No se encontró el canal "([\s\S]*)"\.$/, function (m) { return "Channel \"" + m[1] + "\" not found."; }],
+        [/^No se pudo completar el login \(([\s\S]*)\)\.$/, function (m) { return "Could not complete the login (" + m[1] + ")."; }],
+        [/^Portada de ([\s\S]+)$/, function (m) { return "Cover of " + m[1]; }],
+        [/^Foto de perfil de ([\s\S]+)$/, function (m) { return m[1] + "'s profile picture"; }],
+        [/^Se perdió la conexión con el chat, reconectando…([\s\S]*)$/, function (m) {
+            return "Chat connection lost, reconnecting…" + m[1].replace("(código ", "(code ");
+        }],
+        [/^Twitch ya no permite seguir canales desde apps de terceros: hay que confirmarlo en Twitch\. ¿Abrir el canal de ([\s\S]+) en Twitch para seguirlo\?$/, function (m) {
+            return "Twitch no longer allows following channels from third-party apps: you have to confirm it on Twitch. Open " + m[1] + "'s channel on Twitch to follow?";
+        }],
+        [/^Twitch ya no permite dejar de seguir canales desde apps de terceros: hay que confirmarlo en Twitch\. ¿Abrir el canal de ([\s\S]+) en Twitch para dejar de seguirlo\?$/, function (m) {
+            return "Twitch no longer allows unfollowing channels from third-party apps: you have to confirm it on Twitch. Open " + m[1] + "'s channel on Twitch to unfollow?";
+        }]
+    ];
+
+    var currentLang = "es";
+    var observer = null;
+
+    function getSetting() {
+        try { return localStorage.getItem(KEY) || "auto"; } catch (e) { return "auto"; }
+    }
+    function detect() {
+        var list = [];
+        try {
+            list = (navigator.languages && navigator.languages.length) ? navigator.languages : [navigator.language || navigator.userLanguage || ""];
+        } catch (e) {}
+        for (var i = 0; i < list.length; i++) {
+            var code = String(list[i] || "").toLowerCase().split(/[-_]/)[0];
+            if (SUPPORTED.indexOf(code) >= 0) return code;
+        }
+        return "en"; // idioma no soportado -> inglés por defecto
+    }
+    function resolve() {
+        var s = getSetting();
+        return (s === "en" || s === "es") ? s : detect();
+    }
+
+    function tr(str) {
+        if (currentLang !== "en" || str == null) return str;
+        var s = String(str);
+        var core = s.trim();
+        if (!core || core.length > 400) return s;
+        var lead = s.slice(0, s.indexOf(core)), trail = s.slice(lead.length + core.length);
+        var hit = EN[core];
+        if (hit === undefined) {
+            var m = core.match(/^([^A-Za-zÀ-ÿ¿¡"(0-9]*)([\s\S]*)$/);
+            if (m && m[1] && EN[m[2]] !== undefined) hit = m[1] + EN[m[2]];
+        }
+        if (hit === undefined) {
+            for (var i = 0; i < PATTERNS.length; i++) {
+                var pm = core.match(PATTERNS[i][0]);
+                if (pm) { hit = PATTERNS[i][1](pm); break; }
+            }
+        }
+        return hit === undefined ? s : lead + hit + trail;
+    }
+
+    var textRec = new WeakMap(); // Text -> {o: original, t: traducido}
+    var attrRec = new WeakMap(); // Element -> {attr: {o, t}}
+
+    function inSkip(el) { return !!(el && el.closest && el.closest(SKIP_SEL)); }
+
+    function doText(node) {
+        var p = node.parentNode;
+        if (!p) return;
+        var tag = p.nodeName;
+        if (tag === "SCRIPT" || tag === "STYLE" || tag === "TEXTAREA" || tag === "NOSCRIPT") return;
+        var v = node.nodeValue;
+        var rec = textRec.get(node);
+        if (rec && v === rec.t) return;               // ya traducido por nosotros
+        if (!v || !/[A-Za-zÀ-ÿ0-9]/.test(v)) return;
+        if (inSkip(p)) return;
+        var out = tr(v);
+        if (out !== v) { textRec.set(node, { o: v, t: out }); node.nodeValue = out; }
+        else if (rec) textRec.delete(node);
+    }
+    function doAttrs(el) {
+        if (!el.getAttribute || inSkip(el.parentNode)) return;
+        for (var i = 0; i < ATTRS.length; i++) {
+            var a = ATTRS[i];
+            var v = el.getAttribute(a);
+            if (v == null || v === "") continue;
+            var recs = attrRec.get(el);
+            if (recs && recs[a] && recs[a].t === v) continue;
+            var out = tr(v);
+            if (out !== v) {
+                if (!recs) { recs = {}; attrRec.set(el, recs); }
+                recs[a] = { o: v, t: out };
+                el.setAttribute(a, out);
+            } else if (recs && recs[a]) delete recs[a];
+        }
+    }
+    function translateTree(root) {
+        if (!root) return;
+        if (root.nodeType === 3) { doText(root); return; }
+        if (root.nodeType !== 1) return;
+        if (root.classList && root.classList.contains("chat-msg")) return;
+        if (root.nodeName === "SCRIPT" || root.nodeName === "STYLE") return;
+        doAttrs(root);
+        var w = document.createTreeWalker(root, 4 /* SHOW_TEXT */, null, false), n;
+        while ((n = w.nextNode())) doText(n);
+        var els = root.querySelectorAll("[aria-label],[placeholder],[title],[alt]");
+        for (var i = 0; i < els.length; i++) doAttrs(els[i]);
+    }
+    function restoreTree() {
+        var root = document.documentElement;
+        var w = document.createTreeWalker(root, 4, null, false), n, list = [];
+        while ((n = w.nextNode())) { var r = textRec.get(n); if (r && n.nodeValue === r.t) list.push([n, r]); }
+        list.forEach(function (x) { x[0].nodeValue = x[1].o; textRec.delete(x[0]); });
+        var els = root.querySelectorAll("[aria-label],[placeholder],[title],[alt]");
+        for (var i = 0; i < els.length; i++) {
+            var recs = attrRec.get(els[i]);
+            if (!recs) continue;
+            for (var a in recs) {
+                if (els[i].getAttribute(a) === recs[a].t) els[i].setAttribute(a, recs[a].o);
+            }
+            attrRec.delete(els[i]);
+        }
+    }
+
+    function onMutations(list) {
+        for (var i = 0; i < list.length; i++) {
+            var r = list[i];
+            if (r.type === "childList") {
+                for (var j = 0; j < r.addedNodes.length; j++) translateTree(r.addedNodes[j]);
+            } else if (r.type === "characterData") {
+                doText(r.target);
+            } else if (r.type === "attributes") {
+                doAttrs(r.target);
+            }
+        }
+    }
+    function startObserver() {
+        if (observer || !window.MutationObserver) return;
+        observer = new MutationObserver(onMutations);
+        observer.observe(document.documentElement, {
+            childList: true, subtree: true, characterData: true,
+            attributes: true, attributeFilter: ATTRS
+        });
+    }
+    function stopObserver() {
+        if (observer) { observer.disconnect(); observer = null; }
+    }
+
+    function apply(lang) {
+        currentLang = lang;
+        try { document.documentElement.lang = lang; } catch (e) {}
+        if (lang === "en") {
+            startObserver();
+            if (document.body) translateTree(document.documentElement);
+        } else {
+            stopObserver();
+            restoreTree();
+        }
+        try { window.dispatchEvent(new CustomEvent("osmtwich:languagechange", { detail: { lang: lang } })); } catch (e) {}
+    }
+
+    window.OsmI18n = {
+        t: tr,
+        lang: function () { return currentLang; },
+        locale: function () { return currentLang; },
+        setting: getSetting,
+        refresh: function () { var l = resolve(); if (l !== currentLang) apply(l); },
+        setLanguage: function (v) {
+            try { localStorage.setItem(KEY, v); } catch (e) {}
+            this.refresh();
+        }
+    };
+
+    // Arranque: el observer se instala ya (head) para que el primer pintado salga traducido.
+    currentLang = resolve();
+    document.documentElement.lang = currentLang;
+    if (currentLang === "en") {
+        startObserver();
+        document.addEventListener("DOMContentLoaded", function () { translateTree(document.documentElement); });
+    }
+})();
+</script>
+
     <style>
 * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Samsung Sans', Arial, sans-serif; }
 html, body { background: #000; color: #fff; overflow: hidden; }
@@ -3308,7 +3590,7 @@ function handleFollowButtonClick(login, displayName, isFollowing) {
     const warning = isFollowing
         ? `Twitch ya no permite dejar de seguir canales desde apps de terceros: hay que confirmarlo en Twitch. ¿Abrir el canal de ${displayName} en Twitch para dejar de seguirlo?`
         : `Twitch ya no permite seguir canales desde apps de terceros: hay que confirmarlo en Twitch. ¿Abrir el canal de ${displayName} en Twitch para seguirlo?`;
-    if (!confirm(warning)) return;
+    if (!confirm(window.OsmI18n ? window.OsmI18n.t(warning) : warning)) return;
     window.open(`https://www.twitch.tv/${encodeURIComponent(login)}`, "_blank", "noopener");
 }
 
@@ -3628,6 +3910,14 @@ function renderAccountSettings() {
     box.classList.add("is-settings");
     box.innerHTML = `
         <h2>Ajustes</h2>
+        <div class="settings-row-account" data-setting="language">
+            <label>Idioma</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="auto">Automático</button>
+                <button data-nav-btn data-value="en">English</button>
+                <button data-nav-btn data-value="es">Español</button>
+            </div>
+        </div>
         <div class="settings-row-account" data-setting="theme">
     <label>Tema</label>
     <div class="settings-options">
@@ -3702,7 +3992,7 @@ function updateSettingsActiveStates() {
     };
     document.querySelectorAll("#account-box .settings-row-account").forEach(row => {
         const setting = row.dataset.setting;
-        const current = get(setting, null);
+        const current = get(setting, setting === "language" ? "auto" : null);
         row.querySelectorAll("button[data-value]").forEach(btn => {
             btn.classList.toggle("active", btn.dataset.value === current);
         });
@@ -3734,6 +4024,7 @@ function applyInterfaceSettings() {
     window.interfaceChatWidthPreference = get("chatWidth", "20");
     window.interfaceChatHeightPreference = get("chatHeight", "100");
     window.interfaceChatPosPreference = get("chatPos", "right");
+    try { if (window.OsmI18n) window.OsmI18n.refresh(); } catch (e) {}
     applyTextScales();
 }
 
@@ -6153,7 +6444,7 @@ const ROLE_BADGE_LABELS = { broadcaster: "STR", mod: "MOD", vip: "VIP", sub: "SU
 // (renderChatMessages) y el agregado incremental (appendChatMessageDom).
 function chatMessageHtml(m, showTs) {
     if (m.system) return `<div class="chat-system">${escapeHtml(m.text)}</div>`;
-    const ts = showTs ? `<span class="chat-ts">${new Date(m.ts).toLocaleTimeString("es", { hour: "2-digit", minute: "2-digit" })}</span>` : "";
+    const ts = showTs ? `<span class="chat-ts">${new Date(m.ts).toLocaleTimeString(window.OsmI18n ? window.OsmI18n.locale() : "es", { hour: "2-digit", minute: "2-digit" })}</span>` : "";
     // Badges reales (imágenes de Twitch) si ya cargaron para este canal;
     // si todavía no hay nada cargado, se usa el badge de texto viejo
     // como respaldo para no dejar el mensaje sin ninguna marca de rol.
