@@ -63,6 +63,7 @@
         "Idioma": "Language", "Automático": "Automatic", "Tema": "Theme", "Claro": "Light", "Oscuro": "Dark",
         "Tamaño texto app": "App text size", "Color de texto": "Text color", "Blanco": "White", "Amarillo": "Yellow",
         "Verde": "Green", "Cian": "Cyan", "Rojo": "Red", "Negro": "Black", "Tamaño tarjetas": "Card size",
+        "Tipo de fuente": "Font", "Predeterminada": "Default", "Serif": "Serif", "Mono": "Mono", "Verdana": "Verdana", "Casual": "Casual",
         "Iniciar sesión": "Log in", "Iniciar con QR (TV)": "Log in with QR (TV)", "Recargar app": "Reload app",
         "Salir": "Exit", "Cerrar": "Close", "Cerrar sesión": "Log out", "Ver perfil": "View profile", "Cancelar": "Cancel",
         "Sesión iniciada. Ya podés chatear con tu nombre.": "Logged in. You can now chat with your name.",
@@ -1092,6 +1093,16 @@ html.perf-lite #results-screen #results-grid, html.perf-lite #results-screen #cl
 }
 .settings-row-account[data-setting="textColor"] .settings-options button[data-value="black"] { background: #d4d4d8; color: #000; }
 .settings-row-account[data-setting="textColor"] .settings-options button[data-value="black"].active { background: #9146FF; color: #fff; }
+html[data-font="serif"] { --app-font: Georgia, "Times New Roman", serif; }
+html[data-font="mono"] { --app-font: "Courier New", Consolas, monospace; }
+html[data-font="verdana"] { --app-font: Verdana, Geneva, sans-serif; }
+html[data-font="casual"] { --app-font: "Comic Sans MS", "Segoe Print", cursive; }
+html[data-font]:not([data-font="default"]) body *, html[data-font]:not([data-font="default"]) #main-screen #sidebar #nav-list li .nav-label, html[data-font]:not([data-font="default"]) #main-screen #sidebar #nav-list #search-nav-item .nav-label { font-family: var(--app-font) !important; }
+html[data-font] #account-box .settings-row-account[data-setting="font"] button[data-value="default"] { font-family: 'Samsung Sans', Arial, sans-serif !important; }
+html[data-font] #account-box .settings-row-account[data-setting="font"] button[data-value="serif"] { font-family: Georgia, "Times New Roman", serif !important; }
+html[data-font] #account-box .settings-row-account[data-setting="font"] button[data-value="mono"] { font-family: "Courier New", Consolas, monospace !important; }
+html[data-font] #account-box .settings-row-account[data-setting="font"] button[data-value="verdana"] { font-family: Verdana, Geneva, sans-serif !important; }
+html[data-font] #account-box .settings-row-account[data-setting="font"] button[data-value="casual"] { font-family: "Comic Sans MS", "Segoe Print", cursive !important; }
 html[data-text-color="white"] { --app-text-color-light: #18181b; }
 html[data-text-color="yellow"] { --app-text-color-light: #a16207; }
 html[data-text-color="green"] { --app-text-color-light: #15803d; }
@@ -3199,6 +3210,16 @@ function renderAccountSettings() {
                 <button data-nav-btn data-value="black">Negro</button>
             </div>
         </div>
+        <div class="settings-row-account" data-setting="font">
+            <label>Tipo de fuente</label>
+            <div class="settings-options">
+                <button data-nav-btn data-value="default">Predeterminada</button>
+                <button data-nav-btn data-value="serif">Serif</button>
+                <button data-nav-btn data-value="mono">Mono</button>
+                <button data-nav-btn data-value="verdana">Verdana</button>
+                <button data-nav-btn data-value="casual">Casual</button>
+            </div>
+        </div>
         <div class="settings-row-account" data-setting="cardSize">
             <label>Tamaño tarjetas</label>
             <div class="settings-options">
@@ -3241,7 +3262,7 @@ function updateSettingsActiveStates() {
     };
     document.querySelectorAll("#account-box .settings-row-account").forEach(row => {
         const setting = row.dataset.setting;
-        const current = get(setting, setting === "language" ? "auto" : null);
+        const current = get(setting, setting === "language" ? "auto" : setting === "font" ? "default" : null);
         row.querySelectorAll("button[data-value]").forEach(btn => {
             btn.classList.toggle("active", btn.dataset.value === current);
         });
@@ -3263,6 +3284,7 @@ function applyInterfaceSettings() {
     root.dataset.textSize = savedText;
     root.dataset.chatTextSize = get("chatTextSize", "x1");
     root.dataset.textColor = get("textColor", "white");
+    root.dataset.font = get("font", "default");
     if (get("cardSize", "100") === "50") saveInterfaceSetting("cardSize", "100");
     root.dataset.cardSize = get("cardSize", "100");
     window.interfaceChatPreference = get("chat", "yes");
