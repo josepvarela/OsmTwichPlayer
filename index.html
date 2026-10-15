@@ -1117,7 +1117,8 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     <script id="wgt-local-hls-player">
     (function () {
         "use strict";
-        if (location.protocol !== "file:") return;
+        var isTV = !!(window.tizen || window.Capacitor) || /Tizen|Web0S|WebOS|SMART-TV|SmartTV/i.test(navigator.userAgent);
+    if (location.protocol !== "file:" && !isTV) return;
         var GQL = "https://gql.twitch.tv/gql";
         var CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko";
         var USHER = "https://usher.ttvnw.net";
