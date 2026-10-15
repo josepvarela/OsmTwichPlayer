@@ -1117,9 +1117,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     <script id="wgt-local-hls-player">
     (function () {
         "use strict";
-        // Activar también en Tizen/Capacitor para exponer source 1440p
-var isTV = !!(window.tizen || window.Capacitor) || /Tizen|Web0S|WebOS|SMART-TV|SmartTV/i.test(navigator.userAgent);
-if (location.protocol !== "file:" && !isTV) return;
+        if (location.protocol !== "file:") return;
         var GQL = "https://gql.twitch.tv/gql";
         var CLIENT_ID = "kimne78kx3ncx6brgo4mv6wki5h1ko";
         var USHER = "https://usher.ttvnw.net";
@@ -3769,20 +3767,9 @@ let playerUnmuteAttempted = false;
 let qualityUserPicked = false;
 let qualityStartupUpgradeDone = false;
 let qualityUpgradeTimer = null;
-let enforcing1080 = false;
 function clearStartupQualityTimer() {
     if (qualityUpgradeTimer) clearTimeout(qualityUpgradeTimer);
     qualityUpgradeTimer = null;
-}
-function findQualityByResolution(list, targetHeight) {
-    if (!list || !list.length) return null;
-    for (var i = 0; i < list.length; i++) {
-        var q = list[i];
-        var raw = String(q.name || q.group || q.quality || "");
-        var m = raw.match(/(\d{3,4})p/i);
-        if (m && parseInt(m[1], 10) === targetHeight) return q;
-    }
-    return null;
 }
 function refreshQualities() {
     if (!twitchPlayer) return;
@@ -3815,14 +3802,8 @@ function kickAutoplay() {
     qualityUserPicked = false;
     qualityStartupUpgradeDone = false;
     try {
-        if (twitchPlayer && typeof twitchPlayer.getQualities === "function") {
-            var list = twitchPlayer.getQualities() || [];
-            var q1080 = findQualityByResolution(list, 1080);
-            if (q1080) {
-                twitchPlayer.setQuality(q1080.group || q1080.quality || q1080.name);
-            } else {
-                twitchPlayer.setQuality("auto");
-            }
+        if (twitchPlayer && typeof twitchPlayer.setQuality === "function") {
+            twitchPlayer.setQuality("auto");
         }
     } catch (_) {}
     playerAutoplayStarted = false;
@@ -3847,18 +3828,6 @@ function bindPlayerLifecycleListeners() {
         }
     });
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, refreshQualities);
-    twitchPlayer.addEventListener(Twitch.Player.PLAYING, function () {
-        if (qualityUserPicked || enforcing1080) return;
-        enforcing1080 = true;
-        try {
-            var list = twitchPlayer.getQualities() || [];
-            var q1080 = findQualityByResolution(list, 1080);
-            if (q1080) {
-                twitchPlayer.setQuality(q1080.group || q1080.quality || q1080.name);
-            }
-        } catch (_) {}
-        setTimeout(function () { enforcing1080 = false; }, 800);
-    });
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, startProgressLoop);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => { if (qualityPanelVisible) hideQualityPanel(); });
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, hideControls);
@@ -4654,7 +4623,6 @@ function refreshPlayerQualityOptions() {
     try { currentGroup = twitchPlayer ? twitchPlayer.getQuality() : ""; } catch (e) {}
     let savedQuality = "auto";
     try { savedQuality = localStorage.getItem("osmtwich-settings-quality") || "auto"; } catch (e) {}
-    if (/1440/i.test(savedQuality) && !qualityUserPicked) savedQuality = "auto";
     container.innerHTML = list.map(q => {
         const value = q.group || q.quality || q.name;
         let label = q.name || q.group || "Calidad";
@@ -4732,19 +4700,7 @@ function savePlayerSetting(name, value) {
         qualityUserPicked = true;
         clearStartupQualityTimer();
         if (twitchPlayer) {
-            if (value === "auto") {
-                try {
-                    var list = twitchPlayer.getQualities() || [];
-                    var q1080 = findQualityByResolution(list, 1080);
-                    if (q1080) {
-                        twitchPlayer.setQuality(q1080.group || q1080.quality || q1080.name);
-                    } else {
-                        twitchPlayer.setQuality("auto");
-                    }
-                } catch (e) {}
-            } else {
-                try { twitchPlayer.setQuality(value); } catch (e) {}
-            }
+            try { twitchPlayer.setQuality(value); } catch (e) {}
         }
         refreshQualities();
     }
