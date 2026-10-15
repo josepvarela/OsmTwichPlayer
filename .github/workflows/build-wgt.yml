@@ -39,7 +39,6 @@ jobs:
           tag_name: wgt-${{ github.run_number }}
           name: OsmTwich TV ${{ github.run_number }} (unsigned)
           files: OsmTwich.wgt
-          body: |
-            Unsigned .wgt package
+          generate_release_notes: true
         env:
           GITHUB_TOKEN: ${{ secrets.GH_PAT }}
