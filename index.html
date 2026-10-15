@@ -5595,150 +5595,39 @@ function goBack() {
     sync();
 })();
 </script>
-<script id="v14-search-click-back-fix">
+<script id="search-nav-fix">
 (function () {
-    function getSearch() {
-        return document.getElementById("search-nav-item");
-    }
+    const getSearch = () => document.getElementById("search-nav-item");
     function focusSearchNav() {
         const search = getSearch();
         if (!search) return;
-        const index = (typeof NAV_ITEMS !== "undefined")
-            ? NAV_ITEMS.findIndex(item => item.id === "search")
-            : 0;
-        if (typeof setFocus === "function") {
-            setFocus("nav", index >= 0 ? index : 0);
-        } else {
-            search.classList.add("focused");
-            try { search.focus({preventScroll:true}); } catch (_) { search.focus(); }
-        }
+        const index = NAV_ITEMS.findIndex(item => item.id === "search");
+        setFocus("nav", index >= 0 ? index : 0);
         search.classList.add("focused");
     }
     document.addEventListener("click", function (e) {
-        const search = e.target.closest && e.target.closest("#search-nav-item");
-        if (!search) return;
+        if (!e.target.closest("#search-nav-item")) return;
         e.preventDefault();
         e.stopPropagation();
         focusSearchNav();
-        if (typeof openSearch === "function") {
-            openSearch();
-        }
+        openSearch();
     }, true);
     document.addEventListener("pointerdown", function (e) {
-        const search = e.target.closest && e.target.closest("#search-nav-item");
-        if (!search) return;
-        e.stopPropagation();
+        if (e.target.closest("#search-nav-item")) e.stopPropagation();
     }, true);
     document.addEventListener("keydown", function (e) {
         const overlay = document.getElementById("home-search-overlay");
         if (!overlay || !overlay.classList.contains("visible")) return;
-        const key = e.key;
         const code = e.keyCode || e.which;
-        const isBack =
-            key === "Escape" ||
-            key === "BrowserBack" ||
-            key === "GoBack" ||
-            code === 27 ||
-            code === 461 ||
-            code === 10009;
-        if (!isBack) return;
+        if (!(e.key === "Escape" || e.key === "BrowserBack" || e.key === "GoBack" || code === 27 || code === 461 || code === 10009)) return;
         e.preventDefault();
         e.stopPropagation();
         e.stopImmediatePropagation();
-        if (typeof closeHomeSearch === "function") {
-            closeHomeSearch();
-        } else {
-            overlay.classList.remove("visible");
-            overlay.setAttribute("aria-hidden", "true");
-        }
+        closeHomeSearch();
         setTimeout(focusSearchNav, 0);
     }, true);
     document.addEventListener("focusin", function (e) {
-        if (e.target && e.target.id === "home-search-input") {
-            const search = getSearch();
-            if (search) search.classList.add("focused");
-        }
-    }, true);
-})();
-</script>
-<script id="search-back-final-v20">
-(function(){
-    function isSearchOpen(){
-        const o = document.getElementById("home-search-overlay");
-        return !!o && o.classList.contains("visible");
-    }
-    document.addEventListener("keydown", function(e){
-        if (!isSearchOpen()) return;
-        const key = e.key || "";
-        const code = e.keyCode || e.which;
-        const back =
-            key === "Escape" ||
-            key === "BrowserBack" ||
-            key === "GoBack" ||
-            code === 27 ||
-            code === 461 ||
-            code === 10009;
-        if (!back) return;
-        e.preventDefault();
-        e.stopPropagation();
-        e.stopImmediatePropagation();
-        if (typeof closeHomeSearch === "function") {
-            closeHomeSearch();
-        } else {
-            const o = document.getElementById("home-search-overlay");
-            const m = document.getElementById("main-screen");
-            o?.classList.remove("visible");
-            o?.setAttribute("aria-hidden","true");
-            m?.classList.remove("home-search-open","search-dim-content");
-        }
-        setTimeout(function(){
-            const s = document.getElementById("search-nav-item");
-            if (!s) return;
-            s.classList.add("focused");
-            try { s.focus({preventScroll:true}); } catch(_) { s.focus(); }
-        }, 40);
-    }, true);
-})();
-</script>
-<script id="search-back-authoritative-v22">
-(function(){
-    function searchIsOpen(){
-        const o = document.getElementById("home-search-overlay");
-        return !!o && o.classList.contains("visible");
-    }
-    function closeAndRestore(){
-        if (typeof closeHomeSearch === "function") {
-            closeHomeSearch();
-        } else {
-            const o = document.getElementById("home-search-overlay");
-            const m = document.getElementById("main-screen");
-            o?.classList.remove("visible","active","open");
-            o?.setAttribute("aria-hidden","true");
-            o?.removeAttribute("style");
-            m?.classList.remove(
-                "home-search-open","search-open","search-active","search-dim-content"
-            );
-        }
-        const main = document.getElementById("main-screen");
-        main?.classList.remove("search-dim-content","home-search-open","search-open","search-active");
-        const search = document.getElementById("search-nav-item");
-        if (search && typeof setFocus === "function") {
-            const i = (typeof NAV_ITEMS !== "undefined")
-                ? NAV_ITEMS.findIndex(x => x.id === "search") : 0;
-            setFocus("nav", i >= 0 ? i : 0);
-        }
-    }
-    document.addEventListener("keydown", function(e){
-        if (!searchIsOpen()) return;
-        const k = e.key || "";
-        const code = e.keyCode || e.which;
-        const isBack =
-            k === "Escape" || k === "BrowserBack" || k === "GoBack" ||
-            code === 27 || code === 461 || code === 10009;
-        if (!isBack) return;
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        closeAndRestore();
+        if (e.target && e.target.id === "home-search-input") getSearch()?.classList.add("focused");
     }, true);
 })();
 </script>
