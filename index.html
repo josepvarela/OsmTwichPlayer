@@ -1133,6 +1133,19 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                 return r.json();
             });
         }
+        function detectCodecs() {
+            var list = [];
+            try {
+                var v = document.createElement("video");
+                var can = function (t) { var r = v.canPlayType && v.canPlayType(t); return r === "probably" || r === "maybe"; };
+                if (can('video/mp4; codecs="av01.0.13M.08"')) list.push("av1");
+                if (can('video/mp4; codecs="hvc1.1.6.L153.B0"') || can('video/mp4; codecs="hev1.1.6.L153.B0"')) list.push("h265");
+            } catch (e) {}
+            list.push("h264");
+            return list;
+        }
+        var CODECS_ALL = detectCodecs().join(",");
+        function codecsParam(h264Only) { return h264Only ? "h264" : CODECS_ALL; }
         function qs(o) {
             return Object.keys(o).map(function (k) {
                 return encodeURIComponent(k) + "=" + encodeURIComponent(o[k]);
@@ -1149,7 +1162,12 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                 for (var j = i + 1; j < lines.length && j < i + 4; j++) {
                     if (lines[j] && lines[j].charAt(0) !== "#") { url = lines[j]; break; }
                 }
-                if (url) list.push({ name: n ? n[1] : (g ? g[1] : "?"), group: g ? g[1] : (n ? n[1] : "?"), url: url });
+                if (url) {
+                    var grp = g ? g[1] : (n ? n[1] : "?");
+                    var dup = false;
+                    for (var k = 0; k < list.length; k++) { if (list[k].group === grp) { dup = true; break; } }
+                    if (!dup) list.push({ name: n ? n[1] : (g ? g[1] : "?"), group: grp, url: url });
+                }
             }
             return list;
         }
@@ -1159,7 +1177,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                 return r.text();
             }).then(function (t) { return parseMaster(t, url); });
         }
-        function resolveSource(kind, id) {
+        function resolveSource(kind, id, h264Only) {
             var rnd = Math.floor(Math.random() * 1e7);
             if (kind === "channel") {
                 var login = String(id || "").toLowerCase();
@@ -1169,7 +1187,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                     return fetchMaster(USHER + "/api/channel/hls/" + encodeURIComponent(login) + ".m3u8?" + qs({
                         player: "twitchweb", p: rnd, type: "any", allow_source: "true",
                         allow_audio_only: "true", allow_spectre: "false", fast_bread: "true",
-                        supported_codecs: "avc1", sig: t.signature, token: t.value
+                        supported_codecs: codecsParam(h264Only), sig: t.signature, token: t.value
                     }));
                 });
             }
@@ -1181,7 +1199,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                     return fetchMaster(USHER + "/vod/" + encodeURIComponent(vid) + ".m3u8?" + qs({
                         player: "twitchweb", p: rnd, allow_source: "true", allow_audio_only: "true",
                         allow_spectre: "true", playlist_include_framerate: "true",
-                        supported_codecs: "avc1", nauth: t.value, nauthsig: t.signature
+                        supported_codecs: codecsParam(h264Only), nauth: t.value, nauthsig: t.signature
                     }));
                 });
             }
@@ -1220,7 +1238,15 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             v.addEventListener("playing", function () { self._emit("playing"); });
             v.addEventListener("pause", function () { self._emit("pause"); });
             v.addEventListener("ended", function () { self._emit("ended"); });
-            v.addEventListener("error", function () { self._emit("offline"); });
+            v.addEventListener("error", function () {
+                var l = self._last;
+                if (l && !self._h264Only && !self._isClip && CODECS_ALL !== "h264") {
+                    self._h264Only = true;
+                    self._load(l.kind, l.id, l.startAt || self.getCurrentTime());
+                    return;
+                }
+                self._emit("offline");
+            });
             if (opts.channel) this._load("channel", opts.channel, 0);
             else if (opts.video) this._load("video", opts.video, 0);
             else if (opts.clip) this._load("clip", opts.clip, 0);
@@ -1244,10 +1270,12 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         };
         P._load = function (kind, id, startAt) {
             var self = this, gen = ++this._gen;
+            if (!this._last || this._last.kind !== kind || this._last.id !== id) this._h264Only = false;
+            this._last = { kind: kind, id: id, startAt: startAt };
             this._isClip = kind === "clip";
             this._q = [];
             this._cur = this._isClip ? "" : "auto";
-            resolveSource(kind, id).then(function (list) {
+            resolveSource(kind, id, this._h264Only).then(function (list) {
                 if (gen !== self._gen) return;
                 self._q = list;
                 if (self._isClip) self._cur = list[0].group;
@@ -4597,7 +4625,8 @@ function refreshPlayerQualityOptions() {
     try { savedQuality = localStorage.getItem("osmtwich-settings-quality") || "auto"; } catch (e) {}
     container.innerHTML = list.map(q => {
         const value = q.group || q.quality || q.name;
-        const label = q.name || q.group || "Calidad";
+        let label = q.name || q.group || "Calidad";
+        if (/^1440p/i.test(label)) label += " (2K)";
         return `<button data-psetting-btn data-value="${escapeHtml(value)}">${escapeHtml(label)}</button>`;
     }).join("");
     container.querySelectorAll("button").forEach(btn => {
