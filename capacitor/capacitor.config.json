@@ -2,10 +2,7 @@
   "appId": "com.osmtwich.app",
   "appName": "OsmTwich",
   "webDir": "www",
-  "bundledWebRuntime": false,
   "server": {
-    "url": "https://osmtwich.vercel.app",
-    "cleartext": false,
     "androidScheme": "https",
     "allowNavigation": [
       "osmtwich.vercel.app",

@@ -2,17 +2,17 @@
   "name": "osmtwich-android",
   "version": "1.0.0",
   "private": true,
-  "description": "Wrapper Android (Capacitor) para OsmTwich — WebView apuntando a la web en Vercel.",
+  "description": "Wrapper Android (Capacitor 8) para OsmTwich — empaqueta el index.html del repo dentro del APK; el backend (api/*) sigue en Vercel.",
   "scripts": {
     "sync": "npx cap sync android"
   },
   "dependencies": {
-    "@capacitor/android": "^6.1.2",
-    "@capacitor/app": "^6.0.1",
-    "@capacitor/core": "^6.1.2"
+    "@capacitor/android": "^8.0.0",
+    "@capacitor/app": "^8.0.0",
+    "@capacitor/core": "^8.0.0"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^6.1.2"
+    "@capacitor/cli": "^8.0.0"
   }
 }
