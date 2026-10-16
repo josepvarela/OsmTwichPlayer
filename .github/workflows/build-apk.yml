@@ -4,6 +4,7 @@ on:
   push:
     branches: [main]
     paths:
+      - "index.html"
       - "capacitor/**"
       - ".github/workflows/build-apk.yml"
   workflow_dispatch: {}
@@ -19,59 +20,58 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
 
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      # package.json fija Capacitor 8 (minSdk 24 / target 36 / Node 22 / Java 21),
+      # el mismo que generó el APK que sí instala en el TV box.
       - name: Instalar dependencias de Capacitor
-        run: npm install
+        run: npm install --package-lock=false
+
+      # La app lleva el index.html del repo DENTRO del APK (como el .wgt),
+      # ya no abre la web remota.
+      - name: Copiar index.html del repo como app local
+        run: |
+          rm -rf www
+          mkdir -p www
+          cp ../index.html www/index.html
+          # En Capacitor la página corre en https://localhost, así que las
+          # rutas /api/... relativas no existen: se apunta al backend de Vercel.
+          sed -i 's#location.protocol === "file:" || !location.hostname#location.protocol === "file:" || !location.hostname || !!window.Capacitor#' www/index.html
+          grep -q '!!window.Capacitor) ?' www/index.html || { echo "ERROR: no se pudo parchear API_BASE en index.html"; exit 1; }
 
       # "cap add android" genera el proyecto Gradle completo en capacitor/android
       # a partir de capacitor.config.json — no hace falta tenerlo commiteado.
       - name: Generar proyecto Android
         run: npx cap add android
 
-      - name: Restaurar minSdkVersion a 22 (mínimo real de Capacitor/Cordova)
-        # Confirmado por el propio Gradle: cordova-android (que Capacitor
-        # usa por debajo) exige minSdkVersion >= 22. No es 21 ni 16 — con
-        # cualquier valor menor el "manifest merger" corta la build. Esto
-        # es un piso duro del framework: un TV box con Android más viejo
-        # que 5.1 (API 22) no puede instalar apps hechas con Capacitor,
-        # sin ningún workaround posible desde este lado.
-        run: sed -i 's/minSdkVersion = [0-9]\+/minSdkVersion = 22/' android/variables.gradle
+      - name: Forzar minSdk 24 / target 36 / compile 36
+        run: |
+          sed -i -E 's/minSdkVersion = [0-9]+/minSdkVersion = 24/; s/targetSdkVersion = [0-9]+/targetSdkVersion = 36/; s/compileSdkVersion = [0-9]+/compileSdkVersion = 36/' android/variables.gradle
+          cat android/variables.gradle
 
       - name: Generar ícono del APK
         # Toma capacitor/assets/icon.png (idealmente 1024x1024) y genera
         # todos los tamaños/mipmaps de Android (legacy + adaptive icon).
-        # Igual que el manifest, esto hay que rehacerlo en cada build
-        # porque android/ se genera de cero con "cap add android".
         run: npx @capacitor/assets generate --android --iconBackgroundColor "#0e0e10" --iconBackgroundColorDark "#0e0e10"
 
       - name: Sincronizar configuración/plugins
         run: npx cap sync android
 
       - name: Forzar orientación horizontal (landscape) en el manifest
-        # "cap add android" genera el AndroidManifest.xml de cero en cada
-        # build (no está commiteado), así que el bloqueo de orientación
-        # nativo hay que reinyectarlo acá. Esto complementa el intento por
-        # JS (force-landscape-v60 en osmtwich.html): el manifest es la
-        # fuente de verdad real para Android; el JS es solo un respaldo
-        # para WebViews que sí respetan la Screen Orientation API.
         run: |
           MANIFEST=android/app/src/main/AndroidManifest.xml
           if grep -q 'android:screenOrientation="landscape"' "$MANIFEST"; then
             echo "Ya tiene screenOrientation=landscape, no hace falta tocarlo."
           else
             sed -i '/android:name="\.MainActivity"/a\            android:screenOrientation="landscape"' "$MANIFEST"
-            grep -n 'MainActivity' -A1 "$MANIFEST"
           fi
 
       - name: Compatibilidad con TV box sin táctil (manifest)
-        # Muchos TV box de gama baja no tienen pantalla táctil (ni GPS,
-        # cámara, etc.). Por defecto Android/aapt puede marcar
-        # "android.hardware.touchscreen" como REQUERIDO, y el instalador
-        # rechaza la instalación en cualquier dispositivo que no cumpla un
-        # <uses-feature required="true">. Declarar estas features como NO
-        # requeridas es la causa más común de "no se instala" en TV box y
-        # no afecta en nada a celulares/tablets normales.
         run: |
           MANIFEST=android/app/src/main/AndroidManifest.xml
           for FEATURE in \
@@ -88,21 +88,35 @@ jobs:
               sed -i "/<application/i\\    <uses-feature android:name=\"$FEATURE\" android:required=\"false\" />" "$MANIFEST"
             fi
           done
-          grep -n "uses-feature" "$MANIFEST"
 
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
+      # Para que la app aparezca en el launcher de Android TV / TV box:
+      # categoría LEANBACK_LAUNCHER en la actividad principal + banner.
+      - name: Aparecer en el launcher de TV (LEANBACK_LAUNCHER + banner)
+        run: |
+          MANIFEST=android/app/src/main/AndroidManifest.xml
+          if grep -q 'LEANBACK_LAUNCHER' "$MANIFEST"; then
+            echo "Ya tiene LEANBACK_LAUNCHER."
+          else
+            sed -i '/android.intent.category.LAUNCHER"/a\                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />' "$MANIFEST"
+          fi
+          if ! grep -q 'android:banner=' "$MANIFEST"; then
+            sed -i 's#<application#<application android:banner="@mipmap/ic_launcher"#' "$MANIFEST"
+          fi
+          grep -n -E "LAUNCHER|banner|uses-feature|screenOrientation" "$MANIFEST"
+
+      # Keystore FIJO commiteado en capacitor/debug.keystore: todos los builds
+      # salen con la misma firma y se pueden instalar uno encima del otro
+      # (antes cada build generaba un keystore nuevo en el runner).
+      - name: Usar keystore debug fijo
+        run: |
+          test -f debug.keystore || { echo "ERROR: falta capacitor/debug.keystore en el repo"; exit 1; }
+          mkdir -p ~/.android
+          cp debug.keystore ~/.android/debug.keystore
 
       - uses: android-actions/setup-android@v3
         with:
-          # Por defecto esta acción intenta instalar el paquete legacy
-          # "tools", que Google sacó del repositorio del SDK — por eso
-          # fallaba con "Failed to find package 'tools'". Pidiendo acá
-          # explícitamente solo lo que hace falta para compilar (sin
-          # "tools") se evita ese error.
-          packages: "platform-tools platforms;android-34 build-tools;34.0.0"
+          # Sin el paquete legacy "tools" (ya no existe en el repositorio del SDK).
+          packages: "platform-tools platforms;android-36 build-tools;36.0.0"
 
       - name: Aceptar licencias del SDK
         run: yes | sdkmanager --licenses || true
@@ -116,5 +130,5 @@ jobs:
         with:
           name: OsmTwich-apk
           path: capacitor/android/app/build/outputs/apk/debug/app-debug.apk
-          # Sin release automática: descargá el APK desde acá, en la
-          # pestaña "Summary" de este run de Actions (sección Artifacts).
+          # Descargá el APK desde la pestaña "Summary" de este run de Actions
+          # (sección Artifacts). Viene dentro de un .zip: hay que extraerlo.
