@@ -4,11 +4,11 @@
   "webDir": "www",
   "bundledWebRuntime": false,
   "server": {
-    "url": "https://osmtwich2.vercel.app/osmtwich.html",
+    "url": "https://osmtwich.vercel.app",
     "cleartext": false,
     "androidScheme": "https",
     "allowNavigation": [
-      "osmtwich2.vercel.app",
+      "osmtwich.vercel.app",
       "id.twitch.tv",
       "www.twitch.tv",
       "player.twitch.tv",
