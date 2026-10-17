@@ -1122,8 +1122,12 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         var FORCE_H264 = !!window.Capacitor;
         var __hlsState = "idle", __hlsQ = [];
         function __hlsFlush() { var q = __hlsQ.splice(0); for (var i = 0; i < q.length; i++) { try { q[i](); } catch (e) {} } }
+        // Aviso de diagnóstico apagado por defecto. Para activarlo en la app:
+        // localStorage.setItem("osm-debug","1") y reiniciar.
+        var __dbgOn = false;
+        try { __dbgOn = localStorage.getItem("osm-debug") === "1"; } catch (e) {}
         function dbg(msg) {
-            if (!window.Capacitor) return;
+            if (!window.Capacitor || !__dbgOn) return;
             try {
                 __dbgLines.push(String(msg).slice(0, 140));
                 if (__dbgLines.length > 7) __dbgLines.shift();
