@@ -13,6 +13,11 @@
       "clips.twitch.tv"
     ]
   },
+  "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    }
+  },
   "android": {
     "allowMixedContent": false
   }
