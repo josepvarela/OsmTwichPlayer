@@ -39,6 +39,9 @@ jobs:
           rm -rf www
           mkdir -p www
           cp ../index.html www/index.html
+          # hls.js: el WebView de Android no reproduce HLS nativo (error 4)
+          test -f node_modules/hls.js/dist/hls.min.js || { echo "ERROR: falta hls.js (npm install)"; exit 1; }
+          cp node_modules/hls.js/dist/hls.min.js www/hls.min.js
           # En Capacitor la página corre en https://localhost, así que las
           # rutas /api/... relativas no existen: se apunta al backend de Vercel.
           sed -i 's#location.protocol === "file:" || !location.hostname#location.protocol === "file:" || !location.hostname || !!window.Capacitor#' www/index.html
