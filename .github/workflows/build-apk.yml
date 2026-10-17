@@ -102,8 +102,11 @@ jobs:
           else
             sed -i '/android.intent.category.LAUNCHER"/a\                <category android:name="android.intent.category.LEANBACK_LAUNCHER" />' "$MANIFEST"
           fi
+          # Banner 16:9 (640x360) para el launcher de TV
+          mkdir -p android/app/src/main/res/drawable
+          cp assets/banner.png android/app/src/main/res/drawable/banner.png
           if ! grep -q 'android:banner=' "$MANIFEST"; then
-            sed -i 's#<application#<application android:banner="@mipmap/ic_launcher"#' "$MANIFEST"
+            sed -i 's#<application#<application android:banner="@drawable/banner"#' "$MANIFEST"
           fi
           grep -n -E "LAUNCHER|banner|uses-feature|screenOrientation" "$MANIFEST"
 
