@@ -20,7 +20,10 @@ jobs:
 
       - name: Empaquetar .wgt unsigned
         run: |
-          cp index.html tizen/app.html
+          # La app va directamente como index.html dentro del .wgt (sin lanzador
+          # que redirige a app.html): funciona igual en el TV real y en emuladores
+          # web, donde una navegación relativa daba 404.
+          cp index.html tizen/index.html
           cd tizen
           zip -r ../OsmTwich.wgt . -x ".*"
           cd ..
