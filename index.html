@@ -1119,6 +1119,9 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         "use strict";
         // Diagnóstico en pantalla: SOLO dentro de la app Android (Capacitor).
         var __dbgLines = [];
+        var FORCE_H264 = !!window.Capacitor;
+        var __hlsState = "idle", __hlsQ = [];
+        function __hlsFlush() { var q = __hlsQ.splice(0); for (var i = 0; i < q.length; i++) { try { q[i](); } catch (e) {} } }
         function dbg(msg) {
             if (!window.Capacitor) return;
             try {
@@ -1135,6 +1138,87 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                 el.textContent = __dbgLines.join("\n");
             } catch (e) {}
         }
+    // El WebView de Android no reproduce HLS nativo (<video> error code=4):
+    // en la app se usa hls.js (empaquetado como www/hls.min.js por el workflow).
+    if (window.Capacitor) {
+        __hlsState = "loading";
+        try {
+            var __hs = document.createElement("script");
+            __hs.src = "hls.min.js";
+            __hs.onload = function () {
+                __hlsState = (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) ? "ready" : "nosupport";
+                dbg("hls.js " + __hlsState);
+                __hlsFlush();
+            };
+            __hs.onerror = function () { __hlsState = "missing"; dbg("hls.js NO se pudo cargar"); __hlsFlush(); };
+            document.head.appendChild(__hs);
+        } catch (e) { __hlsState = "missing"; }
+    }
+    // Loader de hls.js: playlists por fetch nativo de Capacitor (sin CORS),
+    // segmentos de video por el fetch original del navegador (rapido, binario).
+    function OsmLoader() {
+        this.stats = { aborted: false, loaded: 0, retry: 0, total: 0, chunkCount: 0, bwEstimate: 0,
+            loading: { start: 0, first: 0, end: 0 }, parsing: { start: 0, end: 0 }, buffering: { start: 0, first: 0, end: 0 } };
+        this.context = null; this.ctrl = null;
+    }
+    OsmLoader.prototype.destroy = function () { this.abort(); };
+    OsmLoader.prototype.abort = function () {
+        this.stats.aborted = true;
+        try { if (this.ctrl) this.ctrl.abort(); } catch (e) {}
+    };
+    OsmLoader.prototype.load = function (context, config, callbacks) {
+        var self = this, st = this.stats;
+        this.context = context;
+        st.loading.start = performance.now();
+        var isBin = context.responseType === "arraybuffer";
+        var patched = window.fetch, orig = window.CapacitorWebFetch || window.fetch;
+        var timeoutMs = (config && (config.maxLoadTimeMs || config.timeout)) || 20000;
+        var done = false;
+        var tid = setTimeout(function () {
+            if (done) return; done = true; self.abort(); callbacks.onTimeout(st, context, null);
+        }, timeoutMs);
+        function init() {
+            var o = { method: "GET" };
+            try { if (typeof AbortController !== "undefined") { self.ctrl = new AbortController(); o.signal = self.ctrl.signal; } } catch (e) {}
+            if (context.rangeStart !== undefined && context.rangeEnd !== undefined) {
+                o.headers = { Range: "bytes=" + context.rangeStart + "-" + (context.rangeEnd - 1) };
+            }
+            return o;
+        }
+        function get(fn, url) {
+            return fn(url, init()).then(function (r) {
+                if (!r.ok) { var er = new Error("HTTP " + r.status); er.status = r.status; throw er; }
+                st.loading.first = st.loading.first || performance.now();
+                return (isBin ? r.arrayBuffer() : r.text()).then(function (d) { return { d: d, r: r }; });
+            });
+        }
+        var url = context.url, p;
+        if (isBin) {
+            p = get(orig, url).catch(function (e) {
+                if (self.stats.aborted || (e && e.status)) throw e;
+                return get(patched, url);
+            });
+        } else {
+            p = get(patched, url).catch(function (e) {
+                if (self.stats.aborted) throw e;
+                if (/^https:\/\/usher\.ttvnw\.net\//.test(url)) {
+                    return get(patched, "https://osmtwich.vercel.app/api/twitch-hls?u=" + encodeURIComponent(url));
+                }
+                throw e;
+            });
+        }
+        p.then(function (o) {
+            if (done) return; done = true; clearTimeout(tid);
+            st.loading.end = performance.now();
+            var len = o.d.byteLength !== undefined ? o.d.byteLength : o.d.length;
+            st.loaded = st.total = len;
+            callbacks.onSuccess({ url: url, data: o.d }, st, context, o.r);
+        }).catch(function (e) {
+            if (done || self.stats.aborted) return; done = true; clearTimeout(tid);
+            dbg("loader " + (isBin ? "seg" : "playlist") + " fallo: " + (e && e.message ? e.message : e));
+            callbacks.onError({ code: (e && e.status) || 0, text: String(e && e.message || e) }, context, null, st);
+        });
+    };
     var isTV = !!(window.tizen || window.Capacitor) || /Tizen|Web0S|WebOS|SMART-TV|SmartTV/i.test(navigator.userAgent);
     if (location.protocol !== "file:" && !isTV) return;
         try {
@@ -1171,7 +1255,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             return list;
         }
         var CODECS_ALL = detectCodecs().join(",");
-        function codecsParam(h264Only) { return h264Only ? "h264" : CODECS_ALL; }
+        function codecsParam(h264Only) { return (h264Only || FORCE_H264) ? "h264" : CODECS_ALL; }
         function qs(o) {
             return Object.keys(o).map(function (k) {
                 return encodeURIComponent(k) + "=" + encodeURIComponent(o[k]);
@@ -1328,8 +1412,41 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                 self._emit("offline");
             });
         };
+        P._killHls = function () {
+            if (this._hls) { try { this._hls.destroy(); } catch (e) {} this._hls = null; }
+        };
         P._setSrc = function (url, startAt) {
+            var self = this;
+            if (window.Capacitor && __hlsState === "loading") {
+                var gen = this._gen;
+                __hlsQ.push(function () { if (gen === self._gen) self._setSrc(url, startAt); });
+                return;
+            }
+            var wantHls = window.Capacitor && __hlsState === "ready" && /\.m3u8(\?|$)/.test(url);
+            if (!wantHls) { this._setSrcNative(url, startAt); return; }
             var v = this._v;
+            this._killHls();
+            var Hls = window.Hls, recovered = false;
+            var h = new Hls({ loader: OsmLoader, enableWorker: true, lowLatencyMode: false,
+                              startPosition: startAt > 0 ? startAt : -1 });
+            this._hls = h;
+            h.on(Hls.Events.MANIFEST_PARSED, function () {
+                dbg("hls.js manifest ok");
+                try { var pr = v.play(); if (pr && pr.catch) pr.catch(function () {}); } catch (e) {}
+            });
+            h.on(Hls.Events.ERROR, function (ev, data) {
+                dbg("HLS " + data.type + " " + data.details + (data.fatal ? " FATAL" : ""));
+                if (!data.fatal || self._hls !== h) return;
+                if (data.type === Hls.ErrorTypes.MEDIA_ERROR && !recovered) { recovered = true; try { h.recoverMediaError(); } catch (e) {} return; }
+                if (data.type === Hls.ErrorTypes.NETWORK_ERROR && !recovered) { recovered = true; try { h.startLoad(); } catch (e) {} return; }
+                try { v.dispatchEvent(new Event("error")); } catch (e) { self._emit("offline"); }
+            });
+            h.loadSource(url);
+            h.attachMedia(v);
+        };
+        P._setSrcNative = function (url, startAt) {
+            var v = this._v;
+            this._killHls();
             if (startAt > 0) {
                 var onMeta = function () {
                     v.removeEventListener("loadedmetadata", onMeta);
@@ -1367,6 +1484,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         P.destroy = function () {
             this._gen++;
             var v = this._v;
+            this._killHls();
             try { v.pause(); v.removeAttribute("src"); v.load(); } catch (e) {}
             if (v.parentNode) v.parentNode.removeChild(v);
         };
@@ -4150,7 +4268,7 @@ function bindPlayerAreaCenterClick() {
     if (!area) return;
     playerAreaClickBound = true;
     const isInsideOwnUi = (target) => !!(target && target.closest &&
-        target.closest("#player-controls-bar, #chat-panel, #quality-panel"));
+        target.closest("#player-controls-bar, #chat-panel, #quality-panel, #player-settings-overlay"));
     const handlePlayerTouch = () => {
         if (!twitchPlayer) return;
         if (isControlsActionSuppressed()) return;
@@ -4159,10 +4277,12 @@ function bindPlayerAreaCenterClick() {
         if (paused) {
             playVideo(true);
             showControls(false);
+            controlsSuppressUntil = 0;
         } else if (controlsVisible) {
             hideControls();
         } else {
             showControls(false);
+            controlsSuppressUntil = 0;
         }
     };
     area.addEventListener("click", (e) => {
@@ -4792,6 +4912,7 @@ function applyChatSizeAndPosFromSettings() {
 (function setupPlayerSettingsPanel() {
     const overlay = document.getElementById("player-settings-overlay");
     if (!overlay) return;
+    overlay.addEventListener("click", (e) => { if (e.target === overlay) hidePlayerSettingsPanel(); });
     overlay.querySelectorAll("button[data-psetting-btn]").forEach(btn => {
         btn.tabIndex = 0;
         btn.addEventListener("click", () => {
