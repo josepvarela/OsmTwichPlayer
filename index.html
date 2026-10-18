@@ -10,6 +10,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
     <title>OsmTwich</title>
+<script id="option-picker-keys">
+window.addEventListener("keydown", function (e) {
+    var P = window.OsmPicker;
+    if (P && P.isOpen()) { P.key(e); }
+}, true);
+</script>
 <script id="i18n-v1">
 (function () {
     "use strict";
@@ -472,6 +478,25 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 #player-settings-overlay .settings-options button.focused { outline: 3px solid #fff; outline-offset: 2px; }
 #player-settings-overlay .account-btn { display: block; width: 100%; border: none; border-radius: 10px; background: #2a2a2e; color: #fff; font-size: 16px; font-weight: 600; padding: 12px 18px; margin-top: 16px; cursor: pointer; outline: none; font-family: inherit; }
 #player-settings-overlay .account-btn.focused { outline: 3px solid #fff; outline-offset: 2px; }
+
+.settings-row-account.has-picker > .settings-options { display: none !important; }
+.settings-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; flex: 1 1 auto; padding: 10px 14px; border: 2px solid transparent; border-radius: 8px; background: #2a2a2e; color: #fff; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; outline: none; text-align: left; }
+.settings-summary:hover { background: #3a3a3f; }
+.settings-summary.focused, .settings-summary:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+.settings-summary .ss-arrow { opacity: .7; font-size: 20px; line-height: 1; }
+#option-picker { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.72); z-index: 400; }
+#option-picker.visible { display: flex; }
+#option-picker .op-box { background: rgba(24,24,27,.98); border: 1px solid rgba(255,255,255,.14); border-radius: 16px; padding: 22px 26px; width: min(560px, 92vw); max-height: 86vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,.55); scrollbar-width: none; }
+#option-picker .op-box::-webkit-scrollbar { display: none; }
+#option-picker .op-title { font-size: 20px; margin-bottom: 12px; color: #fff; text-align: left; }
+#option-picker .op-opt { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; padding: 11px 14px; margin-bottom: 8px; border: 2px solid transparent; border-radius: 10px; background: #2a2a2e; color: #fff; font: inherit; font-size: 16px; font-weight: 600; cursor: pointer; outline: none; text-align: left; }
+#option-picker .op-opt:last-child { margin-bottom: 0; }
+#option-picker .op-opt:hover { background: #3a3a3f; }
+#option-picker .op-opt.active { background: #9146FF; border-color: #fff; }
+#option-picker .op-opt.focused { outline: 3px solid #fff; outline-offset: 2px; }
+#option-picker .op-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+#option-picker .op-prev { font-weight: 400; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+#option-picker .op-check { font-size: 18px; }
 #chat-panel.chat-resizable { top: auto; bottom: 0; border-radius: 0; max-width: none; }
 #quality-panel h3 { font-size: 20px; margin-bottom: 12px; color: #adadb8; }
 .quality-item { padding: 10px 12px; border-radius: 6px; font-size: 16px; cursor: pointer; border: 3px solid transparent; display: flex; justify-content: space-between; }
@@ -3253,6 +3278,161 @@ function logoutTwitch() {
     clearTwitchUser();
     renderAccountOverlay("logged-out");
 }
+
+var OsmPicker = (function () {
+    var el = null, listEl = null, titleEl = null, opts = [], idx = 0, cb = null, openedAt = 0, isOpenFlag = false, ret = null;
+    var FONTS = { "default": "'Samsung Sans', Arial, sans-serif", serif: 'Georgia,"Times New Roman",serif', mono: '"Courier New",Consolas,monospace', verdana: "Verdana,Geneva,sans-serif", casual: '"Comic Sans MS","Segoe Print",cursive' };
+    function ensure() {
+        if (el) return;
+        el = document.createElement("div");
+        el.id = "option-picker";
+        el.setAttribute("aria-hidden", "true");
+        el.innerHTML = '<div class="op-box" role="listbox"><h2 class="op-title"></h2><div class="op-list"></div></div>';
+        (document.getElementById("tv-scale-root") || document.body).appendChild(el);
+        titleEl = el.querySelector(".op-title");
+        listEl = el.querySelector(".op-list");
+        el.addEventListener("click", function (ev) { if (ev.target === el) close(); });
+    }
+    function setFocus(i) {
+        idx = Math.max(0, Math.min(opts.length - 1, i));
+        opts.forEach(function (o, n) { o.classList.toggle("focused", n === idx); });
+        if (opts[idx]) { try { opts[idx].focus({ preventScroll: true }); } catch (_) {} opts[idx].scrollIntoView({ block: "nearest" }); }
+    }
+    function open(cfg) {
+        ensure();
+        ret = cfg.returnTo || null;
+        cb = cfg.onPick;
+        titleEl.textContent = cfg.title || "";
+        listEl.innerHTML = "";
+        opts = [];
+        var activeIdx = 0;
+        cfg.options.forEach(function (o, n) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className = "op-opt" + (o.value === cfg.current ? " active" : "");
+            b.dataset.value = o.value;
+            var main = document.createElement("span");
+            main.className = "op-main";
+            var lab = document.createElement("span");
+            lab.textContent = o.label;
+            if (o.color) lab.style.color = o.color;
+            if (o.bg) { b.style.background = o.bg; }
+            if (o.font) lab.style.fontFamily = o.font;
+            main.appendChild(lab);
+            if (o.preview) {
+                var p = document.createElement("span");
+                p.className = "op-prev";
+                p.textContent = o.preview.text;
+                p.style.fontSize = o.preview.px + "px";
+                main.appendChild(p);
+            }
+            b.appendChild(main);
+            var ck = document.createElement("span");
+            ck.className = "op-check";
+            ck.textContent = o.value === cfg.current ? "✓" : "";
+            b.appendChild(ck);
+            b.addEventListener("click", function (ev) { ev.stopPropagation(); pick(n); });
+            listEl.appendChild(b);
+            opts.push(b);
+            if (o.value === cfg.current) activeIdx = n;
+        });
+        el.classList.add("visible");
+        el.setAttribute("aria-hidden", "false");
+        isOpenFlag = true;
+        openedAt = Date.now();
+        setFocus(activeIdx);
+    }
+    function close() {
+        if (!isOpenFlag) return;
+        isOpenFlag = false;
+        el.classList.remove("visible");
+        el.setAttribute("aria-hidden", "true");
+        var r = ret; ret = null;
+        if (r) {
+            try {
+                document.querySelectorAll(".settings-summary.focused").forEach(function (b) { b.classList.remove("focused"); });
+                r.classList.add("focused");
+                r.focus({ preventScroll: true });
+            } catch (_) {}
+        }
+    }
+    function pick(n) {
+        var v = opts[n] && opts[n].dataset.value;
+        var f = cb;
+        close();
+        if (f && v !== undefined) f(v);
+    }
+    function key(e) {
+        var k = e.keyCode || ({ ArrowLeft: 37, ArrowRight: 39, ArrowUp: 38, ArrowDown: 40, Enter: 13, Escape: 27 }[e.key] || 0);
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        if (k === 27 || k === 10009 || k === 461 || k === 8) { close(); return; }
+        if (k === 38) { setFocus((idx - 1 + opts.length) % opts.length); return; }
+        if (k === 40) { setFocus((idx + 1) % opts.length); return; }
+        if (k === 13) { if (Date.now() - openedAt > 250) pick(idx); return; }
+    }
+    function parseScale(v) {
+        var n = parseFloat(String(v || "").replace(/^x/, ""));
+        return isFinite(n) && n > 0 ? n : 1;
+    }
+    function decorate(root, rowSel, cfg) {
+        if (!root) return;
+        root.querySelectorAll(rowSel).forEach(function (row) {
+            var name = row.dataset[cfg.dataKey];
+            var optsBox = row.querySelector(".settings-options");
+            if (!optsBox) return;
+            row.classList.add("has-picker");
+            var sum = row.querySelector(".settings-summary");
+            if (!sum) {
+                sum = document.createElement("button");
+                sum.type = "button";
+                sum.className = "settings-summary";
+                if (cfg.navAttr) sum.setAttribute(cfg.navAttr, "");
+                sum.innerHTML = '<span class="ss-val"></span><span class="ss-arrow">›</span>';
+                row.insertBefore(sum, optsBox);
+                sum.addEventListener("click", function (ev) {
+                    ev.stopPropagation();
+                    var btns = Array.prototype.slice.call(row.querySelectorAll(".settings-options button[data-value]"));
+                    var activeBtn = btns.filter(function (b) { return b.classList.contains("active"); })[0] || btns[0];
+                    var o = btns.map(function (b) {
+                        var item = { value: b.dataset.value, label: (b.textContent || "").trim() };
+                        if (name === "textSize" || name === "chatTextSize") {
+                            var base = name === "chatTextSize" ? 17 : 16;
+                            item.preview = { px: Math.round(base * parseScale(b.dataset.value) * 10) / 10, text: name === "chatTextSize" ? "user: Hola chat! 😀" : "Aa Abc 123 ¡Hola!" };
+                        }
+                        if (name === "textColor") {
+                            if (b.dataset.value === "black") { item.bg = "#d4d4d8"; item.color = "#000"; }
+                            else if (b.style && b.style.color) item.color = b.style.color;
+                        }
+                        if (name === "font" && FONTS[b.dataset.value]) item.font = FONTS[b.dataset.value];
+                        return item;
+                    });
+                    var lbl = row.querySelector("label");
+                    open({
+                        title: lbl ? lbl.textContent.trim() : "",
+                        options: o,
+                        current: activeBtn ? activeBtn.dataset.value : null,
+                        returnTo: sum,
+                        onPick: function (v) { cfg.onPick(name, v, row); refresh(root, rowSel); }
+                    });
+                });
+            }
+        });
+        refresh(root, rowSel);
+    }
+    function refresh(root, rowSel) {
+        if (!root) return;
+        root.querySelectorAll(rowSel).forEach(function (row) {
+            var sum = row.querySelector(".settings-summary .ss-val");
+            if (!sum) return;
+            var btns = Array.prototype.slice.call(row.querySelectorAll(".settings-options button[data-value]"));
+            var a = btns.filter(function (b) { return b.classList.contains("active"); })[0] || btns[0];
+            sum.textContent = a ? (a.textContent || "").trim() : "";
+        });
+    }
+    return { open: open, close: close, key: key, decorate: decorate, refresh: refresh, isOpen: function () { return isOpenFlag; } };
+})();
+
 let accountOverlayOrigin = "account";
 function openSettingsOverlay() {
     const overlay = document.getElementById("account-overlay");
@@ -3271,6 +3451,7 @@ function openAccountOverlay() {
     renderAccountOverlay(twitchUser ? "logged-in" : "logged-out");
 }
 function closeAccountOverlay() {
+    try { OsmPicker.close(); } catch (e) {}
     stopDeviceLogin();
     const overlay = document.getElementById("account-overlay");
     overlay?.classList.remove("visible");
@@ -3423,23 +3604,18 @@ function renderAccountSettings() {
         </div>
         <button class="account-btn" data-nav-btn data-action="close">← Volver</button>
     `;
-    document.querySelectorAll("#account-box .settings-options button").forEach(btn => {
-        btn.addEventListener("click", () => {
-            const row = btn.closest(".settings-row-account");
-            if (!row) return;
-            saveInterfaceSetting(row.dataset.setting, btn.dataset.value);
-            applyInterfaceSettings();
-            updateSettingsActiveStates();
-            document.querySelectorAll("#account-box .settings-options button.focused")
-                .forEach(b => b.classList.remove("focused"));
-            btn.classList.add("focused");
-            btn.focus({preventScroll:true});
-        });
-    });
     wireAccountButtons();
     updateSettingsActiveStates();
+    OsmPicker.decorate(box, ".settings-row-account", {
+        dataKey: "setting", navAttr: "data-nav-btn",
+        onPick: function (name, value) {
+            saveInterfaceSetting(name, value);
+            applyInterfaceSettings();
+            updateSettingsActiveStates();
+        }
+    });
     setTimeout(() => {
-        const first = document.querySelector("#account-box .settings-options button");
+        const first = document.querySelector("#account-box .settings-summary");
         if (first) {
             first.classList.add("focused");
             try { first.focus({preventScroll:true}); } catch (_) { first.focus(); }
@@ -3453,11 +3629,13 @@ function updateSettingsActiveStates() {
     };
     document.querySelectorAll("#account-box .settings-row-account").forEach(row => {
         const setting = row.dataset.setting;
-        const current = get(setting, setting === "language" ? "auto" : setting === "font" ? "default" : null);
+        const SDEF = { language: "auto", theme: "dark", textSize: "x1", textColor: "white", font: "default", cardSize: "100" };
+        const current = get(setting, SDEF[setting] || null);
         row.querySelectorAll("button[data-value]").forEach(btn => {
             btn.classList.toggle("active", btn.dataset.value === current);
         });
     });
+    try { OsmPicker.refresh(document.getElementById("account-box"), ".settings-row-account"); } catch (e) {}
 }
 function saveInterfaceSetting(name, value) {
     try { localStorage.setItem("osmtwich-settings-" + name, value); } catch (e) {}
@@ -3584,67 +3762,22 @@ function handleAccountOverlayKeys(keyCode, e) {
         return;
     }
     if (accountOverlayView === "settings") {
-        const rows = Array.from(document.querySelectorAll("#account-box .settings-row-account"));
-        const backBtn = document.querySelector('#account-box [data-action="close"]');
-        const items = rows.concat(backBtn ? [backBtn] : []);
+        const items = Array.from(document.querySelectorAll('#account-box .settings-summary, #account-box [data-action="close"]'));
         if (!items.length) return;
-        let currentIdx = items.findIndex(el =>
-            el === document.activeElement || el.contains(document.activeElement)
-        );
-        if (currentIdx === -1) {
-            currentIdx = items.findIndex(el => el.classList.contains("focused"));
-        }
-        if (currentIdx === -1) currentIdx = 0;
-        if (keyCode === 37 || keyCode === 39) {
-            const group = items[currentIdx]?.querySelector?.(".settings-options");
-            if (group) {
-                e.preventDefault();
-                const groupBtns = Array.from(group.querySelectorAll("[data-nav-btn]"));
-                const gIdx = groupBtns.indexOf(document.activeElement);
-                const delta = keyCode === 37 ? -1 : 1;
-                const next = Math.max(0, Math.min(groupBtns.length - 1, (gIdx < 0 ? 0 : gIdx) + delta));
-                groupBtns.forEach(b => b.classList.remove("focused"));
-                groupBtns[next].classList.add("focused");
-                groupBtns[next].focus({preventScroll:true});
-                groupBtns[next].scrollIntoView({block:"nearest",inline:"nearest"});
-            }
-            return;
-        }
+        let i = items.indexOf(document.activeElement);
+        if (i === -1) i = items.findIndex(el => el.classList.contains("focused"));
+        if (i === -1) i = 0;
         if (keyCode === 38 || keyCode === 40) {
             e.preventDefault();
-            const delta = keyCode === 38 ? -1 : 1;
-            const next = (currentIdx + delta + items.length) % items.length;
-            const target = items[next];
-            document.querySelectorAll("#account-box .settings-options button.focused")
-                .forEach(b => b.classList.remove("focused"));
-            document.querySelectorAll("#account-box .account-btn.focused")
-                .forEach(b => b.classList.remove("focused"));
-            if (target.classList.contains("account-btn")) {
-                target.classList.add("focused");
-                target.focus({preventScroll:true});
-                target.scrollIntoView({block:"nearest"});
-            } else {
-                const group = target.querySelector(".settings-options");
-                const buttons = group ? Array.from(group.querySelectorAll("[data-nav-btn]")) : [];
-                const active = buttons.find(b => b.classList.contains("active")) || buttons[0];
-                if (active) {
-                    active.classList.add("focused");
-                    active.focus({preventScroll:true});
-                    active.scrollIntoView({block:"nearest"});
-                }
-            }
+            const n = (i + (keyCode === 38 ? -1 : 1) + items.length) % items.length;
+            items.forEach(b => b.classList.remove("focused"));
+            items[n].classList.add("focused");
+            items[n].focus({ preventScroll: true });
+            items[n].scrollIntoView({ block: "nearest" });
             return;
         }
-        if (keyCode === 13) {
-            e.preventDefault();
-            const active = document.activeElement;
-            if (active && active.dataset && active.dataset.value !== undefined) {
-                active.click();
-            } else if (active && active.dataset && active.dataset.action === "close") {
-                active.click();
-            }
-            return;
-        }
+        if (keyCode === 37 || keyCode === 39) { e.preventDefault(); return; }
+        if (keyCode === 13) { e.preventDefault(); items[i].click(); return; }
         return;
     }
     const btns = Array.from(document.querySelectorAll("#account-box [data-nav-btn]"));
@@ -4512,65 +4645,28 @@ function handlePlayerScreenKeys(keyCode, e) {
     }
         if (playerSettingsPanelVisible) {
         const overlay = document.getElementById("player-settings-overlay");
-        const rows = Array.from(overlay.querySelectorAll(".settings-row-account"));
-        const backBtn = overlay.querySelector('button[data-action="close-settings"]');
-        const items = rows.concat(backBtn ? [backBtn] : []);
+        const items = Array.from(overlay.querySelectorAll('.settings-summary, button[data-action="close-settings"]'));
         if (keyCode === 27 || keyCode === 10009) {
             e.preventDefault();
             hidePlayerSettingsPanel();
             return;
         }
+        let i = items.indexOf(document.activeElement);
+        if (i === -1) i = items.findIndex(el => el.classList.contains("focused"));
+        if (i === -1) i = 0;
         if (keyCode === 38 || keyCode === 40) {
-            const active = document.activeElement;
-            let currentIdx = items.findIndex(el =>
-                el === active || el.contains(active)
-            );
-            if (currentIdx === -1) currentIdx = items.findIndex(el => el.classList.contains("focused"));
-            if (currentIdx === -1) currentIdx = 0;
-            const delta = keyCode === 38 ? -1 : 1;
-            const next = (currentIdx + delta + items.length) % items.length;
-            const target = items[next];
-            overlay.querySelectorAll(".settings-options button.focused")
-                .forEach(b => b.classList.remove("focused"));
-            overlay.querySelectorAll(".account-btn.focused")
-                .forEach(b => b.classList.remove("focused"));
-            if (target.classList.contains("account-btn")) {
-                target.classList.add("focused");
-                target.focus({preventScroll: true});
-                target.scrollIntoView({block: "nearest"});
-            } else {
-                const group = target.querySelector(".settings-options");
-                const buttons = group ? Array.from(group.querySelectorAll("button")) : [];
-                const activeBtn = buttons.find(b => b.classList.contains("active")) || buttons[0];
-                if (activeBtn) {
-                    activeBtn.classList.add("focused");
-                    activeBtn.focus({preventScroll: true});
-                    activeBtn.scrollIntoView({block: "nearest"});
-                }
-            }
+            e.preventDefault();
+            const n = (i + (keyCode === 38 ? -1 : 1) + items.length) % items.length;
+            items.forEach(b => b.classList.remove("focused"));
+            items[n].classList.add("focused");
+            items[n].focus({ preventScroll: true });
+            items[n].scrollIntoView({ block: "nearest" });
             return;
         }
-        if (keyCode === 37 || keyCode === 39) {
-            const active = document.activeElement;
-            const row = active?.closest?.(".settings-row-account");
-            if (!row) return;
-            const rowBtns = Array.from(row.querySelectorAll("button"));
-            const idx = rowBtns.indexOf(active);
-            const delta = keyCode === 37 ? -1 : 1;
-            const next = Math.max(0, Math.min(rowBtns.length - 1, (idx < 0 ? 0 : idx) + delta));
-            rowBtns.forEach(b => b.classList.remove("focused"));
-            rowBtns[next].classList.add("focused");
-            rowBtns[next].focus({preventScroll: true});
-            return;
-        }
+        if (keyCode === 37 || keyCode === 39) { e.preventDefault(); return; }
         if (keyCode === 13) {
             e.preventDefault();
-            const active = document.activeElement;
-            if (active && active.dataset && active.dataset.value !== undefined) {
-                active.click();
-            } else if (active && active.dataset && active.dataset.action === "close-settings") {
-                active.click();
-            }
+            if (items[i]) items[i].click();
             return;
         }
         return;
@@ -4812,6 +4908,10 @@ function showPlayerSettingsPanel() {
     refreshPlayerQualityOptions();
     updatePlayerSettingsActiveStates();
     const overlay = document.getElementById("player-settings-overlay");
+    OsmPicker.decorate(overlay, ".settings-row-account", {
+        dataKey: "psetting",
+        onPick: function (name, value) { savePlayerSetting(name, value); }
+    });
     overlay.classList.remove("hidden");
     overlay.classList.add("visible");
     playerSettingsPanelVisible = true;
@@ -4819,6 +4919,7 @@ function showPlayerSettingsPanel() {
     updatePlayerSettingsPanelFocus();
 }
 function hidePlayerSettingsPanel() {
+    try { OsmPicker.close(); } catch (e) {}
     const overlay = document.getElementById("player-settings-overlay");
     if (overlay) {
         overlay.classList.add("hidden");
@@ -4827,14 +4928,13 @@ function hidePlayerSettingsPanel() {
     playerSettingsPanelVisible = false;
 }
 function updatePlayerSettingsPanelFocus() {
-    document.querySelectorAll("#player-settings-panel .settings-options button")
-        .forEach(b => b.classList.remove("focused"));
-    const active = document.querySelector("#player-settings-panel .settings-options button.active")
-        || document.querySelector("#player-settings-panel .settings-options button");
-    if (active) {
-        active.classList.add("focused");
-        active.focus({preventScroll: true});
-        active.scrollIntoView({block: "nearest"});
+    const overlay = document.getElementById("player-settings-overlay");
+    if (!overlay) return;
+    overlay.querySelectorAll(".settings-summary.focused, .account-btn.focused").forEach(b => b.classList.remove("focused"));
+    const first = overlay.querySelector(".settings-summary");
+    if (first) {
+        first.classList.add("focused");
+        try { first.focus({ preventScroll: true }); } catch (_) {}
     }
 }
 function updatePlayerSettingsActiveStates() {
@@ -4857,6 +4957,7 @@ function updatePlayerSettingsActiveStates() {
             btn.classList.toggle("active", btn.dataset.value === current);
         });
     });
+    try { OsmPicker.refresh(document.getElementById("player-settings-overlay"), ".settings-row-account"); } catch (e) {}
 }
 function savePlayerSetting(name, value) {
     saveInterfaceSetting(name, value);
@@ -6001,6 +6102,7 @@ function goBack() {
         return typeof currentScreen !== "undefined" && currentScreen === "main" && !accountOpen && !searchOpen;
     }
     function handleAndroidBack(e) {
+        if (window.OsmPicker && OsmPicker.isOpen()) { OsmPicker.close(); return; }
         var accountOverlay = document.getElementById("account-overlay");
         if (accountOverlay && accountOverlay.classList.contains("visible")) {
             closeAccountOverlay();
