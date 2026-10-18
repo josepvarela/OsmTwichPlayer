@@ -25,12 +25,20 @@ Cliente no oficial de Twitch para Samsung Tizen TV, Android TV y navegador. Opti
 - Panel de ajustes del reproductor: calidad, tamaño/posición del chat
 - Modo `perf-lite` para TVs de gama baja
 
-Samsung TV: descargá el .wgt desde Releases e instalalo con Tizen Studio.
+## 📦 Instalación
 
-El .wgt viene sin firmar. Para instalarlo en un TV real hay que firmarlo con tu certificado (Certificate Manager).
+**Samsung TV:** descargá el `.wgt` desde Releases e instalalo con Tizen Studio.
 
-🛠 Desarrollo
-Todo vive en index.html (HTML + CSS + JS, sin frameworks). El backend serverless está en Vercel (/api/*) y maneja el token de Twitch y el proxy de comentarios de VODs.
+> El `.wgt` viene sin firmar. Para instalarlo en un TV real hay que firmarlo con tu certificado (Certificate Manager).
 
-⚖️ Aviso
+## 🛠 Desarrollo
+
+Todo vive en `index.html` (HTML + CSS + JS, sin frameworks). El backend serverless está en Vercel (`/api/*`) y maneja el token de Twitch y el proxy de comentarios de VODs.
+
+## 📄 Licencia
+
+Este proyecto está bajo la licencia [MIT](LICENSE). Podés usarlo, copiarlo, modificarlo y distribuirlo libremente, siempre que incluyas el aviso de copyright y de licencia.
+
+## ⚖️ Aviso
+
 No está afiliado ni respaldado por Twitch ni Samsung. Twitch, sus emotes y su logo son marcas de Twitch Interactive, Inc.
