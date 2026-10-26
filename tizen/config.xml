@@ -7,10 +7,9 @@
         <tizen:operation name="http://samsung.com/appcontrol/operation/eden_resume"/>
     </tizen:app-control>
     <!--
-      El "package" (10 caracteres alfanuméricos, empieza con letra) y el
-      "id" de tizen:application deben coincidir con el certificado de autor
-      que generes en Tizen Studio (Certificate Manager). El de abajo es un
-      valor de ejemplo: reemplazalo por el que te asigne tu certificado.
+      package: exactamente 10 caracteres alfanuméricos, empieza con letra.
+      id: package.nombreApp
+      Ambos deben coincidir con el certificado de autor de Tizen Studio.
     -->
     <tizen:application id="OsmTwichTV.OsmTwich" package="OsmTwichTV" required_version="2.3"/>
     <content src="index.html"/>
