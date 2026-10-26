@@ -18,6 +18,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Actualizar versión en config.xml
+        run: |
+          VERSION="1.0.${{ github.run_number }}"
+          echo "Nueva versión: $VERSION"
+          sed -i -E "s/(<widget[^>]*version=\")([^\"]*)(\".*)/\1${VERSION}\3/" tizen/config.xml
+          grep 'version=' tizen/config.xml
+
       - name: Empaquetar .wgt unsigned
         run: |
           # La app va directamente como index.html dentro del .wgt (sin lanzador
@@ -39,11 +46,13 @@ jobs:
         if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: wgt-${{ github.run_number }}
-          name: OsmTwich TV ${{ github.run_number }} (unsigned)
+          tag_name: v1.0.${{ github.run_number }}
+          name: OsmTwich TV v1.0.${{ github.run_number }} (unsigned)
           files: OsmTwich.wgt
           body: |
             Unsigned .wgt package
+
+            Versión: 1.0.${{ github.run_number }}
 
             ## Cambios
             ${{ github.event.head_commit.message }}
