@@ -22,8 +22,11 @@ jobs:
         run: |
           VERSION="1.0.${{ github.run_number }}"
           echo "Nueva versión: $VERSION"
-          sed -i -E "s/(<widget[^>]*version=\")([^\"]*)(\".*)/\1${VERSION}\3/" tizen/config.xml
-          grep 'version=' tizen/config.xml
+          # <widget ...> ocupa varias líneas en config.xml, por eso se usa perl -0
+          # (modo multilínea); con sed línea a línea nunca coincidía y quedaba 1.0.0.
+          VERSION="$VERSION" perl -0pi -e 's/(<widget\b[^>]*?\sversion=")[^"]*(")/$1$ENV{VERSION}$2/s' tizen/config.xml
+          grep -q "version=\"$VERSION\"" tizen/config.xml || { echo "ERROR: no se pudo actualizar la versión en config.xml"; exit 1; }
+          grep -n 'version=' tizen/config.xml
 
       - name: Empaquetar .wgt unsigned
         run: |

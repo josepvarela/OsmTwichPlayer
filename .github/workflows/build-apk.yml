@@ -57,6 +57,12 @@ jobs:
           sed -i -E 's/minSdkVersion = [0-9]+/minSdkVersion = 24/; s/targetSdkVersion = [0-9]+/targetSdkVersion = 36/; s/compileSdkVersion = [0-9]+/compileSdkVersion = 36/' android/variables.gradle
           cat android/variables.gradle
 
+      # La versión del APK sube sola en cada build (antes quedaba en 1 / "1.0").
+      - name: Versión del APK (versionCode / versionName)
+        run: |
+          sed -i -E "s/versionCode [0-9]+/versionCode ${{ github.run_number }}/; s/versionName \"[^\"]*\"/versionName \"1.0.${{ github.run_number }}\"/" android/app/build.gradle
+          grep -n -E "versionCode|versionName" android/app/build.gradle
+
       - name: Generar ícono del APK
         # Toma capacitor/assets/icon.png (idealmente 1024x1024) y genera
         # todos los tamaños/mipmaps de Android (legacy + adaptive icon).
