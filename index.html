@@ -1158,6 +1158,11 @@ html[data-tv-scaled] .ctrl-btn-main { width: 128px !important; height: 128px !im
 html[data-tv-scaled] .ctrl-btn-main svg { width: 64px !important; height: 64px !important; }
 html[data-tv-scaled] .ctrl-btn { flex: 0 0 auto; }
 html[data-tv-scaled] .ctrl-btn-quality { flex: 0 1 auto; width: auto !important; min-width: 104px !important; padding: 0 20px !important; font-size: 30px !important; }
+/* Botones del perfil de canal (Ver en vivo / Chatear / Seguir): son .ctrl-btn.small pero NO son controles del reproductor; en TV no deben heredar el 104x104 / 52px de arriba. Crecen de forma moderada con "Tamaño texto app". */
+html[data-tv-scaled] .ctrl-btn.small { width: auto !important; height: auto !important; min-width: 0 !important; flex: 0 0 auto; padding: .5em 1em !important; border-radius: 8px; font-size: calc(22px + (var(--app-fs, 1) - 1) * 8px) !important; line-height: 1.2; white-space: nowrap; }
+html[data-tv-scaled] .ctrl-btn.small.hidden { display: none !important; }
+html[data-tv-scaled] #channel-statusbar { flex-wrap: wrap; row-gap: 10px; padding-top: 10px; padding-bottom: 10px; }
+html[data-tv-scaled] .channel-badge { font-size: calc(22px + (var(--app-fs, 1) - 1) * 8px); }
 html[data-tv-scaled] #player-info { max-width: 620px; }
 html[data-tv-scaled] .player-profile-btn { width: 72px; height: 72px; flex-basis: 72px; }
 html[data-tv-scaled] #player-channel-name { font-size: 30px; max-width: 380px; }
