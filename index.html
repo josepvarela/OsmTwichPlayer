@@ -1781,15 +1781,15 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                         <div class="player-info-text">
                             <div class="player-info-line">
                                 <span id="player-channel-name"></span>
+                                <span class="player-game-viewers-wrap" id="player-viewers-wrap" style="display:none">
+                                    <span class="player-info-separator" aria-hidden="true">|</span>
+                                    <span id="player-game-viewers"></span>
+                                </span>
                             </div>
                             <div id="player-game-row" class="player-info-line hidden">
                                 <button id="player-game-action" class="player-game-btn info-focus-btn" type="button" aria-label="Abrir streams de este juego">
                                     <span id="player-game-name"></span>
                                 </button>
-                                <span class="player-game-viewers-wrap">
-                                    <span class="player-info-separator" aria-hidden="true">|</span>
-                                    <span id="player-game-viewers"></span>
-                                </span>
                             </div>
                         </div>
                     </div>
@@ -1799,6 +1799,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                         <div class="ctrl-btn" data-action="forward" id="ctrl-forward" tabindex="0" role="button" aria-label="Adelantar 10 segundos"></div>
                     </div>
                         <div class="ctrl-side ctrl-right">
+                        <div class="ctrl-btn" data-action="reload" id="ctrl-reload" tabindex="0" role="button" aria-label="Recargar stream"></div>
                         <div class="ctrl-btn" data-action="mute" id="ctrl-mute" tabindex="0" role="button" aria-label="Silenciar o activar sonido"></div>
                         <div class="ctrl-btn" data-action="settings" id="ctrl-settings" tabindex="0" role="button" aria-label="Ajustes de reproducción"></div>
                         <div class="ctrl-btn" data-action="chat-send" id="ctrl-chat-send" tabindex="0" role="button" aria-label="Enviar mensaje al chat"></div>
@@ -1871,7 +1872,7 @@ function isControlsClickSuppressed() {
 let controlFocusIndex = 0;
 let availableQualities = [];
 let qualityIndex = 0;
-const CONTROL_ACTIONS = ["rewind", "play", "forward", "mute", "settings", "chat-send"];
+const CONTROL_ACTIONS = ["rewind", "play", "forward", "reload", "mute", "settings", "chat-send"];
 let playerInfoFocusIndex = 0;
 let playerInfoHasGame = false;
 let playerReturnScreen = "main";
@@ -1904,6 +1905,7 @@ function setCtrlIcon(action, key) {
 function initControlIcons() {
     setCtrlIcon("rewind", "rewind");
     setCtrlIcon("forward", "forward");
+    setCtrlIcon("reload", "refresh");
     setCtrlIcon("mute", isMuted ? "volumeOff" : "volumeOn");
     setCtrlIcon("settings", "settings");
     setCtrlIcon("chat-send", "chatSend");
@@ -3402,7 +3404,7 @@ var OsmPicker = (function () {
             if (o.color) lab.style.color = o.color;
             if (o.bg) { b.style.background = o.bg; }
             if (o.font) lab.style.fontFamily = o.font;
-            main.appendChild(lab);
+            if (!o.hideLabel) main.appendChild(lab);
             if (o.preview) {
                 var p = document.createElement("span");
                 p.className = "op-prev";
@@ -3482,6 +3484,7 @@ var OsmPicker = (function () {
                         var item = { value: b.dataset.value, label: (b.textContent || "").trim() };
                         if (name === "textSize" || name === "chatTextSize") {
                             var base = name === "chatTextSize" ? 17 : 16;
+                            item.hideLabel = true;
                             item.preview = { px: Math.round(base * parseScale(b.dataset.value) * 10) / 10, text: name === "chatTextSize" ? "user: Hola chat! 😀" : "Aa Abc 123 ¡Hola!" };
                         }
                         if (name === "textColor") {
@@ -3512,6 +3515,12 @@ var OsmPicker = (function () {
             var btns = Array.prototype.slice.call(row.querySelectorAll(".settings-options button[data-value]"));
             var a = btns.filter(function (b) { return b.classList.contains("active"); })[0] || btns[0];
             sum.textContent = a ? (a.textContent || "").trim() : "";
+            var nm = row.dataset.setting || row.dataset.psetting;
+            if (a && (nm === "textSize" || nm === "chatTextSize")) {
+                var base = nm === "chatTextSize" ? 17 : 16;
+                sum.textContent = nm === "chatTextSize" ? "user: Hola chat! 😀" : "Aa Abc 123 ¡Hola!";
+                sum.style.fontSize = Math.round(base * parseScale(a.dataset.value) * 10) / 10 + "px";
+            }
         });
     }
     return { open: open, close: close, key: key, decorate: decorate, refresh: refresh, isOpen: function () { return isOpenFlag; } };
@@ -4228,6 +4237,7 @@ function bindPlayerLifecycleListeners() {
     });
 }
 async function createPlayer(options) {
+    lastPlayerOptions = Object.assign({}, options);
     playerPlaybackStarted = false;
     availableQualities = [];
     qualityIndex = 0;
@@ -4318,15 +4328,17 @@ function setPlayerInfo(displayName, title, gameName, gameId, viewerCount, profil
     document.getElementById("player-game-action").disabled = !playerInfoHasGame;
     currentPlayerGameId = gameId || null;
     currentPlayerGameName = gameName || null;
+    const viewersText = (typeof viewerCount === "number")
+        ? `${viewerCount.toLocaleString("es")} espectadores`
+        : "";
+    viewersEl.textContent = viewersText;
+    const viewersWrap = document.getElementById("player-viewers-wrap");
+    if (viewersWrap) viewersWrap.style.display = viewersText ? "" : "none";
     if (gameName) {
         gameEl.textContent = gameName;
-        viewersEl.textContent = (typeof viewerCount === "number")
-            ? `${viewerCount.toLocaleString("es")} espectadores`
-            : "";
         gameRow.classList.remove("hidden");
     } else {
         gameEl.textContent = "";
-        viewersEl.textContent = "";
         gameRow.classList.add("hidden");
     }
 }
@@ -4814,6 +4826,36 @@ function runControlAction(action) {
         case "settings": togglePlayerSettingsPanel(); break;
         case "chat-send": openChatComposer(); break;
         case "mute": toggleMute(); break;
+        case "reload": reloadStream(); break;
+    }
+}
+let lastPlayerOptions = null;
+let reloadingStream = false;
+function secondsToTwitchTime(sec) {
+    sec = Math.max(0, Math.floor(sec));
+    const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
+    return `${h}h${m}m${s}s`;
+}
+async function reloadStream() {
+    if (reloadingStream || !lastPlayerOptions || currentScreen !== "player") return;
+    reloadingStream = true;
+    const opts = Object.assign({}, lastPlayerOptions);
+    delete opts.time;
+    const login = currentChannelLogin;
+    const videoId = currentVideoId;
+    let resumeAt = 0;
+    try {
+        if ("video" in opts && twitchPlayer) resumeAt = Math.floor(twitchPlayer.getCurrentTime() || 0);
+    } catch (_) {}
+    if (resumeAt > 0) opts.time = secondsToTwitchTime(resumeAt);
+    try {
+        destroyPlayer();
+        await createPlayer(opts);
+        if (currentScreen !== "player") return;
+        if ("channel" in opts && login) connectChat(login);
+        else if ("video" in opts && videoId) startVodChatReplay(videoId, resumeAt);
+    } finally {
+        reloadingStream = false;
     }
 }
 function playVideo(userGesture = false) {
