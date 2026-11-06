@@ -53,8 +53,6 @@ jobs:
           name: OsmTwich TV v1.0.${{ github.run_number }} (unsigned)
           files: OsmTwich.wgt
           body: |
-            Unsigned .wgt package
-
             Versión: 1.0.${{ github.run_number }}
 
             ## Cambios
