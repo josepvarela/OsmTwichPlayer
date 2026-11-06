@@ -1068,11 +1068,13 @@ html[data-text-color="cyan"] { --app-text-color: #22d3ee; }
 html[data-text-color="red"] { --app-text-color: #ff4d4d; }
 html[data-text-color="black"] { --app-text-color: #000000; }
 body, .section-title, .stream-title, .stream-meta, .game-name, .game-viewers, html[data-text-color] .nav-label, html[data-text-color] #player-channel-name, html[data-text-color] #player-stream-title, html[data-text-color] .player-title-row, html[data-text-color] .progress-label, html[data-text-color] #channel-name, html[data-text-color] #channel-substat, html[data-text-color] #channel-followers, html[data-text-color] #channel-description, html[data-text-color] .profile-section h2, html[data-text-color] .chat-msg .chat-text { color: var(--app-text-color, #fff) !important; }
-html[data-card-size="100"] { --profile-card-size: clamp(175px, 16vw, 250px); }
-html[data-card-size="150"] { --profile-card-size: clamp(263px, 24vw, 375px); }
-html[data-card-size="200"] { --profile-card-size: clamp(350px, 32vw, 500px); }
-html[data-card-size="250"] { --profile-card-size: clamp(438px, 40vw, 625px); }
-html[data-card-size="300"] { --profile-card-size: clamp(525px, 48vw, 750px); }
+html { --app-vw: 100vw; --profile-card-size: calc((var(--app-vw) - 216px) / 5); }
+html[data-tv-scaled] { --app-vw: 1920px; }
+html[data-card-size="100"] { --profile-card-size: calc((var(--app-vw) - 216px) / 5); }
+html[data-card-size="150"] { --profile-card-size: calc((var(--app-vw) - 192px) / 4); }
+html[data-card-size="200"] { --profile-card-size: calc((var(--app-vw) - 168px) / 3); }
+html[data-card-size="250"] { --profile-card-size: calc((var(--app-vw) - 144px) / 2); }
+html[data-card-size="300"] { --profile-card-size: calc(var(--app-vw) - 120px); }
 #results-screen #results-grid .tile-stream, #results-screen #clips-grid .tile-clip, #main-screen #content .tile-track > .tile-stream, #main-screen #content .tile-track > .tile-clip { flex: 0 0 var(--profile-card-size, clamp(175px, 16vw, 250px)) !important; width: var(--profile-card-size, clamp(175px, 16vw, 250px)) !important; max-width: var(--profile-card-size, clamp(175px, 16vw, 250px)) !important; }
 #main-screen #content .tile-track > .tile-game { flex: 0 0 calc(var(--profile-card-size, clamp(175px, 16vw, 250px)) * 0.72) !important; width: calc(var(--profile-card-size, clamp(175px, 16vw, 250px)) * 0.72) !important; max-width: calc(var(--profile-card-size, clamp(175px, 16vw, 250px)) * 0.72) !important; }
 html[data-card-size="100"] #game-screen-grid { grid-template-columns: repeat(5, minmax(0, 1fr)) !important; }
@@ -2075,6 +2077,7 @@ function enableDragScroll(track) {
     track.addEventListener("click", (e) => { if (moved > 6) { e.stopPropagation(); e.preventDefault(); } }, true);
 }
 function handleKeyDown(e) {
+    if (window.OskKeyboard && OskKeyboard.isOpen()) return;
     const keyCode = e.keyCode || ({ArrowLeft:37, ArrowRight:39, ArrowUp:38, ArrowDown:40, Enter:13, " ":32, Escape:27}[e.key] || 0);
     if (document.getElementById("account-overlay")?.classList.contains("visible")) {
         handleAccountOverlayKeys(keyCode, e);
@@ -2093,7 +2096,7 @@ function handleKeyDown(e) {
         if (!document.activeElement || document.activeElement === document.body) restoreMainFocus(focusZone === "content" ? navIndexForRow(contentRowId) : navIndex);
         handleMainScreenKeys(keyCode, e);
     } else if (currentScreen === "game" || currentScreen === "results") {
-        handleGridScreenKeys(keyCode);
+        handleGridScreenKeys(keyCode, e);
     }
 }
 function handleMainScreenKeys(keyCode, e) {
@@ -2205,7 +2208,7 @@ function focusResultsAction(preferred) {
     target.classList.add("focused");
     return true;
 }
-function handleGridScreenKeys(keyCode) {
+function handleGridScreenKeys(keyCode, e) {
     if (currentScreen === "results") {
         const { watchBtn, followBtn, chatBtn, sendBtn, watchVisible, followVisible, chatVisible, sendVisible } = getResultsActionEls();
         const sectionTiles = resultsContentSection === "clips"
@@ -2232,6 +2235,7 @@ function handleGridScreenKeys(keyCode) {
             } else if (keyCode === 13) {
                 const targets = { watch: watchBtn, follow: followBtn, chat: chatBtn, send: sendBtn };
                 const target = targets[resultsActionFocus] || watchBtn;
+                if (e && e.preventDefault) e.preventDefault();
                 target && target.click();
             }
             return;
