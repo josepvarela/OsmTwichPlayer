@@ -17,7 +17,7 @@ env:
   # Versión automática: 1.<N>, donde N = cantidad de commits del repo.
   # Sube sola con cualquier cambio de código. Si quieres que el próximo build
   # sea 1.1, pon aquí (cantidad actual de commits - 1).
-  VERSION_OFFSET: "0"
+  VERSION_OFFSET: "157"
 
 jobs:
   build-wgt:
