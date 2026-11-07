@@ -13,7 +13,7 @@ on:
 env:
   # Versión automática: 1.<N>, donde N = cantidad de commits del repo.
   # Es la misma regla que usa build-wgt.yml, así coinciden Tizen y Android.
-  VERSION_OFFSET: "0"
+  VERSION_OFFSET: "157"
 
 jobs:
   build-apk:
