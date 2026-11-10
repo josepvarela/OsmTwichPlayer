@@ -1493,7 +1493,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             this._v = v;
             var self = this;
             ["resize", "loadedmetadata", "loadeddata", "playing", "timeupdate"].forEach(function (evn) {
-                v.addEventListener(evn, function () { try { if (window.updateResolutionUI) window.updateResolutionUI(); } catch (e) {} });
+                v.addEventListener(evn, function () { try { if (window.updateResolutionUI) window.updateResolutionUI(evn === "resize"); } catch (e) {} });
             });
             v.addEventListener("playing", function () { dbg("video playing"); self._emit("playing"); });
             v.addEventListener("pause", function () { self._emit("pause"); });
@@ -5381,31 +5381,57 @@ function formatTimeHMS(totalSeconds) {
     }
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
-let lastResHeight = 0, resToastTimer = null;
+let lastResHeight = 0, resToastTimer = null, resPolls = 0, resEvents = 0;
 function getRealResolution() {
     try { if (twitchPlayer && twitchPlayer.getResolution) return twitchPlayer.getResolution() || 0; } catch (_) {}
     return 0;
 }
-function updateResolutionUI() {
+function resDebugOn() {
+    try { return localStorage.getItem("osm-debug") === "res"; } catch (_) { return false; }
+}
+// Cada aviso es un elemento NUEVO: en algunas TV (Tizen) un nodo que ya estaba pintado sobre el
+// video no se repinta al cambiar su texto/estilo y se queda mostrando el valor inicial.
+function showResToast(text) {
+    const area = document.getElementById("player-area");
+    if (!area) return;
+    const old = document.getElementById("player-res-toast");
+    const t = document.createElement("div");
+    t.id = "player-res-toast";
+    t.setAttribute("aria-live", "polite");
+    t.className = "visible";
+    t.style.opacity = "1";
+    t.style.visibility = "visible";
+    t.textContent = text;
+    if (old && old.parentNode) old.parentNode.replaceChild(t, old);
+    else area.appendChild(t);
+}
+function updateResolutionUI(fromEvent) {
+    resPolls++;
+    if (fromEvent === true) resEvents++;
     const h = getRealResolution();
+    if (resDebugOn()) {
+        // Diagnóstico: localStorage.setItem("osm-debug","res") y reiniciar la app
+        let w = 0;
+        try { w = twitchPlayer._v.videoWidth || 0; } catch (_) {}
+        const d = document.getElementById("player-res-toast");
+        const txt = h + "p " + w + "x" + h + " ev" + resEvents + " n" + resPolls;
+        if (d && d.textContent !== txt) showResToast(txt);
+        else if (!d) showResToast(txt);
+    }
     if (!h) return;
     const label = h + "p";
     const badge = document.getElementById("progress-res");
     if (badge && badge.textContent !== label) badge.textContent = label;
     if (h === lastResHeight) return;
     lastResHeight = h;
-    const toast = document.getElementById("player-res-toast");
-    if (!toast) return;
-    toast.textContent = label;
-    toast.style.transition = "none";
-    toast.style.opacity = "1";
-    toast.style.visibility = "visible";
-    toast.classList.add("visible");
+    if (resDebugOn()) return;
+    showResToast(label);
     clearTimeout(resToastTimer);
     resToastTimer = setTimeout(hideResToast, 5000);
 }
 window.updateResolutionUI = updateResolutionUI;
 function hideResToast() {
+    if (resDebugOn()) return;
     const t = document.getElementById("player-res-toast");
     if (!t) return;
     t.classList.remove("visible");
