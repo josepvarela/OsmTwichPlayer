@@ -5875,15 +5875,38 @@ function appendVodChatMessage(comment) {
 }
 function syncVodChatWithPlayback() {
     if (!twitchPlayer || playbackType !== "vod" || !currentVideoId) return;
+
+    // No hacer nada mientras hay una carga en curso (evita concurrencia)
+    if (vodChatLoading) return;
+
     const myToken = vodChatToken;
+
+    // Leer el tiempo con validación estricta
     let current = 0;
-    try { current = twitchPlayer.getCurrentTime() || 0; } catch (e) { return; }
+    try {
+        const t = twitchPlayer.getCurrentTime();
+        if (typeof t !== "number" || !isFinite(t) || t < 0) return; // player aún no listo
+        current = t;
+    } catch (e) {
+        return;
+    }
+
+    // Si el player devuelve 0 repetidamente al inicio, esperar a que arranque de verdad.
+    // Solo consideramos "saltos" cuando ya hay progreso real (>3 s) para evitar
+    // falsos positivos durante el warm-up del reproductor.
+    const hasRealProgress = current > 3;
+
     const nextPending = vodChatComments[vodChatPlayedIndex];
-    const lastShown = vodChatPlayedIndex > 0 ? vodChatComments[vodChatPlayedIndex - 1].offset : null;
-    const jumped =
-        (nextPending && current + 20 < nextPending.offset) ||
-        (lastShown !== null && current < lastShown - 20);
-    if (jumped) {
+    const lastShown = vodChatPlayedIndex > 0
+        ? vodChatComments[vodChatPlayedIndex - 1].offset
+        : null;
+
+    const jumpedForward =
+        hasRealProgress && nextPending && current - nextPending.offset > 20;
+    const jumpedBackward =
+        hasRealProgress && lastShown !== null && current < lastShown - 20;
+
+    if (jumpedForward || jumpedBackward) {
         vodChatToken++;
         const jumpToken = vodChatToken;
         chatMessages = [];
@@ -5896,14 +5919,27 @@ function syncVodChatWithPlayback() {
         loadVodChatFrom(currentVideoId, current, jumpToken);
         return;
     }
-    while (vodChatPlayedIndex < vodChatComments.length && vodChatComments[vodChatPlayedIndex].offset <= current) {
+
+    // Mostrar mensajes cuyo offset ya fue alcanzado por el video
+    while (vodChatPlayedIndex < vodChatComments.length &&
+           vodChatComments[vodChatPlayedIndex].offset <= current) {
         appendVodChatMessage(vodChatComments[vodChatPlayedIndex]);
         vodChatPlayedIndex++;
     }
-    const lastBuffered = vodChatComments.length ? vodChatComments[vodChatComments.length - 1].offset : current;
-    if (!vodChatLoading && !vodChatEnded && Date.now() >= vodChatRetryAt && lastBuffered - current < 60) {
-        if (vodChatNextCursor) loadVodChatFrom(currentVideoId, lastBuffered, myToken, vodChatNextCursor);
-        else loadVodChatFrom(currentVideoId, lastBuffered + 1, myToken);
+
+    // Precarga del siguiente bloque
+    const lastBuffered = vodChatComments.length
+        ? vodChatComments[vodChatComments.length - 1].offset
+        : current;
+
+    if (!vodChatLoading && !vodChatEnded &&
+        Date.now() >= vodChatRetryAt &&
+        lastBuffered - current < 60) {
+        if (vodChatNextCursor) {
+            loadVodChatFrom(currentVideoId, lastBuffered, myToken, vodChatNextCursor);
+        } else {
+            loadVodChatFrom(currentVideoId, lastBuffered + 1, myToken);
+        }
     }
 }
 let chatLayoutIndex = 0;
