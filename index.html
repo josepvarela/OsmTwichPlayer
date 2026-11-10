@@ -606,6 +606,12 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 .progress-track:focus { outline: none; }
 .progress-track.focused { box-shadow: 0 0 0 2px #fff; }
 .progress-label { font-size: 15px; color: #fff; min-width: 56px; }
+.progress-res { font-size: 14px; font-weight: 700; color: #fff; background: rgba(255,255,255,.18); border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
+.progress-res:empty { display: none; }
+#player-res-toast { position: absolute; top: 18px; left: 22px; z-index: 12; font-size: 18px; font-weight: 700; color: #fff; background: rgba(0,0,0,.6); border-radius: 6px; padding: 6px 14px; opacity: 0; pointer-events: none; transition: opacity .25s; }
+#player-res-toast.visible { opacity: 1; }
+html[data-tv-scaled] .progress-res { font-size: 26px; padding: 4px 14px; }
+html[data-tv-scaled] #player-res-toast { font-size: 32px; top: 30px; left: 40px; padding: 10px 22px; }
 .live-label { display: flex; align-items: center; gap: 7px; }
 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #eb0400; display: inline-block; flex: 0 0 8px; box-shadow: 0 0 0 2px rgba(235,4,0,.18); }
 #progress-elapsed { text-align: left; }
@@ -1486,6 +1492,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             if (c) c.appendChild(v);
             this._v = v;
             var self = this;
+            v.addEventListener("resize", function () { try { if (window.updateResolutionUI) window.updateResolutionUI(); } catch (e) {} });
             v.addEventListener("playing", function () { dbg("video playing"); self._emit("playing"); });
             v.addEventListener("pause", function () { self._emit("pause"); });
             v.addEventListener("ended", function () { self._emit("ended"); });
@@ -1598,6 +1605,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         P.setVideo = function (id, t) { this._load("video", id, t || 0); };
         P.getQualities = function () { return this._q.map(function (q) { return { name: q.name, group: q.group }; }); };
         P.getQuality = function () { return this._cur; };
+        P.getResolution = function () { return (this._v && this._v.videoHeight) || 0; };
         P.setQuality = function (g) {
             for (var i = 0; i < this._q.length; i++) {
                 if (this._q[i].group === g) {
@@ -1722,6 +1730,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     <div id="player-screen" class="screen">
         <div id="player-area">
             <div id="twitch-player-target"></div>
+            <div id="player-res-toast" aria-live="polite"></div>
             <div id="chat-panel" class="chat-large">
                 <div id="chat-messages"></div>
                 <div id="profile-chat-composer">
@@ -1794,6 +1803,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                         <div class="progress-fill" id="progress-fill"></div>
                     </div>
                     <span class="progress-label" id="progress-remaining"></span>
+                    <span class="progress-res" id="progress-res"></span>
                 </div>
                 <div class="player-title-row">
                     <div id="player-stream-title"></div>
@@ -4382,6 +4392,7 @@ function bindPlayerLifecycleListeners() {
 }
 async function createPlayer(options) {
     lastPlayerOptions = Object.assign({}, options);
+    resetResolutionUI();
     playerPlaybackStarted = false;
     availableQualities = [];
     qualityIndex = 0;
@@ -4684,10 +4695,6 @@ function getPlayerNavigationItems() {
     if (game && playerInfoHasGame && !game.classList.contains("disabled") && !game.classList.contains("hidden")) {
         items.push({type:"info", index:1, el:game});
     }
-    const seekTrack = document.getElementById("progress-track");
-    if (seekTrack && !seekTrack.classList.contains("is-live")) {
-        items.push({type:"seek", el:seekTrack});
-    }
     CONTROL_ACTIONS.forEach((action) => {
         const el = document.getElementById(`ctrl-${action}`);
         if (el && !el.classList.contains("disabled") && !el.classList.contains("hidden")) {
@@ -4830,11 +4837,32 @@ function scheduleControlsAutoHide() {
         controlsAutoHideTimer = null;
         if (currentScreen !== "player" || !controlsVisible) return;
         if (qualityPanelVisible || OskKeyboard.isOpen()) return;
+        const sk = document.getElementById("progress-track");
+        if (playbackType === "vod" && sk && document.activeElement === sk) { scheduleControlsAutoHide(); return; }
         let paused = false;
         try { paused = !!(twitchPlayer && twitchPlayer.isPaused()); } catch (err) {}
         if (paused) return;
         hideControls();
     }, CONTROLS_AUTO_HIDE_MS);
+}
+let lastAutoHideRestart = 0;
+function restartControlsAutoHide() {
+    const n = Date.now();
+    if (n - lastAutoHideRestart < 400) return;
+    lastAutoHideRestart = n;
+    clearControlsAutoHide();
+    scheduleControlsAutoHide();
+}
+function focusSeekBar() {
+    const sk = document.getElementById("progress-track");
+    if (playbackType !== "vod" || !sk || sk.classList.contains("is-live")) return false;
+    clearPlayerNavigationFocus();
+    controlsVisible = true;
+    document.getElementById("player-controls-bar")?.classList.add("visible");
+    try { sk.focus({preventScroll:true}); } catch (_) { sk.focus(); }
+    sk.classList.add("focused");
+    restartControlsAutoHide();
+    return true;
 }
 function clearControlsAutoHide() {
     if (controlsAutoHideTimer) { clearTimeout(controlsAutoHideTimer); controlsAutoHideTimer = null; }
@@ -4869,7 +4897,7 @@ function updateControlsFocus() {
 }
 function handlePlayerScreenKeys(keyCode, e) {
     const activeEl = document.activeElement;
-    if (controlsVisible) scheduleControlsAutoHide();
+    if (controlsVisible) restartControlsAutoHide();
     const targetTag = e.target.tagName;
     if (OskKeyboard.isOpen()) return;
     if (targetTag === "INPUT" || targetTag === "TEXTAREA" || targetTag === "A") {
@@ -4914,10 +4942,16 @@ function handlePlayerScreenKeys(keyCode, e) {
     const current = getCurrentPlayerNavigationIndex();
     const items = getPlayerNavigationItems();
     const focusedItem = items[current];
-    if ((keyCode === 37 || keyCode === 39) && focusedItem?.type === "seek") {
-        e.preventDefault();
-        seekBy(keyCode === 37 ? -5 : 5);
-        return;
+    const seekEl = document.getElementById("progress-track");
+    if (seekEl && document.activeElement === seekEl && playbackType === "vod") {
+        if (keyCode === 37 || keyCode === 39) { e.preventDefault(); seekBy(keyCode === 37 ? -5 : 5); restartControlsAutoHide(); return; }
+        if (keyCode === 38) { e.preventDefault(); return; }
+        if (keyCode === 40) { e.preventDefault(); showControls(true); return; }
+        if (keyCode === 13 || keyCode === 23) {
+            e.preventDefault(); e.stopPropagation();
+            if (!isControlsActionSuppressed() && twitchPlayer) togglePlayPause(true);
+            return;
+        }
     }
     if (keyCode === 37) {
         e.preventDefault();
@@ -4931,6 +4965,7 @@ function handlePlayerScreenKeys(keyCode, e) {
     }
     if (keyCode === 38) {
         e.preventDefault();
+        if (controlsVisible && focusedItem?.type === "control" && focusSeekBar()) return;
         showControls(true);
         return;
     }
@@ -5326,8 +5361,37 @@ function formatTimeHMS(totalSeconds) {
     }
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
+let lastResHeight = 0, resToastTimer = null;
+function getRealResolution() {
+    try { if (twitchPlayer && twitchPlayer.getResolution) return twitchPlayer.getResolution() || 0; } catch (_) {}
+    return 0;
+}
+function updateResolutionUI() {
+    const h = getRealResolution();
+    if (!h) return;
+    const label = h + "p";
+    const badge = document.getElementById("progress-res");
+    if (badge && badge.textContent !== label) badge.textContent = label;
+    if (h === lastResHeight) return;
+    lastResHeight = h;
+    const toast = document.getElementById("player-res-toast");
+    if (!toast) return;
+    toast.textContent = label;
+    toast.classList.add("visible");
+    clearTimeout(resToastTimer);
+    resToastTimer = setTimeout(() => toast.classList.remove("visible"), 5000);
+}
+window.updateResolutionUI = updateResolutionUI;
+function resetResolutionUI() {
+    lastResHeight = 0;
+    clearTimeout(resToastTimer);
+    document.getElementById("player-res-toast")?.classList.remove("visible");
+    const badge = document.getElementById("progress-res");
+    if (badge) badge.textContent = "";
+}
 function updateProgressUI() {
     if (!twitchPlayer) return;
+    updateResolutionUI();
     const track = document.getElementById("progress-track");
     const fill = document.getElementById("progress-fill");
     const elapsedEl = document.getElementById("progress-elapsed");
@@ -5743,19 +5807,22 @@ async function startVodChatReplay(videoId, startOffsetSeconds) {
     if (vodChatComments.length) chatMessages = chatMessages.filter(m => !m.system);
     renderChatMessages();
 }
-async function loadVodChatFrom(videoId, offsetSeconds, myToken) {
+let vodChatRetryAt = 0;
+async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
     vodChatLoading = true;
     try {
-        let url = `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&offset=${Math.max(0, Math.floor(offsetSeconds))}`;
+        let url = startCursor
+            ? `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&cursor=${encodeURIComponent(startCursor)}`
+            : `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&offset=${Math.max(0, Math.floor(offsetSeconds))}`;
         let cursor = null;
         let fetchedAny = false;
         let hadError = false;
         for (let i = 0; i < 6; i++) {
             const res = await fetch(url, { cache: "no-store" });
             if (myToken !== vodChatToken) return;
-            if (!res.ok) { hadError = true; vodChatEnded = true; break; }
+            if (!res.ok) { hadError = true; break; }
             const data = await res.json();
-            if (data.error) { hadError = true; vodChatEnded = true; break; }
+            if (data.error) { hadError = true; break; }
             fetchedAny = true;
             (data.comments || []).forEach(c => {
                 vodChatComments.push({
@@ -5770,20 +5837,27 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken) {
             cursor = data._next || null;
             const lastOffset = vodChatComments.length ? vodChatComments[vodChatComments.length - 1].offset : offsetSeconds;
             if (!cursor) { vodChatEnded = true; break; }
-            if (lastOffset - offsetSeconds > 120) break;
+            if (lastOffset - offsetSeconds > 90) break;
             url = `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&cursor=${encodeURIComponent(cursor)}`;
         }
         vodChatComments.sort((a, b) => a.offset - b.offset);
-        vodChatNextCursor = cursor;
-        if (!fetchedAny && hadError && myToken === vodChatToken && !vodChatComments.length) {
-            appendSystemMessage("Este video no tiene chat guardado o Twitch no permite verlo desde acá.");
+        if (!hadError || fetchedAny) vodChatNextCursor = cursor;
+        if (hadError) {
+            if (!vodChatComments.length) {
+                vodChatEnded = true;
+                if (myToken === vodChatToken) appendSystemMessage("Este video no tiene chat guardado o Twitch no permite verlo desde acá.");
+            } else {
+                vodChatRetryAt = Date.now() + 5000;
+            }
         }
     } catch (e) {
         console.warn("No se pudo cargar la repetición del chat:", e);
-        if (myToken === vodChatToken && !vodChatComments.length) appendSystemMessage("No se pudo cargar la repetición del chat.");
-        vodChatEnded = true;
+        if (myToken === vodChatToken) {
+            if (!vodChatComments.length) { appendSystemMessage("No se pudo cargar la repetición del chat."); vodChatEnded = true; }
+            else vodChatRetryAt = Date.now() + 5000;
+        }
     } finally {
-        vodChatLoading = false;
+        if (myToken === vodChatToken) vodChatLoading = false;
     }
 }
 function appendVodChatMessage(comment) {
@@ -5810,24 +5884,26 @@ function syncVodChatWithPlayback() {
         (nextPending && current + 20 < nextPending.offset) ||
         (lastShown !== null && current < lastShown - 20);
     if (jumped) {
+        vodChatToken++;
+        const jumpToken = vodChatToken;
         chatMessages = [];
         vodChatComments = [];
         vodChatPlayedIndex = 0;
+        vodChatNextCursor = null;
         vodChatEnded = false;
+        vodChatRetryAt = 0;
         renderChatMessages();
-        loadVodChatFrom(currentVideoId, current, myToken);
+        loadVodChatFrom(currentVideoId, current, jumpToken);
         return;
     }
-    let shown = false;
     while (vodChatPlayedIndex < vodChatComments.length && vodChatComments[vodChatPlayedIndex].offset <= current) {
         appendVodChatMessage(vodChatComments[vodChatPlayedIndex]);
         vodChatPlayedIndex++;
-        shown = true;
     }
-    if (shown) return;
     const lastBuffered = vodChatComments.length ? vodChatComments[vodChatComments.length - 1].offset : current;
-    if (!vodChatLoading && !vodChatEnded && lastBuffered - current < 30) {
-        loadVodChatFrom(currentVideoId, lastBuffered + 1, myToken);
+    if (!vodChatLoading && !vodChatEnded && Date.now() >= vodChatRetryAt && lastBuffered - current < 60) {
+        if (vodChatNextCursor) loadVodChatFrom(currentVideoId, lastBuffered, myToken, vodChatNextCursor);
+        else loadVodChatFrom(currentVideoId, lastBuffered + 1, myToken);
     }
 }
 let chatLayoutIndex = 0;
