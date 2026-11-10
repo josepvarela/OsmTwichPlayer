@@ -51,7 +51,7 @@ window.addEventListener("keydown", function (e) {
         "Pausar": "Pause", "Reproducir": "Play", "Progreso del video": "Video progress",
         "Silenciar o activar sonido": "Mute or unmute", "Calidad": "Quality", "Auto": "Auto",
         "Tamaño texto chat": "Chat text size", "Mostrar chat": "Show chat", "Sí": "Yes",
-        "Ancho del chat": "Chat width", "Altura del chat": "Chat height", "Posición del chat": "Chat position",
+        "Ancho del chat": "Chat width", "Altura del chat": "Chat height", "Posición del chat": "Chat position", "Posición vertical del chat": "Vertical chat position", "Arriba": "Top", "Abajo": "Bottom",
         "Izquierda": "Left", "Derecha": "Right", "Volver": "Back",
         "No se pudo cargar Twitch Embed": "Could not load Twitch Embed",
         "Twitch Embed no está disponible": "Twitch Embed is not available",
@@ -90,9 +90,9 @@ window.addEventListener("keydown", function (e) {
     };
     var EN_EXTRA = {"Gris": "Gray", "Gris oscuro": "Gray Dark", "No": "No", "Enviar": "Send", "Espacio": "Space", "Escribir": "Write"};
     for (var __k in EN_EXTRA) EN[__k] = EN_EXTRA[__k];
-    var DICTS = { en: EN, ru: {"Buscar": "Поиск", "Canales seguidos": "Отслеживаемые каналы", "Destacados": "Рекомендуемое", "Streamers top": "Топ стримеров", "Juegos top": "Топ игр", "Ajustes": "Настройки", "Cuenta": "Аккаунт", "Donar": "Поддержать", "Enviar comentarios": "Отправить отзыв", "Transmisiones destacadas": "Рекомендуемые трансляции", "Streamers más vistos ahora": "Самые популярные стримеры сейчас", "Juegos más vistos": "Самые популярные игры", "En vivo ahora": "Сейчас в эфире", "Clips destacados": "Рекомендуемые клипы", "VODs recientes": "Недавние записи", "Buscar canal": "Поиск канала", "Buscar canal…": "Поиск канала…", "Cerrar búsqueda": "Закрыть поиск", "Sugerencias de canales": "Подсказки каналов", "Nombre del canal de Twitch...": "Название канала Twitch...", "Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.": "Печатайте на клавиатуре (ПК) или используйте пульт ТВ, чтобы открыть экранную клавиатуру.", "Buscando…": "Поиск…", "CANAL NO ENCONTRADO": "КАНАЛ НЕ НАЙДЕН", "Cargando…": "Загрузка…", "EN VIVO": "В ЭФИРЕ", "OFFLINE": "ОФЛАЙН", "(sin título)": "(без названия)", "Sin transmisiones recientes": "Нет недавних трансляций", "ayer": "вчера", "Inicia sesión para ver canales seguidos": "Войдите, чтобы видеть отслеживаемые каналы", "No hay transmisiones en vivo de este juego ahora.": "Сейчас нет трансляций этой игры.", "No se pudieron cargar juegos.": "Не удалось загрузить игры.", "No se pudieron cargar streamers.": "Не удалось загрузить стримеров.", "No se pudieron cargar transmisiones en español.": "Не удалось загрузить трансляции на русском.", "Este canal no tiene VODs recientes.": "У этого канала нет недавних записей.", "Este canal no tiene clips destacados.": "У этого канала нет рекомендуемых клипов.", "Ver en vivo": "Смотреть эфир", "Seguir": "Подписаться", "Siguiendo ✓": "Вы подписаны ✓", "Foto de perfil": "Фото профиля", "Ajustes de reproducción": "Настройки воспроизведения", "Información del stream": "Информация о трансляции", "Abrir canal del streamer": "Открыть канал стримера", "Abrir streams de este juego": "Открыть трансляции этой игры", "Adelantar 10 segundos": "Перемотать на 10 секунд вперёд", "Retroceder 10 segundos": "Перемотать на 10 секунд назад", "Pausar": "Пауза", "Reproducir": "Воспроизвести", "Progreso del video": "Ход воспроизведения", "Silenciar o activar sonido": "Выключить или включить звук", "Calidad": "Качество", "Auto": "Авто", "Tamaño texto chat": "Размер текста чата", "Mostrar chat": "Показывать чат", "Sí": "Да", "Ancho del chat": "Ширина чата", "Altura del chat": "Высота чата", "Posición del chat": "Положение чата", "Izquierda": "Слева", "Derecha": "Справа", "Volver": "Назад", "No se pudo cargar Twitch Embed": "Не удалось загрузить Twitch Embed", "Twitch Embed no está disponible": "Twitch Embed недоступен", "No se pudo cargar el reproductor de Twitch.": "Не удалось загрузить плеер Twitch.", "Comprueba la conexión a Internet y vuelve a pulsar Actualizar.": "Проверьте подключение к интернету и нажмите «Обновить» ещё раз.", "Chatear": "Чат", "Chatea": "Чат", "Chatea...": "Чат...", "Cerrar chat": "Закрыть чат", "Enviar mensaje al chat": "Отправить сообщение в чат", "Conectando al chat…": "Подключение к чату…", "Cargando repetición del chat…": "Загрузка повтора чата…", "Este video no tiene chat guardado o Twitch no permite verlo desde acá.": "У этого видео нет сохранённого чата, или Twitch не разрешает просматривать его здесь.", "No se pudo cargar la repetición del chat.": "Не удалось загрузить повтор чата.", "No se pudo enviar: el chat no está conectado en este momento.": "Не удалось отправить: чат сейчас не подключён.", "Para enviar mensajes al chat necesitas iniciar sesión con Twitch.": "Чтобы отправлять сообщения в чат, войдите через Twitch.", "Tu sesión de Twitch venció. Volvés a modo solo lectura — iniciá sesión de nuevo desde \"Cuenta\".": "Сеанс Twitch истёк. Вы снова в режиме только чтения — войдите заново через «Аккаунт».", "Chat grande derecha": "Большой чат, справа", "Chat mediano derecha": "Средний чат, справа", "Chat pequeño derecha": "Маленький чат, справа", "Chat grande izquierda": "Большой чат, слева", "Chat mediano izquierda": "Средний чат, слева", "Chat pequeño izquierda": "Маленький чат, слева", "Idioma": "Язык", "Automático": "Автоматически", "Tema": "Тема", "Claro": "Светлая", "Oscuro": "Тёмная", "Tamaño texto app": "Размер текста приложения", "Color de texto": "Цвет текста", "Blanco": "Белый", "Amarillo": "Жёлтый", "Verde": "Зелёный", "Cian": "Голубой", "Rojo": "Красный", "Negro": "Чёрный", "Tamaño tarjetas": "Размер карточек", "Tipo de fuente": "Шрифт", "Predeterminada": "По умолчанию", "Serif": "Serif", "Mono": "Mono", "Verdana": "Verdana", "Casual": "Casual", "Iniciar sesión": "Войти", "Iniciar con QR (TV)": "Войти по QR-коду (ТВ)", "Recargar app": "Перезагрузить приложение", "Salir": "Выход", "Cerrar": "Закрыть", "Cerrar sesión": "Выйти", "Ver perfil": "Открыть профиль", "Cancelar": "Отмена", "Sesión iniciada. Ya podés chatear con tu nombre.": "Вы вошли. Теперь можно писать в чат под своим именем.", "Preparando código QR…": "Подготовка QR-кода…", "Un momento.": "Минутку.", "Inicia sesión desde tu celular": "Войдите с телефона", "Escanea el código con la cámara, o ve a twitch.tv/activate en cualquier dispositivo y escribe el código de 8 dígitos.": "Отсканируйте код камерой или откройте twitch.tv/activate на любом устройстве и введите 8-значный код.", "Código QR para iniciar sesión en Twitch": "QR-код для входа в Twitch", "No se pudo iniciar sesión": "Не удалось войти", "Reintentar con QR": "Повторить через QR", "Iniciar sesión (redirigir)": "Войти (перенаправление)", "No se pudo preparar el login (sin conexión con Twitch).": "Не удалось подготовить вход (нет связи с Twitch).", "No se pudo iniciar el login por QR.": "Не удалось начать вход по QR.", "No se pudo conectar con Twitch.": "Не удалось подключиться к Twitch.", "El código QR expiró. Probá de nuevo.": "QR-код истёк. Попробуйте снова.", "Pulsa atrás de nuevo para salir": "Нажмите «Назад» ещё раз, чтобы выйти", "Presiona atrás de nuevo para salir": "Нажмите «Назад» ещё раз, чтобы выйти", "¿Deseas salir? Pulsa atrás de nuevo para salir de la app": "Выйти? Нажмите «Назад» ещё раз, чтобы выйти из приложения", "Gris": "Серый", "Gris oscuro": "Тёмно-серый", "No": "Нет"},
-        it: {"Buscar": "Cerca", "Canales seguidos": "Canali seguiti", "Destacados": "In evidenza", "Streamers top": "Top streamer", "Juegos top": "Top giochi", "Ajustes": "Impostazioni", "Cuenta": "Account", "Donar": "Dona", "Enviar comentarios": "Invia feedback", "Transmisiones destacadas": "Stream in evidenza", "Streamers más vistos ahora": "Streamer più seguiti ora", "Juegos más vistos": "Giochi più visti", "En vivo ahora": "In diretta ora", "Clips destacados": "Clip in evidenza", "VODs recientes": "VOD recenti", "Buscar canal": "Cerca canale", "Buscar canal…": "Cerca canale…", "Cerrar búsqueda": "Chiudi ricerca", "Sugerencias de canales": "Suggerimenti di canali", "Nombre del canal de Twitch...": "Nome del canale Twitch...", "Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.": "Scrivi con la tastiera (PC) o usa il telecomando della TV per aprire la tastiera su schermo.", "Buscando…": "Ricerca in corso…", "CANAL NO ENCONTRADO": "CANALE NON TROVATO", "Cargando…": "Caricamento…", "EN VIVO": "IN DIRETTA", "OFFLINE": "OFFLINE", "(sin título)": "(senza titolo)", "Sin transmisiones recientes": "Nessuno stream recente", "ayer": "ieri", "Inicia sesión para ver canales seguidos": "Accedi per vedere i canali seguiti", "No hay transmisiones en vivo de este juego ahora.": "Al momento non ci sono stream in diretta di questo gioco.", "No se pudieron cargar juegos.": "Impossibile caricare i giochi.", "No se pudieron cargar streamers.": "Impossibile caricare gli streamer.", "No se pudieron cargar transmisiones en español.": "Impossibile caricare gli stream in italiano.", "Este canal no tiene VODs recientes.": "Questo canale non ha VOD recenti.", "Este canal no tiene clips destacados.": "Questo canale non ha clip in evidenza.", "Ver en vivo": "Guarda in diretta", "Seguir": "Segui", "Siguiendo ✓": "Seguito ✓", "Foto de perfil": "Foto profilo", "Ajustes de reproducción": "Impostazioni di riproduzione", "Información del stream": "Informazioni sullo stream", "Abrir canal del streamer": "Apri il canale dello streamer", "Abrir streams de este juego": "Apri gli stream di questo gioco", "Adelantar 10 segundos": "Avanti di 10 secondi", "Retroceder 10 segundos": "Indietro di 10 secondi", "Pausar": "Pausa", "Reproducir": "Riproduci", "Progreso del video": "Avanzamento del video", "Silenciar o activar sonido": "Disattiva o attiva l'audio", "Calidad": "Qualità", "Auto": "Auto", "Tamaño texto chat": "Dimensione testo chat", "Mostrar chat": "Mostra chat", "Sí": "Sì", "Ancho del chat": "Larghezza chat", "Altura del chat": "Altezza chat", "Posición del chat": "Posizione chat", "Izquierda": "Sinistra", "Derecha": "Destra", "Volver": "Indietro", "No se pudo cargar Twitch Embed": "Impossibile caricare Twitch Embed", "Twitch Embed no está disponible": "Twitch Embed non è disponibile", "No se pudo cargar el reproductor de Twitch.": "Impossibile caricare il player di Twitch.", "Comprueba la conexión a Internet y vuelve a pulsar Actualizar.": "Controlla la connessione a Internet e premi di nuovo Aggiorna.", "Chatear": "Chat", "Chatea": "Chat", "Chatea...": "Chat...", "Cerrar chat": "Chiudi chat", "Enviar mensaje al chat": "Invia messaggio in chat", "Conectando al chat…": "Connessione alla chat…", "Cargando repetición del chat…": "Caricamento della replica della chat…", "Este video no tiene chat guardado o Twitch no permite verlo desde acá.": "Questo video non ha una chat salvata, oppure Twitch non permette di vederla da qui.", "No se pudo cargar la repetición del chat.": "Impossibile caricare la replica della chat.", "No se pudo enviar: el chat no está conectado en este momento.": "Invio non riuscito: la chat non è connessa al momento.", "Para enviar mensajes al chat necesitas iniciar sesión con Twitch.": "Per inviare messaggi in chat devi accedere con Twitch.", "Tu sesión de Twitch venció. Volvés a modo solo lectura — iniciá sesión de nuevo desde \"Cuenta\".": "La tua sessione Twitch è scaduta. Sei tornato in modalità sola lettura: accedi di nuovo da \"Account\".", "Chat grande derecha": "Chat grande, a destra", "Chat mediano derecha": "Chat medio, a destra", "Chat pequeño derecha": "Chat piccolo, a destra", "Chat grande izquierda": "Chat grande, a sinistra", "Chat mediano izquierda": "Chat medio, a sinistra", "Chat pequeño izquierda": "Chat piccolo, a sinistra", "Idioma": "Lingua", "Automático": "Automatico", "Tema": "Tema", "Claro": "Chiaro", "Oscuro": "Scuro", "Tamaño texto app": "Dimensione testo app", "Color de texto": "Colore del testo", "Blanco": "Bianco", "Amarillo": "Giallo", "Verde": "Verde", "Cian": "Ciano", "Rojo": "Rosso", "Negro": "Nero", "Tamaño tarjetas": "Dimensione schede", "Tipo de fuente": "Tipo di carattere", "Predeterminada": "Predefinito", "Serif": "Serif", "Mono": "Mono", "Verdana": "Verdana", "Casual": "Casual", "Iniciar sesión": "Accedi", "Iniciar con QR (TV)": "Accedi con QR (TV)", "Recargar app": "Ricarica app", "Salir": "Esci", "Cerrar": "Chiudi", "Cerrar sesión": "Esci dall'account", "Ver perfil": "Vedi profilo", "Cancelar": "Annulla", "Sesión iniciada. Ya podés chatear con tu nombre.": "Accesso effettuato. Ora puoi scrivere in chat con il tuo nome.", "Preparando código QR…": "Preparazione del codice QR…", "Un momento.": "Un momento.", "Inicia sesión desde tu celular": "Accedi dal tuo telefono", "Escanea el código con la cámara, o ve a twitch.tv/activate en cualquier dispositivo y escribe el código de 8 dígitos.": "Inquadra il codice con la fotocamera, oppure vai su twitch.tv/activate da qualsiasi dispositivo e inserisci il codice di 8 cifre.", "Código QR para iniciar sesión en Twitch": "Codice QR per accedere a Twitch", "No se pudo iniciar sesión": "Impossibile accedere", "Reintentar con QR": "Riprova con QR", "Iniciar sesión (redirigir)": "Accedi (reindirizzamento)", "No se pudo preparar el login (sin conexión con Twitch).": "Impossibile preparare l'accesso (nessuna connessione con Twitch).", "No se pudo iniciar el login por QR.": "Impossibile avviare l'accesso con QR.", "No se pudo conectar con Twitch.": "Impossibile connettersi a Twitch.", "El código QR expiró. Probá de nuevo.": "Il codice QR è scaduto. Riprova.", "Pulsa atrás de nuevo para salir": "Premi di nuovo indietro per uscire", "Presiona atrás de nuevo para salir": "Premi di nuovo indietro per uscire", "¿Deseas salir? Pulsa atrás de nuevo para salir de la app": "Vuoi uscire? Premi di nuovo indietro per uscire dall'app", "Gris": "Grigio", "Gris oscuro": "Grigio scuro", "No": "No"},
-        fr: {"Buscar": "Rechercher", "Canales seguidos": "Chaînes suivies", "Destacados": "À la une", "Streamers top": "Top streamers", "Juegos top": "Top jeux", "Ajustes": "Paramètres", "Cuenta": "Compte", "Donar": "Faire un don", "Enviar comentarios": "Envoyer un commentaire", "Transmisiones destacadas": "Streams à la une", "Streamers más vistos ahora": "Streamers les plus regardés en ce moment", "Juegos más vistos": "Jeux les plus regardés", "En vivo ahora": "En direct maintenant", "Clips destacados": "Clips à la une", "VODs recientes": "VOD récentes", "Buscar canal": "Rechercher une chaîne", "Buscar canal…": "Rechercher une chaîne…", "Cerrar búsqueda": "Fermer la recherche", "Sugerencias de canales": "Suggestions de chaînes", "Nombre del canal de Twitch...": "Nom de la chaîne Twitch...", "Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.": "Tapez au clavier (PC) ou utilisez la télécommande de la TV pour ouvrir le clavier à l'écran.", "Buscando…": "Recherche…", "CANAL NO ENCONTRADO": "CHAÎNE INTROUVABLE", "Cargando…": "Chargement…", "EN VIVO": "EN DIRECT", "OFFLINE": "HORS LIGNE", "(sin título)": "(sans titre)", "Sin transmisiones recientes": "Aucun stream récent", "ayer": "hier", "Inicia sesión para ver canales seguidos": "Connectez-vous pour voir les chaînes suivies", "No hay transmisiones en vivo de este juego ahora.": "Aucun stream en direct pour ce jeu pour le moment.", "No se pudieron cargar juegos.": "Impossible de charger les jeux.", "No se pudieron cargar streamers.": "Impossible de charger les streamers.", "No se pudieron cargar transmisiones en español.": "Impossible de charger les streams en français.", "Este canal no tiene VODs recientes.": "Cette chaîne n'a pas de VOD récentes.", "Este canal no tiene clips destacados.": "Cette chaîne n'a pas de clips à la une.", "Ver en vivo": "Regarder en direct", "Seguir": "Suivre", "Siguiendo ✓": "Suivi ✓", "Foto de perfil": "Photo de profil", "Ajustes de reproducción": "Paramètres de lecture", "Información del stream": "Infos sur le stream", "Abrir canal del streamer": "Ouvrir la chaîne du streamer", "Abrir streams de este juego": "Ouvrir les streams de ce jeu", "Adelantar 10 segundos": "Avancer de 10 secondes", "Retroceder 10 segundos": "Reculer de 10 secondes", "Pausar": "Pause", "Reproducir": "Lecture", "Progreso del video": "Progression de la vidéo", "Silenciar o activar sonido": "Couper ou activer le son", "Calidad": "Qualité", "Auto": "Auto", "Tamaño texto chat": "Taille du texte du chat", "Mostrar chat": "Afficher le chat", "Sí": "Oui", "Ancho del chat": "Largeur du chat", "Altura del chat": "Hauteur du chat", "Posición del chat": "Position du chat", "Izquierda": "Gauche", "Derecha": "Droite", "Volver": "Retour", "No se pudo cargar Twitch Embed": "Impossible de charger Twitch Embed", "Twitch Embed no está disponible": "Twitch Embed n'est pas disponible", "No se pudo cargar el reproductor de Twitch.": "Impossible de charger le lecteur Twitch.", "Comprueba la conexión a Internet y vuelve a pulsar Actualizar.": "Vérifiez votre connexion Internet et appuyez de nouveau sur Actualiser.", "Chatear": "Chat", "Chatea": "Chat", "Chatea...": "Chat...", "Cerrar chat": "Fermer le chat", "Enviar mensaje al chat": "Envoyer un message dans le chat", "Conectando al chat…": "Connexion au chat…", "Cargando repetición del chat…": "Chargement du replay du chat…", "Este video no tiene chat guardado o Twitch no permite verlo desde acá.": "Cette vidéo n'a pas de chat enregistré, ou Twitch ne permet pas de le voir d'ici.", "No se pudo cargar la repetición del chat.": "Impossible de charger le replay du chat.", "No se pudo enviar: el chat no está conectado en este momento.": "Échec de l'envoi : le chat n'est pas connecté pour le moment.", "Para enviar mensajes al chat necesitas iniciar sesión con Twitch.": "Pour envoyer des messages dans le chat, connectez-vous avec Twitch.", "Tu sesión de Twitch venció. Volvés a modo solo lectura — iniciá sesión de nuevo desde \"Cuenta\".": "Votre session Twitch a expiré. Vous repassez en lecture seule — reconnectez-vous depuis « Compte ».", "Chat grande derecha": "Grand chat, à droite", "Chat mediano derecha": "Chat moyen, à droite", "Chat pequeño derecha": "Petit chat, à droite", "Chat grande izquierda": "Grand chat, à gauche", "Chat mediano izquierda": "Chat moyen, à gauche", "Chat pequeño izquierda": "Petit chat, à gauche", "Idioma": "Langue", "Automático": "Automatique", "Tema": "Thème", "Claro": "Clair", "Oscuro": "Sombre", "Tamaño texto app": "Taille du texte de l'app", "Color de texto": "Couleur du texte", "Blanco": "Blanc", "Amarillo": "Jaune", "Verde": "Vert", "Cian": "Cyan", "Rojo": "Rouge", "Negro": "Noir", "Tamaño tarjetas": "Taille des cartes", "Tipo de fuente": "Police", "Predeterminada": "Par défaut", "Serif": "Serif", "Mono": "Mono", "Verdana": "Verdana", "Casual": "Casual", "Iniciar sesión": "Se connecter", "Iniciar con QR (TV)": "Se connecter avec un QR (TV)", "Recargar app": "Recharger l'app", "Salir": "Quitter", "Cerrar": "Fermer", "Cerrar sesión": "Se déconnecter", "Ver perfil": "Voir le profil", "Cancelar": "Annuler", "Sesión iniciada. Ya podés chatear con tu nombre.": "Connecté. Vous pouvez maintenant discuter avec votre nom.", "Preparando código QR…": "Préparation du code QR…", "Un momento.": "Un instant.", "Inicia sesión desde tu celular": "Connectez-vous depuis votre téléphone", "Escanea el código con la cámara, o ve a twitch.tv/activate en cualquier dispositivo y escribe el código de 8 dígitos.": "Scannez le code avec votre appareil photo, ou allez sur twitch.tv/activate depuis n'importe quel appareil et saisissez le code à 8 chiffres.", "Código QR para iniciar sesión en Twitch": "Code QR pour se connecter à Twitch", "No se pudo iniciar sesión": "Connexion impossible", "Reintentar con QR": "Réessayer avec le QR", "Iniciar sesión (redirigir)": "Se connecter (redirection)", "No se pudo preparar el login (sin conexión con Twitch).": "Impossible de préparer la connexion (pas de connexion à Twitch).", "No se pudo iniciar el login por QR.": "Impossible de démarrer la connexion par QR.", "No se pudo conectar con Twitch.": "Impossible de se connecter à Twitch.", "El código QR expiró. Probá de nuevo.": "Le code QR a expiré. Réessayez.", "Pulsa atrás de nuevo para salir": "Appuyez de nouveau sur retour pour quitter", "Presiona atrás de nuevo para salir": "Appuyez de nouveau sur retour pour quitter", "¿Deseas salir? Pulsa atrás de nuevo para salir de la app": "Voulez-vous quitter ? Appuyez de nouveau sur retour pour quitter l'application", "Gris": "Gris", "Gris oscuro": "Gris foncé", "No": "Non"} };
+    var DICTS = { en: EN, ru: {"Buscar": "Поиск", "Canales seguidos": "Отслеживаемые каналы", "Destacados": "Рекомендуемое", "Streamers top": "Топ стримеров", "Juegos top": "Топ игр", "Ajustes": "Настройки", "Cuenta": "Аккаунт", "Donar": "Поддержать", "Enviar comentarios": "Отправить отзыв", "Transmisiones destacadas": "Рекомендуемые трансляции", "Streamers más vistos ahora": "Самые популярные стримеры сейчас", "Juegos más vistos": "Самые популярные игры", "En vivo ahora": "Сейчас в эфире", "Clips destacados": "Рекомендуемые клипы", "VODs recientes": "Недавние записи", "Buscar canal": "Поиск канала", "Buscar canal…": "Поиск канала…", "Cerrar búsqueda": "Закрыть поиск", "Sugerencias de canales": "Подсказки каналов", "Nombre del canal de Twitch...": "Название канала Twitch...", "Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.": "Печатайте на клавиатуре (ПК) или используйте пульт ТВ, чтобы открыть экранную клавиатуру.", "Buscando…": "Поиск…", "CANAL NO ENCONTRADO": "КАНАЛ НЕ НАЙДЕН", "Cargando…": "Загрузка…", "EN VIVO": "В ЭФИРЕ", "OFFLINE": "ОФЛАЙН", "(sin título)": "(без названия)", "Sin transmisiones recientes": "Нет недавних трансляций", "ayer": "вчера", "Inicia sesión para ver canales seguidos": "Войдите, чтобы видеть отслеживаемые каналы", "No hay transmisiones en vivo de este juego ahora.": "Сейчас нет трансляций этой игры.", "No se pudieron cargar juegos.": "Не удалось загрузить игры.", "No se pudieron cargar streamers.": "Не удалось загрузить стримеров.", "No se pudieron cargar transmisiones en español.": "Не удалось загрузить трансляции на русском.", "Este canal no tiene VODs recientes.": "У этого канала нет недавних записей.", "Este canal no tiene clips destacados.": "У этого канала нет рекомендуемых клипов.", "Ver en vivo": "Смотреть эфир", "Seguir": "Подписаться", "Siguiendo ✓": "Вы подписаны ✓", "Foto de perfil": "Фото профиля", "Ajustes de reproducción": "Настройки воспроизведения", "Información del stream": "Информация о трансляции", "Abrir canal del streamer": "Открыть канал стримера", "Abrir streams de este juego": "Открыть трансляции этой игры", "Adelantar 10 segundos": "Перемотать на 10 секунд вперёд", "Retroceder 10 segundos": "Перемотать на 10 секунд назад", "Pausar": "Пауза", "Reproducir": "Воспроизвести", "Progreso del video": "Ход воспроизведения", "Silenciar o activar sonido": "Выключить или включить звук", "Calidad": "Качество", "Auto": "Авто", "Tamaño texto chat": "Размер текста чата", "Mostrar chat": "Показывать чат", "Sí": "Да", "Ancho del chat": "Ширина чата", "Altura del chat": "Высота чата", "Posición del chat": "Положение чата", "Posición vertical del chat": "Вертикальное положение чата", "Arriba": "Сверху", "Abajo": "Снизу", "Izquierda": "Слева", "Derecha": "Справа", "Volver": "Назад", "No se pudo cargar Twitch Embed": "Не удалось загрузить Twitch Embed", "Twitch Embed no está disponible": "Twitch Embed недоступен", "No se pudo cargar el reproductor de Twitch.": "Не удалось загрузить плеер Twitch.", "Comprueba la conexión a Internet y vuelve a pulsar Actualizar.": "Проверьте подключение к интернету и нажмите «Обновить» ещё раз.", "Chatear": "Чат", "Chatea": "Чат", "Chatea...": "Чат...", "Cerrar chat": "Закрыть чат", "Enviar mensaje al chat": "Отправить сообщение в чат", "Conectando al chat…": "Подключение к чату…", "Cargando repetición del chat…": "Загрузка повтора чата…", "Este video no tiene chat guardado o Twitch no permite verlo desde acá.": "У этого видео нет сохранённого чата, или Twitch не разрешает просматривать его здесь.", "No se pudo cargar la repetición del chat.": "Не удалось загрузить повтор чата.", "No se pudo enviar: el chat no está conectado en este momento.": "Не удалось отправить: чат сейчас не подключён.", "Para enviar mensajes al chat necesitas iniciar sesión con Twitch.": "Чтобы отправлять сообщения в чат, войдите через Twitch.", "Tu sesión de Twitch venció. Volvés a modo solo lectura — iniciá sesión de nuevo desde \"Cuenta\".": "Сеанс Twitch истёк. Вы снова в режиме только чтения — войдите заново через «Аккаунт».", "Chat grande derecha": "Большой чат, справа", "Chat mediano derecha": "Средний чат, справа", "Chat pequeño derecha": "Маленький чат, справа", "Chat grande izquierda": "Большой чат, слева", "Chat mediano izquierda": "Средний чат, слева", "Chat pequeño izquierda": "Маленький чат, слева", "Idioma": "Язык", "Automático": "Автоматически", "Tema": "Тема", "Claro": "Светлая", "Oscuro": "Тёмная", "Tamaño texto app": "Размер текста приложения", "Color de texto": "Цвет текста", "Blanco": "Белый", "Amarillo": "Жёлтый", "Verde": "Зелёный", "Cian": "Голубой", "Rojo": "Красный", "Negro": "Чёрный", "Tamaño tarjetas": "Размер карточек", "Tipo de fuente": "Шрифт", "Predeterminada": "По умолчанию", "Serif": "Serif", "Mono": "Mono", "Verdana": "Verdana", "Casual": "Casual", "Iniciar sesión": "Войти", "Iniciar con QR (TV)": "Войти по QR-коду (ТВ)", "Recargar app": "Перезагрузить приложение", "Salir": "Выход", "Cerrar": "Закрыть", "Cerrar sesión": "Выйти", "Ver perfil": "Открыть профиль", "Cancelar": "Отмена", "Sesión iniciada. Ya podés chatear con tu nombre.": "Вы вошли. Теперь можно писать в чат под своим именем.", "Preparando código QR…": "Подготовка QR-кода…", "Un momento.": "Минутку.", "Inicia sesión desde tu celular": "Войдите с телефона", "Escanea el código con la cámara, o ve a twitch.tv/activate en cualquier dispositivo y escribe el código de 8 dígitos.": "Отсканируйте код камерой или откройте twitch.tv/activate на любом устройстве и введите 8-значный код.", "Código QR para iniciar sesión en Twitch": "QR-код для входа в Twitch", "No se pudo iniciar sesión": "Не удалось войти", "Reintentar con QR": "Повторить через QR", "Iniciar sesión (redirigir)": "Войти (перенаправление)", "No se pudo preparar el login (sin conexión con Twitch).": "Не удалось подготовить вход (нет связи с Twitch).", "No se pudo iniciar el login por QR.": "Не удалось начать вход по QR.", "No se pudo conectar con Twitch.": "Не удалось подключиться к Twitch.", "El código QR expiró. Probá de nuevo.": "QR-код истёк. Попробуйте снова.", "Pulsa atrás de nuevo para salir": "Нажмите «Назад» ещё раз, чтобы выйти", "Presiona atrás de nuevo para salir": "Нажмите «Назад» ещё раз, чтобы выйти", "¿Deseas salir? Pulsa atrás de nuevo para salir de la app": "Выйти? Нажмите «Назад» ещё раз, чтобы выйти из приложения", "Gris": "Серый", "Gris oscuro": "Тёмно-серый", "No": "Нет"},
+        it: {"Buscar": "Cerca", "Canales seguidos": "Canali seguiti", "Destacados": "In evidenza", "Streamers top": "Top streamer", "Juegos top": "Top giochi", "Ajustes": "Impostazioni", "Cuenta": "Account", "Donar": "Dona", "Enviar comentarios": "Invia feedback", "Transmisiones destacadas": "Stream in evidenza", "Streamers más vistos ahora": "Streamer più seguiti ora", "Juegos más vistos": "Giochi più visti", "En vivo ahora": "In diretta ora", "Clips destacados": "Clip in evidenza", "VODs recientes": "VOD recenti", "Buscar canal": "Cerca canale", "Buscar canal…": "Cerca canale…", "Cerrar búsqueda": "Chiudi ricerca", "Sugerencias de canales": "Suggerimenti di canali", "Nombre del canal de Twitch...": "Nome del canale Twitch...", "Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.": "Scrivi con la tastiera (PC) o usa il telecomando della TV per aprire la tastiera su schermo.", "Buscando…": "Ricerca in corso…", "CANAL NO ENCONTRADO": "CANALE NON TROVATO", "Cargando…": "Caricamento…", "EN VIVO": "IN DIRETTA", "OFFLINE": "OFFLINE", "(sin título)": "(senza titolo)", "Sin transmisiones recientes": "Nessuno stream recente", "ayer": "ieri", "Inicia sesión para ver canales seguidos": "Accedi per vedere i canali seguiti", "No hay transmisiones en vivo de este juego ahora.": "Al momento non ci sono stream in diretta di questo gioco.", "No se pudieron cargar juegos.": "Impossibile caricare i giochi.", "No se pudieron cargar streamers.": "Impossibile caricare gli streamer.", "No se pudieron cargar transmisiones en español.": "Impossibile caricare gli stream in italiano.", "Este canal no tiene VODs recientes.": "Questo canale non ha VOD recenti.", "Este canal no tiene clips destacados.": "Questo canale non ha clip in evidenza.", "Ver en vivo": "Guarda in diretta", "Seguir": "Segui", "Siguiendo ✓": "Seguito ✓", "Foto de perfil": "Foto profilo", "Ajustes de reproducción": "Impostazioni di riproduzione", "Información del stream": "Informazioni sullo stream", "Abrir canal del streamer": "Apri il canale dello streamer", "Abrir streams de este juego": "Apri gli stream di questo gioco", "Adelantar 10 segundos": "Avanti di 10 secondi", "Retroceder 10 segundos": "Indietro di 10 secondi", "Pausar": "Pausa", "Reproducir": "Riproduci", "Progreso del video": "Avanzamento del video", "Silenciar o activar sonido": "Disattiva o attiva l'audio", "Calidad": "Qualità", "Auto": "Auto", "Tamaño texto chat": "Dimensione testo chat", "Mostrar chat": "Mostra chat", "Sí": "Sì", "Ancho del chat": "Larghezza chat", "Altura del chat": "Altezza chat", "Posición del chat": "Posizione chat", "Posición vertical del chat": "Posizione verticale chat", "Arriba": "In alto", "Abajo": "In basso", "Izquierda": "Sinistra", "Derecha": "Destra", "Volver": "Indietro", "No se pudo cargar Twitch Embed": "Impossibile caricare Twitch Embed", "Twitch Embed no está disponible": "Twitch Embed non è disponibile", "No se pudo cargar el reproductor de Twitch.": "Impossibile caricare il player di Twitch.", "Comprueba la conexión a Internet y vuelve a pulsar Actualizar.": "Controlla la connessione a Internet e premi di nuovo Aggiorna.", "Chatear": "Chat", "Chatea": "Chat", "Chatea...": "Chat...", "Cerrar chat": "Chiudi chat", "Enviar mensaje al chat": "Invia messaggio in chat", "Conectando al chat…": "Connessione alla chat…", "Cargando repetición del chat…": "Caricamento della replica della chat…", "Este video no tiene chat guardado o Twitch no permite verlo desde acá.": "Questo video non ha una chat salvata, oppure Twitch non permette di vederla da qui.", "No se pudo cargar la repetición del chat.": "Impossibile caricare la replica della chat.", "No se pudo enviar: el chat no está conectado en este momento.": "Invio non riuscito: la chat non è connessa al momento.", "Para enviar mensajes al chat necesitas iniciar sesión con Twitch.": "Per inviare messaggi in chat devi accedere con Twitch.", "Tu sesión de Twitch venció. Volvés a modo solo lectura — iniciá sesión de nuevo desde \"Cuenta\".": "La tua sessione Twitch è scaduta. Sei tornato in modalità sola lettura: accedi di nuovo da \"Account\".", "Chat grande derecha": "Chat grande, a destra", "Chat mediano derecha": "Chat medio, a destra", "Chat pequeño derecha": "Chat piccolo, a destra", "Chat grande izquierda": "Chat grande, a sinistra", "Chat mediano izquierda": "Chat medio, a sinistra", "Chat pequeño izquierda": "Chat piccolo, a sinistra", "Idioma": "Lingua", "Automático": "Automatico", "Tema": "Tema", "Claro": "Chiaro", "Oscuro": "Scuro", "Tamaño texto app": "Dimensione testo app", "Color de texto": "Colore del testo", "Blanco": "Bianco", "Amarillo": "Giallo", "Verde": "Verde", "Cian": "Ciano", "Rojo": "Rosso", "Negro": "Nero", "Tamaño tarjetas": "Dimensione schede", "Tipo de fuente": "Tipo di carattere", "Predeterminada": "Predefinito", "Serif": "Serif", "Mono": "Mono", "Verdana": "Verdana", "Casual": "Casual", "Iniciar sesión": "Accedi", "Iniciar con QR (TV)": "Accedi con QR (TV)", "Recargar app": "Ricarica app", "Salir": "Esci", "Cerrar": "Chiudi", "Cerrar sesión": "Esci dall'account", "Ver perfil": "Vedi profilo", "Cancelar": "Annulla", "Sesión iniciada. Ya podés chatear con tu nombre.": "Accesso effettuato. Ora puoi scrivere in chat con il tuo nome.", "Preparando código QR…": "Preparazione del codice QR…", "Un momento.": "Un momento.", "Inicia sesión desde tu celular": "Accedi dal tuo telefono", "Escanea el código con la cámara, o ve a twitch.tv/activate en cualquier dispositivo y escribe el código de 8 dígitos.": "Inquadra il codice con la fotocamera, oppure vai su twitch.tv/activate da qualsiasi dispositivo e inserisci il codice di 8 cifre.", "Código QR para iniciar sesión en Twitch": "Codice QR per accedere a Twitch", "No se pudo iniciar sesión": "Impossibile accedere", "Reintentar con QR": "Riprova con QR", "Iniciar sesión (redirigir)": "Accedi (reindirizzamento)", "No se pudo preparar el login (sin conexión con Twitch).": "Impossibile preparare l'accesso (nessuna connessione con Twitch).", "No se pudo iniciar el login por QR.": "Impossibile avviare l'accesso con QR.", "No se pudo conectar con Twitch.": "Impossibile connettersi a Twitch.", "El código QR expiró. Probá de nuevo.": "Il codice QR è scaduto. Riprova.", "Pulsa atrás de nuevo para salir": "Premi di nuovo indietro per uscire", "Presiona atrás de nuevo para salir": "Premi di nuovo indietro per uscire", "¿Deseas salir? Pulsa atrás de nuevo para salir de la app": "Vuoi uscire? Premi di nuovo indietro per uscire dall'app", "Gris": "Grigio", "Gris oscuro": "Grigio scuro", "No": "No"},
+        fr: {"Buscar": "Rechercher", "Canales seguidos": "Chaînes suivies", "Destacados": "À la une", "Streamers top": "Top streamers", "Juegos top": "Top jeux", "Ajustes": "Paramètres", "Cuenta": "Compte", "Donar": "Faire un don", "Enviar comentarios": "Envoyer un commentaire", "Transmisiones destacadas": "Streams à la une", "Streamers más vistos ahora": "Streamers les plus regardés en ce moment", "Juegos más vistos": "Jeux les plus regardés", "En vivo ahora": "En direct maintenant", "Clips destacados": "Clips à la une", "VODs recientes": "VOD récentes", "Buscar canal": "Rechercher une chaîne", "Buscar canal…": "Rechercher une chaîne…", "Cerrar búsqueda": "Fermer la recherche", "Sugerencias de canales": "Suggestions de chaînes", "Nombre del canal de Twitch...": "Nom de la chaîne Twitch...", "Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.": "Tapez au clavier (PC) ou utilisez la télécommande de la TV pour ouvrir le clavier à l'écran.", "Buscando…": "Recherche…", "CANAL NO ENCONTRADO": "CHAÎNE INTROUVABLE", "Cargando…": "Chargement…", "EN VIVO": "EN DIRECT", "OFFLINE": "HORS LIGNE", "(sin título)": "(sans titre)", "Sin transmisiones recientes": "Aucun stream récent", "ayer": "hier", "Inicia sesión para ver canales seguidos": "Connectez-vous pour voir les chaînes suivies", "No hay transmisiones en vivo de este juego ahora.": "Aucun stream en direct pour ce jeu pour le moment.", "No se pudieron cargar juegos.": "Impossible de charger les jeux.", "No se pudieron cargar streamers.": "Impossible de charger les streamers.", "No se pudieron cargar transmisiones en español.": "Impossible de charger les streams en français.", "Este canal no tiene VODs recientes.": "Cette chaîne n'a pas de VOD récentes.", "Este canal no tiene clips destacados.": "Cette chaîne n'a pas de clips à la une.", "Ver en vivo": "Regarder en direct", "Seguir": "Suivre", "Siguiendo ✓": "Suivi ✓", "Foto de perfil": "Photo de profil", "Ajustes de reproducción": "Paramètres de lecture", "Información del stream": "Infos sur le stream", "Abrir canal del streamer": "Ouvrir la chaîne du streamer", "Abrir streams de este juego": "Ouvrir les streams de ce jeu", "Adelantar 10 segundos": "Avancer de 10 secondes", "Retroceder 10 segundos": "Reculer de 10 secondes", "Pausar": "Pause", "Reproducir": "Lecture", "Progreso del video": "Progression de la vidéo", "Silenciar o activar sonido": "Couper ou activer le son", "Calidad": "Qualité", "Auto": "Auto", "Tamaño texto chat": "Taille du texte du chat", "Mostrar chat": "Afficher le chat", "Sí": "Oui", "Ancho del chat": "Largeur du chat", "Altura del chat": "Hauteur du chat", "Posición del chat": "Position du chat", "Posición vertical del chat": "Position verticale du chat", "Arriba": "Haut", "Abajo": "Bas", "Izquierda": "Gauche", "Derecha": "Droite", "Volver": "Retour", "No se pudo cargar Twitch Embed": "Impossible de charger Twitch Embed", "Twitch Embed no está disponible": "Twitch Embed n'est pas disponible", "No se pudo cargar el reproductor de Twitch.": "Impossible de charger le lecteur Twitch.", "Comprueba la conexión a Internet y vuelve a pulsar Actualizar.": "Vérifiez votre connexion Internet et appuyez de nouveau sur Actualiser.", "Chatear": "Chat", "Chatea": "Chat", "Chatea...": "Chat...", "Cerrar chat": "Fermer le chat", "Enviar mensaje al chat": "Envoyer un message dans le chat", "Conectando al chat…": "Connexion au chat…", "Cargando repetición del chat…": "Chargement du replay du chat…", "Este video no tiene chat guardado o Twitch no permite verlo desde acá.": "Cette vidéo n'a pas de chat enregistré, ou Twitch ne permet pas de le voir d'ici.", "No se pudo cargar la repetición del chat.": "Impossible de charger le replay du chat.", "No se pudo enviar: el chat no está conectado en este momento.": "Échec de l'envoi : le chat n'est pas connecté pour le moment.", "Para enviar mensajes al chat necesitas iniciar sesión con Twitch.": "Pour envoyer des messages dans le chat, connectez-vous avec Twitch.", "Tu sesión de Twitch venció. Volvés a modo solo lectura — iniciá sesión de nuevo desde \"Cuenta\".": "Votre session Twitch a expiré. Vous repassez en lecture seule — reconnectez-vous depuis « Compte ».", "Chat grande derecha": "Grand chat, à droite", "Chat mediano derecha": "Chat moyen, à droite", "Chat pequeño derecha": "Petit chat, à droite", "Chat grande izquierda": "Grand chat, à gauche", "Chat mediano izquierda": "Chat moyen, à gauche", "Chat pequeño izquierda": "Petit chat, à gauche", "Idioma": "Langue", "Automático": "Automatique", "Tema": "Thème", "Claro": "Clair", "Oscuro": "Sombre", "Tamaño texto app": "Taille du texte de l'app", "Color de texto": "Couleur du texte", "Blanco": "Blanc", "Amarillo": "Jaune", "Verde": "Vert", "Cian": "Cyan", "Rojo": "Rouge", "Negro": "Noir", "Tamaño tarjetas": "Taille des cartes", "Tipo de fuente": "Police", "Predeterminada": "Par défaut", "Serif": "Serif", "Mono": "Mono", "Verdana": "Verdana", "Casual": "Casual", "Iniciar sesión": "Se connecter", "Iniciar con QR (TV)": "Se connecter avec un QR (TV)", "Recargar app": "Recharger l'app", "Salir": "Quitter", "Cerrar": "Fermer", "Cerrar sesión": "Se déconnecter", "Ver perfil": "Voir le profil", "Cancelar": "Annuler", "Sesión iniciada. Ya podés chatear con tu nombre.": "Connecté. Vous pouvez maintenant discuter avec votre nom.", "Preparando código QR…": "Préparation du code QR…", "Un momento.": "Un instant.", "Inicia sesión desde tu celular": "Connectez-vous depuis votre téléphone", "Escanea el código con la cámara, o ve a twitch.tv/activate en cualquier dispositivo y escribe el código de 8 dígitos.": "Scannez le code avec votre appareil photo, ou allez sur twitch.tv/activate depuis n'importe quel appareil et saisissez le code à 8 chiffres.", "Código QR para iniciar sesión en Twitch": "Code QR pour se connecter à Twitch", "No se pudo iniciar sesión": "Connexion impossible", "Reintentar con QR": "Réessayer avec le QR", "Iniciar sesión (redirigir)": "Se connecter (redirection)", "No se pudo preparar el login (sin conexión con Twitch).": "Impossible de préparer la connexion (pas de connexion à Twitch).", "No se pudo iniciar el login por QR.": "Impossible de démarrer la connexion par QR.", "No se pudo conectar con Twitch.": "Impossible de se connecter à Twitch.", "El código QR expiró. Probá de nuevo.": "Le code QR a expiré. Réessayez.", "Pulsa atrás de nuevo para salir": "Appuyez de nouveau sur retour pour quitter", "Presiona atrás de nuevo para salir": "Appuyez de nouveau sur retour pour quitter", "¿Deseas salir? Pulsa atrás de nuevo para salir de la app": "Voulez-vous quitter ? Appuyez de nouveau sur retour pour quitter l'application", "Gris": "Gris", "Gris oscuro": "Gris foncé", "No": "Non"} };
     var OSK_I18N = {
         ru: {"Enviar": "Отправить", "Espacio": "Пробел", "Escribir": "Написать"},
         it: {"Enviar": "Invia", "Espacio": "Spazio", "Escribir": "Scrivi"},
@@ -1791,6 +1791,13 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         <div class="settings-options">
             <button data-psetting-btn data-value="left">Izquierda</button>
             <button data-psetting-btn data-value="right">Derecha</button>
+        </div>
+    </div>
+    <div class="settings-row-account" data-psetting="chatVPos">
+        <label>Posición vertical del chat</label>
+        <div class="settings-options">
+            <button data-psetting-btn data-value="top">Arriba</button>
+            <button data-psetting-btn data-value="bottom">Abajo</button>
         </div>
     </div>
     <button class="account-btn" data-psetting-btn data-action="close-settings">← Volver</button>
@@ -3912,6 +3919,7 @@ function applyInterfaceSettings() {
     window.interfaceChatWidthPreference = get("chatWidth", "20");
     window.interfaceChatHeightPreference = get("chatHeight", "100");
     window.interfaceChatPosPreference = get("chatPos", "right");
+    window.interfaceChatVPosPreference = get("chatVPos", "bottom");
     try { if (window.OsmI18n) window.OsmI18n.refresh(); } catch (e) {}
     applyTextScales();
 }
@@ -4394,6 +4402,7 @@ function bindPlayerLifecycleListeners() {
 async function createPlayer(options) {
     lastPlayerOptions = Object.assign({}, options);
     resetResolutionUI();
+    startResolutionWatcher();
     playerPlaybackStarted = false;
     availableQualities = [];
     qualityIndex = 0;
@@ -5250,7 +5259,8 @@ function updatePlayerSettingsActiveStates() {
         chat: "yes",
         chatWidth: "20",
         chatHeight: "100",
-        chatPos: "right"
+        chatPos: "right",
+        chatVPos: "bottom"
     };
     const get = (name) => {
         try { return localStorage.getItem("osmtwich-settings-" + name) || defaults[name] || null; }
@@ -5290,7 +5300,7 @@ function savePlayerSetting(name, value) {
             }
         }
     }
-    if (name === "chatWidth" || name === "chatHeight" || name === "chatPos") {
+    if (name === "chatWidth" || name === "chatHeight" || name === "chatPos" || name === "chatVPos") {
         applyChatSizeAndPosFromSettings();
     }
     updatePlayerSettingsActiveStates();
@@ -5303,13 +5313,20 @@ function applyChatSizeAndPosFromSettings() {
     const widthPct  = Number(get("chatWidth", "20")) || 20;
     const heightPct = Number(get("chatHeight", "100")) || 100;
     const pos = get("chatPos", "right");
+    const vpos = get("chatVPos", "bottom");
     const panel = document.getElementById("chat-panel");
     if (!panel) return;
     panel.classList.remove("chat-large", "chat-medium", "chat-small", "chat-left");
     panel.style.width = widthPct + "vw";
     panel.style.height = heightPct + "%";
-    panel.style.bottom = "0";
-    panel.style.top = "auto";
+    // Con altura menor al 100% el chat puede ir arriba o abajo; al 100% ocupa todo y no cambia nada
+    if (vpos === "top") {
+        panel.style.top = "0";
+        panel.style.bottom = "auto";
+    } else {
+        panel.style.bottom = "0";
+        panel.style.top = "auto";
+    }
     if (pos === "left") {
         panel.style.left = "0";
         panel.style.right = "auto";
@@ -5378,11 +5395,21 @@ function updateResolutionUI() {
     const toast = document.getElementById("player-res-toast");
     if (!toast) return;
     toast.textContent = label;
+    toast.classList.remove("visible");
+    void toast.offsetWidth;
     toast.classList.add("visible");
     clearTimeout(resToastTimer);
     resToastTimer = setTimeout(() => toast.classList.remove("visible"), 5000);
 }
 window.updateResolutionUI = updateResolutionUI;
+let resWatchTimer = null;
+function startResolutionWatcher() {
+    if (resWatchTimer) clearInterval(resWatchTimer);
+    resWatchTimer = setInterval(() => {
+        if (currentScreen !== "player" || !twitchPlayer) return;
+        updateResolutionUI();
+    }, 500);
+}
 function resetResolutionUI() {
     lastResHeight = 0;
     clearTimeout(resToastTimer);
@@ -5793,11 +5820,14 @@ function renderVodFragments(fragments, plainBody) {
 function stopVodChatReplay() {
     vodChatToken++;
     if (vodChatAbort) { try { vodChatAbort.abort(); } catch (_) {} vodChatAbort = null; }
+    vodChatLoading = false;
     vodChatComments = [];
     vodChatPlayedIndex = 0;
     vodChatNextCursor = null;
     vodChatEnded = false;
     vodChatRetryAt = 0;
+    vodChatFailures = 0;
+    vodChatLastTime = -1;
 }
 async function startVodChatReplay(videoId, startOffsetSeconds) {
     stopVodChatReplay();
@@ -5810,25 +5840,37 @@ async function startVodChatReplay(videoId, startOffsetSeconds) {
     if (vodChatComments.length) chatMessages = chatMessages.filter(m => !m.system);
     renderChatMessages();
 }
-let vodChatRetryAt = 0;
+let vodChatRetryAt = 0, vodChatFailures = 0, vodChatLastTime = -1;
+const VOD_CHAT_FETCH_TIMEOUT_MS = 10000;
 async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
     if (vodChatLoading) return;
     vodChatLoading = true;
-    try { vodChatAbort = new AbortController(); } catch (_) { vodChatAbort = null; }
+    let ctrl = null;
+    try { ctrl = new AbortController(); } catch (_) {}
+    vodChatAbort = ctrl;
+    let timedOut = false;
+    let timer = null;
     try {
         let url = startCursor
             ? `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&cursor=${encodeURIComponent(startCursor)}`
             : `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&offset=${Math.max(0, Math.floor(offsetSeconds))}`;
-        let cursor = null;
+        let cursor = startCursor || null;
         let fetchedAny = false;
         let hadError = false;
-        for (let i = 0; i < 6; i++) {
-            const res = await fetch(url, { cache: "no-store", signal: vodChatAbort ? vodChatAbort.signal : undefined });
+        for (let i = 0; i < 3; i++) {
+            // Sin timeout un fetch colgado dejaba vodChatLoading en true para siempre y el chat dejaba de avanzar
+            timer = setTimeout(() => { timedOut = true; try { ctrl && ctrl.abort(); } catch (_) {} }, VOD_CHAT_FETCH_TIMEOUT_MS);
+            let res;
+            try {
+                res = await fetch(url, { cache: "no-store", signal: ctrl ? ctrl.signal : undefined });
+            } finally { clearTimeout(timer); }
             if (myToken !== vodChatToken) return;
             if (!res.ok) { hadError = true; break; }
             const data = await res.json();
+            if (myToken !== vodChatToken) return;
             if (data.error) { hadError = true; break; }
             fetchedAny = true;
+            // Los comentarios se agregan por página: ya se pueden mostrar mientras llegan las siguientes
             (data.comments || []).forEach(c => {
                 vodChatComments.push({
                     offset: c.content_offset_seconds || 0,
@@ -5840,31 +5882,33 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
                 });
             });
             cursor = data._next || null;
-            const lastOffset = vodChatComments.length ? vodChatComments[vodChatComments.length - 1].offset : offsetSeconds;
+            vodChatNextCursor = cursor;
             if (!cursor) { vodChatEnded = true; break; }
-            if (lastOffset - offsetSeconds > 90) break;
+            const lastOffset = vodChatComments.length ? vodChatComments[vodChatComments.length - 1].offset : offsetSeconds;
+            if (lastOffset - offsetSeconds > 60) break;
             url = `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&cursor=${encodeURIComponent(cursor)}`;
         }
-        vodChatComments.sort((a, b) => a.offset - b.offset);
-        if (!hadError || fetchedAny) vodChatNextCursor = cursor;
-        if (hadError) {
-            if (!vodChatComments.length) {
-                vodChatEnded = true;
-                if (myToken === vodChatToken) appendSystemMessage("Este video no tiene chat guardado o Twitch no permite verlo desde acá.");
-            } else {
-                vodChatRetryAt = Date.now() + 5000;
-            }
-        }
+        if (myToken !== vodChatToken) return;
+        if (fetchedAny) vodChatFailures = 0;
+        if (hadError) throw new Error("vod-comments");
     } catch (e) {
-        if (e && e.name === "AbortError") return;
-        console.warn("No se pudo cargar la repetición del chat:", e);
-        if (myToken === vodChatToken) {
-            if (!vodChatComments.length) { appendSystemMessage("No se pudo cargar la repetición del chat."); vodChatEnded = true; }
-            else vodChatRetryAt = Date.now() + 5000;
+        if (myToken !== vodChatToken) return;
+        if (e && e.name === "AbortError" && !timedOut) return;
+        vodChatFailures++;
+        console.warn("Repetición del chat: fallo", vodChatFailures, e);
+        if (!vodChatComments.length && vodChatFailures >= 4) {
+            vodChatEnded = true;
+            appendSystemMessage("Este video no tiene chat guardado o Twitch no permite verlo desde acá.");
+        } else {
+            vodChatRetryAt = Date.now() + Math.min(8000, 1500 * vodChatFailures);
         }
     } finally {
-        vodChatLoading = false;
-        vodChatAbort = null;
+        clearTimeout(timer);
+        // Solo liberar si esta carga sigue siendo la vigente (si no, ya lo hizo stop/salto)
+        if (myToken === vodChatToken) {
+            vodChatLoading = false;
+            if (vodChatAbort === ctrl) vodChatAbort = null;
+        }
     }
 }
 function appendVodChatMessage(comment) {
@@ -5880,73 +5924,69 @@ function appendVodChatMessage(comment) {
     if (chatMessages.length > MAX_CHAT_MESSAGES) chatMessages.shift();
     appendChatMessageDom(msg, true);
 }
+function vodChatReload(current) {
+    vodChatToken++;
+    const jumpToken = vodChatToken;
+    if (vodChatAbort) { try { vodChatAbort.abort(); } catch (_) {} vodChatAbort = null; }
+    vodChatLoading = false;
+    chatMessages = [];
+    vodChatComments = [];
+    vodChatPlayedIndex = 0;
+    vodChatNextCursor = null;
+    vodChatEnded = false;
+    vodChatRetryAt = 0;
+    vodChatFailures = 0;
+    renderChatMessages();
+    loadVodChatFrom(currentVideoId, current, jumpToken);
+}
 function syncVodChatWithPlayback() {
     if (!twitchPlayer || playbackType !== "vod" || !currentVideoId) return;
 
-    // No hacer nada mientras hay una carga en curso (evita concurrencia)
-    if (vodChatLoading) return;
-
-    const myToken = vodChatToken;
-
-    // Leer el tiempo con validación estricta
     let current = 0;
     try {
         const t = twitchPlayer.getCurrentTime();
-        if (typeof t !== "number" || !isFinite(t) || t < 0) return; // player aún no listo
+        if (typeof t !== "number" || !isFinite(t) || t < 0) return;
         current = t;
     } catch (e) {
         return;
     }
 
-    // Si el player devuelve 0 repetidamente al inicio, esperar a que arranque de verdad.
-    // Solo consideramos "saltos" cuando ya hay progreso real (>3 s) para evitar
-    // falsos positivos durante el warm-up del reproductor.
-    const hasRealProgress = current > 3;
-
-    const nextPending = vodChatComments[vodChatPlayedIndex];
-    const lastShown = vodChatPlayedIndex > 0
-        ? vodChatComments[vodChatPlayedIndex - 1].offset
-        : null;
-
-    const jumpedForward =
-        hasRealProgress && nextPending && current - nextPending.offset > 20;
-    const jumpedBackward =
-        hasRealProgress && lastShown !== null && current < lastShown - 20;
-
-    if (jumpedForward || jumpedBackward) {
-        vodChatToken++;
-        const jumpToken = vodChatToken;
-        chatMessages = [];
-        vodChatComments = [];
-        vodChatPlayedIndex = 0;
-        vodChatNextCursor = null;
-        vodChatEnded = false;
-        vodChatRetryAt = 0;
-        renderChatMessages();
-        loadVodChatFrom(currentVideoId, current, jumpToken);
-        return;
+    // Un salto (seek) se detecta por el cambio del tiempo del video entre ticks, no por la carga del
+    // chat: si la carga tardaba >20s se creía que el usuario había saltado y se reiniciaba en bucle.
+    const delta = vodChatLastTime < 0 ? 0 : current - vodChatLastTime;
+    vodChatLastTime = current;
+    if (delta > 6 || delta < -2) {
+        const first = vodChatComments.length ? vodChatComments[0].offset : null;
+        const last = vodChatComments.length ? vodChatComments[vodChatComments.length - 1].offset : null;
+        if (first !== null && current >= first && current <= last) {
+            // El salto cae dentro de lo ya descargado: reposicionar sin volver a pedir nada
+            let i = 0;
+            while (i < vodChatComments.length && vodChatComments[i].offset <= current) i++;
+            chatMessages = [];
+            vodChatPlayedIndex = Math.max(0, i - 30);
+            renderChatMessages();
+        } else {
+            vodChatReload(current);
+            return;
+        }
     }
 
-    // Mostrar mensajes cuyo offset ya fue alcanzado por el video
+    // Mostrar mensajes cuyo offset ya fue alcanzado (también mientras se descarga el siguiente bloque)
     while (vodChatPlayedIndex < vodChatComments.length &&
            vodChatComments[vodChatPlayedIndex].offset <= current) {
         appendVodChatMessage(vodChatComments[vodChatPlayedIndex]);
         vodChatPlayedIndex++;
     }
 
+    if (vodChatLoading || vodChatEnded || Date.now() < vodChatRetryAt) return;
+
     // Precarga del siguiente bloque
     const lastBuffered = vodChatComments.length
         ? vodChatComments[vodChatComments.length - 1].offset
         : current;
-
-    if (!vodChatLoading && !vodChatEnded &&
-        Date.now() >= vodChatRetryAt &&
-        lastBuffered - current < 60) {
-        if (vodChatNextCursor) {
-            loadVodChatFrom(currentVideoId, lastBuffered, myToken, vodChatNextCursor);
-        } else {
-            loadVodChatFrom(currentVideoId, lastBuffered + 1, myToken);
-        }
+    if (lastBuffered - current < 60) {
+        if (vodChatNextCursor) loadVodChatFrom(currentVideoId, lastBuffered, vodChatToken, vodChatNextCursor);
+        else loadVodChatFrom(currentVideoId, Math.max(current, lastBuffered), vodChatToken);
     }
 }
 let chatLayoutIndex = 0;
