@@ -5545,6 +5545,7 @@ let vodChatNextCursor = null;
 let vodChatLoading = false;
 let vodChatEnded = false;
 let vodChatToken = 0;
+let vodChatAbort = null;
 function connectChat(channelLogin) {
     disconnectChat();
     chatCurrentChannel = channelLogin;
@@ -5790,11 +5791,12 @@ function renderVodFragments(fragments, plainBody) {
 }
 function stopVodChatReplay() {
     vodChatToken++;
+    if (vodChatAbort) { try { vodChatAbort.abort(); } catch (_) {} vodChatAbort = null; }
     vodChatComments = [];
     vodChatPlayedIndex = 0;
     vodChatNextCursor = null;
-    vodChatLoading = false;
     vodChatEnded = false;
+    vodChatRetryAt = 0;
 }
 async function startVodChatReplay(videoId, startOffsetSeconds) {
     stopVodChatReplay();
@@ -5809,7 +5811,9 @@ async function startVodChatReplay(videoId, startOffsetSeconds) {
 }
 let vodChatRetryAt = 0;
 async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
+    if (vodChatLoading) return;
     vodChatLoading = true;
+    try { vodChatAbort = new AbortController(); } catch (_) { vodChatAbort = null; }
     try {
         let url = startCursor
             ? `${API_BASE}/api/vod-comments?videoId=${encodeURIComponent(videoId)}&cursor=${encodeURIComponent(startCursor)}`
@@ -5818,7 +5822,7 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
         let fetchedAny = false;
         let hadError = false;
         for (let i = 0; i < 6; i++) {
-            const res = await fetch(url, { cache: "no-store" });
+            const res = await fetch(url, { cache: "no-store", signal: vodChatAbort ? vodChatAbort.signal : undefined });
             if (myToken !== vodChatToken) return;
             if (!res.ok) { hadError = true; break; }
             const data = await res.json();
@@ -5851,13 +5855,15 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
             }
         }
     } catch (e) {
+        if (e && e.name === "AbortError") return;
         console.warn("No se pudo cargar la repetición del chat:", e);
         if (myToken === vodChatToken) {
             if (!vodChatComments.length) { appendSystemMessage("No se pudo cargar la repetición del chat."); vodChatEnded = true; }
             else vodChatRetryAt = Date.now() + 5000;
         }
     } finally {
-        if (myToken === vodChatToken) vodChatLoading = false;
+        vodChatLoading = false;
+        vodChatAbort = null;
     }
 }
 function appendVodChatMessage(comment) {
