@@ -1917,6 +1917,7 @@ function isControlsClickSuppressed() {
 let controlFocusIndex = 0;
 let availableQualities = [];
 let qualityIndex = 0;
+let chapterList = [];
 const CONTROL_ACTIONS = ["rewind", "play", "forward", "reload", "mute", "settings", "chat-send"];
 let playerInfoFocusIndex = 0;
 let playerInfoHasGame = false;
@@ -3191,7 +3192,7 @@ function setChannelAccentFromImage(url) {
                 const accent = `rgb(${r}, ${g}, ${b})`;
                 root.style.setProperty("--channel-accent", accent);
                 const bg = document.getElementById("focus-background");
-                if (bg && !findFocusedCard()) {
+                if (bg && !document.querySelector(".tile-stream.focused, .tile-game.focused, .tile-clip.focused, .game-card.focused")) {
                     bg.classList.remove("visible");
                     bg.style.backgroundImage = "";
                     bg.style.backgroundColor = "";
