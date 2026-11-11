@@ -552,7 +552,7 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 #player-game-viewers { font-size: 14px; color: #dedee3; white-space: nowrap; }
 .player-title-row { width: 100%; min-width: 0; padding: 0 4px; color: #fff; font-size: 16px; line-height: 1.35; }
 #player-stream-title { display: block; width: 100%; white-space: normal; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; word-break: break-word; }
-#quality-panel { position: absolute; right: 340px; bottom: 110px; width: 240px; max-height: 50%; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; background: rgba(14,14,16,0.82); border-radius: 10px; padding: 20px; z-index: 11; }
+#quality-panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 240px; max-height: 50%; overflow-y: auto; scrollbar-width: none; -ms-overflow-style: none; background: rgba(14,14,16,0.92); border-radius: 10px; padding: 20px; z-index: 30; }
 #quality-panel.hidden { display: none; }
 #player-settings-overlay { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.72); z-index: 220; }
 #player-settings-overlay.visible { display: flex; }
@@ -606,12 +606,6 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 .progress-track:focus { outline: none; }
 .progress-track.focused { box-shadow: 0 0 0 2px #fff; }
 .progress-label { font-size: 15px; color: #fff; min-width: 56px; }
-.progress-res { font-size: 14px; font-weight: 700; color: #fff; background: rgba(255,255,255,.18); border-radius: 4px; padding: 2px 8px; white-space: nowrap; }
-.progress-res:empty { display: none; }
-#player-res-toast { position: absolute; top: 18px; left: 22px; z-index: 12; font-size: 18px; font-weight: 700; color: #fff; background: rgba(0,0,0,.6); border-radius: 6px; padding: 6px 14px; opacity: 0; pointer-events: none; transition: opacity .25s; }
-#player-res-toast.visible { opacity: 1; }
-html[data-tv-scaled] .progress-res { font-size: 26px; padding: 4px 14px; }
-html[data-tv-scaled] #player-res-toast { font-size: 32px; top: 30px; left: 40px; padding: 10px 22px; }
 .live-label { display: flex; align-items: center; gap: 7px; }
 .live-dot { width: 8px; height: 8px; border-radius: 50%; background: #eb0400; display: inline-block; flex: 0 0 8px; box-shadow: 0 0 0 2px rgba(235,4,0,.18); }
 #progress-elapsed { text-align: left; }
@@ -1198,7 +1192,7 @@ html[data-tv-scaled] #player-info { max-width: 620px; }
 html[data-tv-scaled] .player-profile-btn { width: 72px; height: 72px; flex-basis: 72px; }
 html[data-tv-scaled] #player-channel-name { font-size: 30px; max-width: 380px; }
 html[data-tv-scaled] .player-info-line, html[data-tv-scaled] #player-game-name, html[data-tv-scaled] #player-game-viewers { font-size: 24px; }
-html[data-tv-scaled] #quality-panel { width: 400px; right: 560px; bottom: 300px; padding: 24px; }
+html[data-tv-scaled] #quality-panel { width: 400px; padding: 24px; }
 html[data-tv-scaled] #quality-panel h3 { font-size: 30px; }
 html[data-tv-scaled] .quality-item { font-size: 28px; padding: 14px 18px; }
 html[data-tv-scaled] #chat-panel.chat-medium, html[data-tv-scaled] #chat-panel.chat-small { bottom: 300px; }
@@ -1732,7 +1726,6 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
     <div id="player-screen" class="screen">
         <div id="player-area">
             <div id="twitch-player-target"></div>
-            <div id="player-res-toast" aria-live="polite"></div>
             <div id="chat-panel" class="chat-large">
                 <div id="chat-messages"></div>
                 <div id="profile-chat-composer">
@@ -1812,7 +1805,6 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                         <div class="progress-fill" id="progress-fill"></div>
                     </div>
                     <span class="progress-label" id="progress-remaining"></span>
-                    <span class="progress-res" id="progress-res"></span>
                 </div>
                 <div class="player-title-row">
                     <div id="player-stream-title"></div>
@@ -1843,6 +1835,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
                         <div class="ctrl-btn" data-action="forward" id="ctrl-forward" tabindex="0" role="button" aria-label="Adelantar 10 segundos"></div>
                     </div>
                         <div class="ctrl-side ctrl-right">
+                        <div class="ctrl-btn ctrl-btn-quality" data-action="quality" id="ctrl-quality" tabindex="0" role="button" aria-label="Cambiar calidad"></div>
                         <div class="ctrl-btn" data-action="reload" id="ctrl-reload" tabindex="0" role="button" aria-label="Recargar stream"></div>
                         <div class="ctrl-btn" data-action="mute" id="ctrl-mute" tabindex="0" role="button" aria-label="Silenciar o activar sonido"></div>
                         <div class="ctrl-btn" data-action="settings" id="ctrl-settings" tabindex="0" role="button" aria-label="Ajustes de reproducción"></div>
@@ -1927,7 +1920,7 @@ let controlFocusIndex = 0;
 let availableQualities = [];
 let qualityIndex = 0;
 let chapterList = [];
-const CONTROL_ACTIONS = ["rewind", "play", "forward", "reload", "mute", "settings", "chat-send"];
+const CONTROL_ACTIONS = ["rewind", "play", "forward", "quality", "reload", "mute", "settings", "chat-send"];
 let playerInfoFocusIndex = 0;
 let playerInfoHasGame = false;
 let playerReturnScreen = "main";
@@ -4386,7 +4379,7 @@ function bindPlayerLifecycleListeners() {
     });
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, refreshQualities);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, startProgressLoop);
-    twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => { if (qualityPanelVisible) hideQualityPanel(); });
+    twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => {});
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, hideControls);
     twitchPlayer.addEventListener(Twitch.Player.PLAYING, () => updatePlayPauseVisibility(true));
     twitchPlayer.addEventListener(Twitch.Player.PAUSE, showControls);
@@ -4917,10 +4910,11 @@ function handlePlayerScreenKeys(keyCode, e) {
         return;
     }
         if (qualityPanelVisible) {
+        e.preventDefault(); e.stopPropagation();
         if (keyCode === 38) { qualityPanelFocusIndex = Math.max(0, qualityPanelFocusIndex - 1); updateQualityPanelFocus(); return; }
         if (keyCode === 40) { qualityPanelFocusIndex = Math.min(availableQualities.length - 1, qualityPanelFocusIndex + 1); updateQualityPanelFocus(); return; }
-        if (keyCode === 13) { selectQuality(qualityPanelFocusIndex); return; }
-        if (keyCode === 10009 || keyCode === 27) { e.preventDefault(); hideQualityPanel(); return; }
+        if (keyCode === 13 || keyCode === 23) { selectQuality(qualityPanelFocusIndex); return; }
+        if (keyCode === 10009 || keyCode === 27) { hideQualityPanel(); return; }
         return;
     }
         if (playerSettingsPanelVisible) {
@@ -5015,6 +5009,7 @@ function runControlAction(action) {
         case "chat-send": openChatComposer(); break;
         case "mute": toggleMute(); break;
         case "reload": reloadStream(); break;
+        case "quality": showQualityPanel(); break;
     }
 }
 let lastPlayerOptions = null;
@@ -5156,16 +5151,41 @@ function updateQualityPanelFocus() {
         el.scrollIntoView({ block: "nearest" });
     }
 }
+function showQualityPanel() {
+    if (!twitchPlayer) return;
+    if (qualityPanelVisible) { hideQualityPanel(); return; }
+    if (playerSettingsPanelVisible) hidePlayerSettingsPanel();
+    let list = [];
+    try { list = twitchPlayer.getQualities() || []; } catch (_) {}
+    if (!list.length) list = [{ name: "Auto", group: "auto" }];
+    availableQualities = list;
+    try {
+        const cur = twitchPlayer.getQuality();
+        const i = list.findIndex(q => q.group === cur);
+        if (i !== -1) qualityIndex = i;
+    } catch (_) {}
+    if (qualityIndex >= list.length) qualityIndex = 0;
+    const box = document.getElementById("quality-list");
+    box.innerHTML = list.map((q, i) => {
+        let label = q.name || q.group || "Calidad";
+        if (/^1440p/i.test(label)) label += " (2K)";
+        return `<div class="quality-item${i === qualityIndex ? " active" : ""}" data-index="${i}"><span>${escapeHtml(label)}</span>${i === qualityIndex ? "<span>✓</span>" : ""}</div>`;
+    }).join("");
+    box.querySelectorAll(".quality-item").forEach(el => {
+        el.addEventListener("click", () => selectQuality(Number(el.dataset.index)));
+    });
+    qualityPanelFocusIndex = qualityIndex;
+    document.getElementById("quality-panel").classList.remove("hidden");
+    qualityPanelVisible = true;
+    updateQualityPanelFocus();
+}
 function selectQuality(index) {
-    qualityUserPicked = true;
-    clearStartupQualityTimer();
-    qualityIndex = index;
     const q = availableQualities[index];
-    if (q && twitchPlayer) {
-        const qualityValue = q.group || q.quality || q.name;
-        try { twitchPlayer.setQuality(qualityValue); } catch (e) { console.warn("No se pudo cambiar la calidad", e); }
-    }
+    qualityIndex = index;
     hideQualityPanel();
+    if (!q || !twitchPlayer) return;
+    // Mismo camino que Ajustes de reproducción (guarda la preferencia y aplica la calidad)
+    savePlayerSetting("quality", q.group || q.quality || q.name);
     updateQualityCtrlLabel();
 }
 function qualityShortLabel(q) {
@@ -5175,11 +5195,25 @@ function qualityShortLabel(q) {
     const match = String(q.name || raw).match(/^(\d+p)/i);
     return match ? match[1] : (q.name || raw || "Auto");
 }
+// Botón junto a "recargar": muestra la resolución real del video (y "Auto ·" si la calidad es automática)
 function updateQualityCtrlLabel() {
     const el = document.getElementById("ctrl-quality");
     if (!el) return;
     const q = availableQualities[qualityIndex];
-    el.textContent = qualityShortLabel(q);
+    const isAuto = qualityShortLabel(q) === "Auto";
+    const h = lastResHeight || getRealResolution();
+    let text;
+    if (resDebugOn()) {
+        // Diagnóstico: localStorage.setItem("osm-debug","res") y reiniciar la app
+        let w = 0;
+        try { w = twitchPlayer._v.videoWidth || 0; } catch (_) {}
+        text = h + "p " + w + "x" + h + " ev" + resEvents + " n" + resPolls;
+    } else if (h) {
+        text = (isAuto ? "Auto · " : "") + h + "p";
+    } else {
+        text = qualityShortLabel(q);
+    }
+    if (el.textContent !== text) el.textContent = text;
     el.classList.add("ctrl-btn-quality");
 }
 let playerSettingsPanelVisible = false;
@@ -5381,7 +5415,7 @@ function formatTimeHMS(totalSeconds) {
     }
     return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
-let lastResHeight = 0, resToastTimer = null, resPolls = 0, resEvents = 0;
+let lastResHeight = 0, resPolls = 0, resEvents = 0;
 function getRealResolution() {
     try { if (twitchPlayer && twitchPlayer.getResolution) return twitchPlayer.getResolution() || 0; } catch (_) {}
     return 0;
@@ -5389,55 +5423,14 @@ function getRealResolution() {
 function resDebugOn() {
     try { return localStorage.getItem("osm-debug") === "res"; } catch (_) { return false; }
 }
-// Cada aviso es un elemento NUEVO: en algunas TV (Tizen) un nodo que ya estaba pintado sobre el
-// video no se repinta al cambiar su texto/estilo y se queda mostrando el valor inicial.
-function showResToast(text) {
-    const area = document.getElementById("player-area");
-    if (!area) return;
-    const old = document.getElementById("player-res-toast");
-    const t = document.createElement("div");
-    t.id = "player-res-toast";
-    t.setAttribute("aria-live", "polite");
-    t.className = "visible";
-    t.style.opacity = "1";
-    t.style.visibility = "visible";
-    t.textContent = text;
-    if (old && old.parentNode) old.parentNode.replaceChild(t, old);
-    else area.appendChild(t);
-}
 function updateResolutionUI(fromEvent) {
     resPolls++;
     if (fromEvent === true) resEvents++;
     const h = getRealResolution();
-    if (resDebugOn()) {
-        // Diagnóstico: localStorage.setItem("osm-debug","res") y reiniciar la app
-        let w = 0;
-        try { w = twitchPlayer._v.videoWidth || 0; } catch (_) {}
-        const d = document.getElementById("player-res-toast");
-        const txt = h + "p " + w + "x" + h + " ev" + resEvents + " n" + resPolls;
-        if (d && d.textContent !== txt) showResToast(txt);
-        else if (!d) showResToast(txt);
-    }
-    if (!h) return;
-    const label = h + "p";
-    const badge = document.getElementById("progress-res");
-    if (badge && badge.textContent !== label) badge.textContent = label;
-    if (h === lastResHeight) return;
-    lastResHeight = h;
-    if (resDebugOn()) return;
-    showResToast(label);
-    clearTimeout(resToastTimer);
-    resToastTimer = setTimeout(hideResToast, 5000);
+    if (h) lastResHeight = h;
+    updateQualityCtrlLabel();
 }
 window.updateResolutionUI = updateResolutionUI;
-function hideResToast() {
-    if (resDebugOn()) return;
-    const t = document.getElementById("player-res-toast");
-    if (!t) return;
-    t.classList.remove("visible");
-    t.style.opacity = "0";
-    t.style.visibility = "hidden";
-}
 let resWatchTimer = null;
 function startResolutionWatcher() {
     if (resWatchTimer) clearInterval(resWatchTimer);
@@ -5448,10 +5441,8 @@ function startResolutionWatcher() {
 }
 function resetResolutionUI() {
     lastResHeight = 0;
-    clearTimeout(resToastTimer);
-    hideResToast();
-    const badge = document.getElementById("progress-res");
-    if (badge) badge.textContent = "";
+    hideQualityPanel();
+    updateQualityCtrlLabel();
 }
 function updateProgressUI() {
     if (!twitchPlayer) return;
