@@ -596,6 +596,7 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 #option-picker .op-main { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 #option-picker .op-prev { font-weight: 400; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 #option-picker .op-check { font-size: 18px; }
+.settings-row-account.has-picker > .settings-options { display: none; }
 #chat-panel.chat-resizable { top: auto; bottom: 0; border-radius: 0; max-width: none; }
 #quality-panel h3 { font-size: 20px; margin-bottom: 12px; color: #adadb8; }
 .quality-item { padding: 10px 12px; border-radius: 6px; font-size: 16px; cursor: pointer; border: 3px solid transparent; display: flex; justify-content: space-between; }
@@ -4136,6 +4137,15 @@ function renderAccountSettings() {
     `;
     wireAccountButtons();
     updateSettingsActiveStates();
+    OsmPicker.decorate(box, ".settings-row-account", {
+        dataKey: "setting",
+        navAttr: "data-nav-btn",
+        onPick: function (name, value) {
+            saveInterfaceSetting(name, value);
+            applyInterfaceSettings();
+            updateSettingsActiveStates();
+        }
+    });
     box.querySelectorAll(".settings-row-account button[data-value]").forEach(btn => {
         btn.addEventListener("click", () => {
             const row = btn.closest(".settings-row-account");
@@ -4147,9 +4157,9 @@ function renderAccountSettings() {
     });
     setTimeout(() => {
         if (!panelFocused) return;
-        const first = document.querySelector("#account-box .settings-row-account button[data-value]");
+        const first = document.querySelector("#account-box .settings-summary") || document.querySelector("#account-box .settings-row-account button[data-value]");
         if (first) {
-            document.querySelectorAll("#account-box .settings-options button.focused").forEach(b => b.classList.remove("focused"));
+            document.querySelectorAll("#account-box .settings-options button.focused, #account-box .settings-summary.focused").forEach(b => b.classList.remove("focused"));
             first.classList.add("focused");
             try { first.focus({preventScroll:true}); } catch (_) { first.focus(); }
         }
@@ -5563,6 +5573,15 @@ function showPlayerSettingsPanel() {
                 btn.focus({preventScroll: true});
             });
         });
+    });
+    OsmPicker.decorate(overlay, ".settings-row-account", {
+        dataKey: "psetting",
+        navAttr: "data-psetting-btn",
+        onPick: function (name, value) {
+            savePlayerSetting(name, value);
+            if (name === "quality") refreshPlayerQualityOptions();
+            updatePlayerSettingsActiveStates();
+        }
     });
     overlay.classList.remove("hidden");
     overlay.classList.add("visible");
