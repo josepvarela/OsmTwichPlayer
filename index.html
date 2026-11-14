@@ -1870,7 +1870,7 @@ const TWITCH_TOKEN_ENDPOINT = API_BASE + "/api/twitch-token";
 let twitchAppToken = null;
 let twitchTokenExpiresAt = 0;
 // Máximo de streams que se cargan por sección (Helix entrega hasta 100 por página)
-const HOME_SECTION_STREAMS = 100;
+const HOME_SECTION_STREAMS = 20;  // carga inicial ligera
 const NAV_ITEMS = [
     { id: "search",           label: "Buscar" },
     { id: "seguidosChannels", label: "Canales seguidos" },
@@ -2856,7 +2856,7 @@ function buildClipTile(c) {
 async function loadFeatured() {
     const track = document.getElementById("track-featured");
     const featuredLang = (window.OsmI18n && ["en", "ru", "it", "fr"].indexOf(window.OsmI18n.lang()) >= 0) ? window.OsmI18n.lang() : "es";
-    const streams = await fetchTopStreams(HOME_SECTION_STREAMS, featuredLang);
+    const streams = await fetchTopStreams(20, featuredLang);  // antes 100
     track.innerHTML = "";
     if (!streams.length) { track.innerHTML = '<div class="tile-loading">No se pudieron cargar transmisiones en español.</div>'; return; }
     const profileMap = await getStreamerProfileMap(streams);
@@ -2880,9 +2880,10 @@ async function loadTopGames() {
         setCategoriesMessage("No se pudieron cargar las categorías.");
         return;
     }
+    // Solo 12 streams por juego (no 100) y se cargan las secciones al hacer scroll
     const gamesWithStreams = await Promise.all(games.map(async g => {
         try {
-            const streams = await fetchStreamsByGame(g.id, 100);
+            const streams = await fetchStreamsByGame(g.id, 12);
             const viewerCount = streams.reduce((total, s) => total + (Number(s.viewer_count) || 0), 0);
             return { ...g, viewer_count: viewerCount, streams };
         } catch (_) {
@@ -2895,26 +2896,76 @@ async function loadTopGames() {
 }
 async function buildGameStreamSections(games) {
     removeGameStreamSections();
-    const MAX_STREAMS_PER_GAME = HOME_SECTION_STREAMS;
     const gamesWithLiveStreams = games.filter(g => (g.streams || []).length);
     if (!gamesWithLiveStreams.length) { setCategoriesMessage("No hay streams disponibles por categoría."); return; }
-    const shownStreams = gamesWithLiveStreams.flatMap(g => g.streams.slice(0, MAX_STREAMS_PER_GAME));
-    const profileMap = await getStreamerProfileMap(shownStreams);
     const catPlaceholder = document.querySelector('.section-row[data-section-id="categories"]');
     if (catPlaceholder) catPlaceholder.remove();
+    // Solo crear la sección vacía; las tarjetas se cargan al hacer scroll (lazy)
     gamesWithLiveStreams.forEach(g => {
         const sectionId = `game-${g.id}`;
         buildSectionSkeleton(sectionId, g.name);
         const row = document.querySelector(`.section-row[data-section-id="${sectionId}"]`);
-        if (row) row.dataset.gameSection = "1";
-        const gameTrack = document.getElementById(`track-${sectionId}`);
-        if (!gameTrack) return;
-        gameTrack.innerHTML = "";
-        g.streams.slice(0, MAX_STREAMS_PER_GAME).forEach(s => {
-            const profile = profileMap.get(String(s.user_login || "").toLowerCase()) || "";
-            gameTrack.appendChild(buildStreamTile(s, profile));
-        });
+        if (row) {
+            row.dataset.gameSection = "1";
+            setupLazyRowLoad(sectionId, g.streams);
+        }
     });
+}
+// ===== Lazy loading de tarjetas por fila (categorías) =====
+const LAZY_CHUNK_SIZE = 12;
+const lazyRowState = new Map(); // sectionId -> { streams, loaded, profileMap, loading }
+
+function setupLazyRowLoad(sectionId, streams) {
+    const track = document.getElementById(`track-${sectionId}`);
+    if (!track) return;
+    track.innerHTML = "";
+    lazyRowState.set(sectionId, {
+        streams: streams.slice(),
+        loaded: 0,
+        profileMap: new Map(),
+        loading: false
+    });
+    loadMoreForRow(sectionId);
+    // Observer para cargar más al acercarse al final del scroll horizontal
+    const row = track.closest(".section-row");
+    if (!row) return;
+    const obs = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) loadMoreForRow(sectionId);
+        });
+    }, { root: null, rootMargin: "200px" });
+    obs.observe(track);
+    // Al hacer scroll horizontal, cargar más si falta poco
+    track.addEventListener("scroll", () => {
+        const st = lazyRowState.get(sectionId);
+        if (!st || st.loading) return;
+        if (track.scrollLeft + track.clientWidth >= track.scrollWidth - 400) {
+            loadMoreForRow(sectionId);
+        }
+    }, { passive: true });
+}
+
+async function loadMoreForRow(sectionId) {
+    const st = lazyRowState.get(sectionId);
+    if (!st || st.loading) return;
+    if (st.loaded >= st.streams.length) return;
+    st.loading = true;
+    const track = document.getElementById(`track-${sectionId}`);
+    if (!track) { st.loading = false; return; }
+    const chunk = st.streams.slice(st.loaded, st.loaded + LAZY_CHUNK_SIZE);
+    // Cargar perfiles solo de este chunk
+    const chunkProfiles = await getStreamerProfileMap(chunk);
+    chunkProfiles.forEach((v, k) => st.profileMap.set(k, v));
+    chunk.forEach(s => {
+        const profile = st.profileMap.get(String(s.user_login || "").toLowerCase()) || "";
+        track.appendChild(buildStreamTile(s, profile));
+    });
+    st.loaded += chunk.length;
+    st.loading = false;
+    // Si quedan y el track aún no llena el ancho, seguir
+    if (st.loaded < st.streams.length && track.scrollWidth <= track.clientWidth + 10) {
+        loadMoreForRow(sectionId);
+    }
 }
 function setCategoriesMessage(text) {
     const t = document.getElementById("track-categories");
@@ -2930,7 +2981,7 @@ function removeGameStreamSections() {
 }
 async function loadTopStreamers() {
     const track = document.getElementById("track-topStreamers");
-    const streams = await fetchTopStreams(HOME_SECTION_STREAMS);
+    const streams = await fetchTopStreams(20);  // antes 100
     track.innerHTML = "";
     if (!streams.length) { track.innerHTML = '<div class="tile-loading">No se pudieron cargar streamers.</div>'; return; }
     const profileMap = await getStreamerProfileMap(streams);
@@ -2967,14 +3018,15 @@ async function loadSeguidosChannels() {
     }
     const liveIds = new Set(liveStreams.map(s => s.user_id));
     const offline = channels.filter(c => !liveIds.has(c.broadcaster_id));
-    const sortedLive = liveStreams.slice().sort((a, b) => Number(b.viewer_count || 0) - Number(a.viewer_count || 0));
+    const sortedLive = liveStreams.slice().sort((a, b) => Number(b.viewer_count || 0) - Number(a.viewer_count || 0)).slice(0, 30);
+    const offlineLimited = offline.slice(0, 20);
     const [profileMap, coverMap, offlineAvatarMap, lastLiveMap] = await Promise.all([
         getStreamerProfileMap(sortedLive),
         fetchUserCoverImagesByLogin(offline.map(c => c.broadcaster_login)),
         fetchUserAvatarsByLogin(offline.map(c => c.broadcaster_login)),
         fetchLastLiveByUserIds(offline.map(c => c.broadcaster_id))
     ]);
-    const offlineSorted = offline.slice().sort((a, b) => {
+    const offlineSorted = offlineLimited.slice().sort((a, b) => {
         const ta = lastLiveMap.get(a.broadcaster_id);
         const tb = lastLiveMap.get(b.broadcaster_id);
         if (ta && tb) return new Date(tb) - new Date(ta);
@@ -3167,7 +3219,7 @@ async function openGameScreen(gameId, gameName, gameBoxArt = "") {
             }
         } catch (_) {}
     }
-    const streams = await fetchStreamsByGame(gameId, 20);
+    const streams = await fetchStreamsByGame(gameId, 12);
     grid.innerHTML = "";
     if (!streams.length) {
         if (gameViewersEl) gameViewersEl.textContent = "0 espectadores";
