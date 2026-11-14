@@ -579,7 +579,6 @@ header h1 { font-size: 42px; margin-bottom: 12px; }
 #player-settings-overlay .account-btn { display: block; width: 100%; border: none; border-radius: 10px; background: #2a2a2e; color: #fff; font-size: 16px; font-weight: 600; padding: 12px 18px; margin-top: 16px; cursor: pointer; outline: none; font-family: inherit; }
 #player-settings-overlay .account-btn.focused { outline: 3px solid #fff; outline-offset: 2px; }
 
-.settings-row-account.has-picker > .settings-options { display: none !important; }
 .settings-summary { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; flex: 1 1 auto; padding: 10px 14px; border: 2px solid transparent; border-radius: 8px; background: #2a2a2e; color: #fff; font: inherit; font-size: 15px; font-weight: 600; cursor: pointer; outline: none; text-align: left; }
 .settings-summary:hover { background: #3a3a3f; }
 .settings-summary.focused, .settings-summary:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
@@ -3241,7 +3240,7 @@ async function openGameScreen(gameId, gameName, gameBoxArt = "") {
             }
         } catch (_) {}
     }
-    const streams = await fetchStreamsByGame(gameId, 12);
+    const streams = await fetchStreamsByGame(gameId, 10);
     grid.innerHTML = "";
     if (!streams.length) {
         if (gameViewersEl) gameViewersEl.textContent = "0 espectadores";
@@ -4137,18 +4136,20 @@ function renderAccountSettings() {
     `;
     wireAccountButtons();
     updateSettingsActiveStates();
-    OsmPicker.decorate(box, ".settings-row-account", {
-        dataKey: "setting", navAttr: "data-nav-btn",
-        onPick: function (name, value) {
-            saveInterfaceSetting(name, value);
+    box.querySelectorAll(".settings-row-account button[data-value]").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const row = btn.closest(".settings-row-account");
+            if (!row) return;
+            saveInterfaceSetting(row.dataset.setting, btn.dataset.value);
             applyInterfaceSettings();
             updateSettingsActiveStates();
-        }
+        });
     });
     setTimeout(() => {
         if (!panelFocused) return;
-        const first = document.querySelector("#account-box .settings-summary");
+        const first = document.querySelector("#account-box .settings-row-account button[data-value]");
         if (first) {
+            document.querySelectorAll("#account-box .settings-options button.focused").forEach(b => b.classList.remove("focused"));
             first.classList.add("focused");
             try { first.focus({preventScroll:true}); } catch (_) { first.focus(); }
         }
@@ -4167,7 +4168,6 @@ function updateSettingsActiveStates() {
             btn.classList.toggle("active", btn.dataset.value === current);
         });
     });
-    try { OsmPicker.refresh(document.getElementById("account-box"), ".settings-row-account"); } catch (e) {}
 }
 function saveInterfaceSetting(name, value) {
     try { localStorage.setItem("osmtwich-settings-" + name, value); } catch (e) {}
@@ -5551,9 +5551,18 @@ function showPlayerSettingsPanel() {
     refreshPlayerQualityOptions();
     updatePlayerSettingsActiveStates();
     const overlay = document.getElementById("player-settings-overlay");
-    OsmPicker.decorate(overlay, ".settings-row-account", {
-        dataKey: "psetting",
-        onPick: function (name, value) { savePlayerSetting(name, value); }
+    overlay.querySelectorAll('.settings-row-account').forEach(row => {
+        if (row.dataset.psetting === "quality") return; // ya manejado en refreshPlayerQualityOptions
+        row.querySelectorAll("button[data-value]").forEach(btn => {
+            if (btn.__psettingBound) return;
+            btn.__psettingBound = true;
+            btn.addEventListener("click", () => {
+                savePlayerSetting(row.dataset.psetting, btn.dataset.value);
+                overlay.querySelectorAll(".settings-options button.focused").forEach(b => b.classList.remove("focused"));
+                btn.classList.add("focused");
+                btn.focus({preventScroll: true});
+            });
+        });
     });
     overlay.classList.remove("hidden");
     overlay.classList.add("visible");
@@ -5601,7 +5610,6 @@ function updatePlayerSettingsActiveStates() {
             btn.classList.toggle("active", btn.dataset.value === current);
         });
     });
-    try { OsmPicker.refresh(document.getElementById("player-settings-overlay"), ".settings-row-account"); } catch (e) {}
 }
 function savePlayerSetting(name, value) {
     saveInterfaceSetting(name, value);
