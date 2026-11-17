@@ -161,7 +161,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: OsmTwich-AndroidTV-beta
-          path: OsmTwich-AndroidTV-beta.apk
+          path: capacitor/OsmTwich-AndroidTV-beta.apk
 
       - name: Publicar APK en Release
         if: github.event_name == 'push'
