@@ -167,7 +167,7 @@ jobs:
         with:
           tag_name: v${{ env.APP_VERSION }}
           name: OsmTwich v${{ env.APP_VERSION }}
-          files: OsmTwich-AndroidTV-beta.apk
+          files: capacitor/OsmTwich-AndroidTV-beta.apk
           body: |
             OsmTwich Android TV beta
 
