@@ -1705,7 +1705,7 @@ html[data-tv-scaled] #content #account-overlay .account-box { max-height: none; 
         </main>
         <div id="home-search-overlay" aria-hidden="true">
             <div class="home-search-box">
-                <input id="home-search-input" type="text" placeholder="Buscar canal…" autocomplete="off" aria-label="Buscar canal" role="combobox" aria-expanded="false" aria-controls="home-search-suggestions" aria-autocomplete="list">
+                <input id="home-search-input" type="text" placeholder="Buscar canal…" autocomplete="off" readonly inputmode="none" aria-label="Buscar canal" role="combobox" aria-expanded="false" aria-controls="home-search-suggestions" aria-autocomplete="list">
                 <button id="home-search-submit" type="button">Buscar</button>
                 <button id="home-search-close" class="search-close" type="button" aria-label="Cerrar búsqueda">✕</button>
             </div>
@@ -1717,7 +1717,7 @@ html[data-tv-scaled] #content #account-overlay .account-box { max-height: none; 
             <h1>Buscar canal</h1>
             <p class="search-hint">Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.</p>
             <div id="search-box">
-                <input type="text" id="search-input" placeholder="Nombre del canal de Twitch..." autocomplete="off">
+                <input type="text" id="search-input" placeholder="Nombre del canal de Twitch..." autocomplete="off" readonly inputmode="none">
             </div>
             <button id="search-submit-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Buscar</button>
         </header>
@@ -4674,11 +4674,28 @@ function setupSearchInput() {
             runSearch(value);
         }
     };
+    input?.addEventListener("click", () => {
+        if (window.OskKeyboard && !OskKeyboard.isOpen()) {
+            OskKeyboard.open({
+                label: "Teclado de búsqueda",
+                placeholder: "Nombre del canal de Twitch",
+                onSubmit: (value) => {
+                    input.value = String(value || "").trim();
+                    submit(input);
+                }
+            });
+        }
+    });
     input?.addEventListener("keydown", (e) => {
         if (e.key === "Enter") { e.preventDefault(); submit(input); }
     });
     input?.addEventListener("change", () => submit(input));
-    submitBtn?.addEventListener("click", () => submit(input));
+    submitBtn?.addEventListener("click", () => {
+        if (!input?.value.trim()) input?.click();
+        else submit(input);
+    });
+    // Use the app keyboard instead of the native device keyboard.
+    homeInput?.addEventListener("click", () => openHomeSearchKeyboard());
     homeInput?.addEventListener("input", () => scheduleHomeSearchSuggestions(homeInput.value));
     homeInput?.addEventListener("keydown", (e) => {
         if (e.key === "ArrowDown") {
@@ -4702,11 +4719,30 @@ function setupSearchInput() {
             if (i !== homeSearchSuggestionIndex) { homeSearchSuggestionIndex = i; renderHomeSearchSuggestions(); }
         }
     });
-    homeSubmit?.addEventListener("click", () => submit(homeInput));
+    homeSubmit?.addEventListener("click", () => {
+        if (!homeInput?.value.trim()) openHomeSearchKeyboard();
+        else submit(homeInput);
+    });
     homeClose?.addEventListener("click", closeHomeSearch);
     [homeSubmit, homeClose].forEach(btn => {
         btn?.addEventListener("focus", () => btn.classList.add("focused"));
         btn?.addEventListener("blur", () => btn.classList.remove("focused"));
+    });
+}
+function openHomeSearchKeyboard() {
+    const input = document.getElementById("home-search-input");
+    if (!input || (window.OskKeyboard && OskKeyboard.isOpen())) return;
+    OskKeyboard.open({
+        label: "Teclado de búsqueda",
+        placeholder: "Buscar canal",
+        onSubmit: (value) => {
+            const query = String(value || "").trim().toLowerCase();
+            if (!query) return;
+            input.value = query;
+            clearHomeSearchSuggestions();
+            closeHomeSearch();
+            runSearch(query);
+        }
     });
 }
 function openSearch() {
@@ -4722,9 +4758,14 @@ function openSearch() {
     overlay?.classList.add("visible");
     overlay?.setAttribute("aria-hidden", "false");
     clearHomeSearchSuggestions();
-    if (input) { input.value = ""; setTimeout(() => input.focus({ preventScroll: true }), 30); }
+    if (input) {
+        input.value = "";
+        try { input.blur(); } catch (_) {}
+        setTimeout(() => openHomeSearchKeyboard(), 40);
+    }
 }
 function closeHomeSearch() {
+    if (window.OskKeyboard && OskKeyboard.isOpen()) OskKeyboard.close();
     const main = document.getElementById("main-screen");
     const overlay = document.getElementById("home-search-overlay");
     main?.classList.remove(
