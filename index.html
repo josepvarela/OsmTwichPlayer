@@ -1994,6 +1994,35 @@ html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus-visible {
     box-shadow: none !important;
 }
 
+
+/* Tema claro: quitar por completo el indicador visual de selección del menú lateral. */
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus-visible {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 !important;
+    border-left: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+    transform: none !important;
+}
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused::before,
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused::after,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused::before,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused::after {
+    content: none !important;
+    display: none !important;
+    background: transparent !important;
+    border: 0 !important;
+    box-shadow: none !important;
+}
+
 </style>
 </head>
 <body>
