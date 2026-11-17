@@ -26,7 +26,7 @@ jobs:
 
       - name: Actualizar versión en config.xml
         run: |
-          COUNT=$(git rev-list --first-parent --count "$VERSION_BASE"..HEAD)
+          COUNT=$(git rev-list --first-parent --count "$VERSION_BASE"..HEAD -- index.html api capacitor tizen)
           MINOR=$((COUNT - 1))
           if [ "$MINOR" -lt 0 ]; then MINOR=0; fi
           APP_VERSION="2.${MINOR}.0"
