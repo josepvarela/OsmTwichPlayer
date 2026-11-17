@@ -1968,6 +1968,32 @@ html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible .nav-i
     text-shadow: none !important;
 }
 
+
+/* FIX definitivo: el foco de navegación no debe pintar ningún fondo en tema claro. */
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:hover,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus-visible,
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused::before,
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused::after,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused::before,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused::after {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+}
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus-visible {
+    box-shadow: none !important;
+}
+
 </style>
 </head>
 <body>
