@@ -1836,6 +1836,90 @@ html[data-theme="light"] #game-screen-grid .game-stream-card.focused {
     box-shadow: 0 0 0 1px rgba(24,24,27,.16) !important;
     filter: none !important;
 }
+/* OsmTwich: contraste específico para TV en tema claro. */
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:hover,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus-visible {
+    background: #18181b !important;
+    color: #ffffff !important;
+    border: 2px solid #18181b !important;
+    border-left: 5px solid #9146ff !important;
+    border-radius: 10px !important;
+    outline: 2px solid #18181b !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 3px rgba(24,24,27,.22) !important;
+    text-shadow: none !important;
+}
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused .nav-label,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus .nav-label,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible .nav-label,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:hover .nav-label,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused .nav-label {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    text-shadow: none !important;
+}
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:hover .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused .nav-icon svg,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus .nav-icon svg,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible .nav-icon svg {
+    color: #ffffff !important;
+    stroke: #ffffff !important;
+    fill: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+/* Las insignias conservan sus colores propios en tarjetas con tema claro. */
+html[data-theme="light"] #content .tile-stream .live-badge,
+html[data-theme="light"] #game-screen-grid .game-stream-card .live-badge {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: #eb0400 !important;
+}
+html[data-theme="light"] #content .tile-stream .viewer-badge,
+html[data-theme="light"] #game-screen-grid .game-stream-card .viewer-badge {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+    background: rgba(0,0,0,.78) !important;
+}
+html[data-theme="light"] #content .tile-game .game-name,
+html[data-theme="light"] #content .tile-stream .stream-title,
+html[data-theme="light"] #game-screen-grid .game-stream-card .stream-title {
+    color: #ffffff !important;
+    -webkit-text-fill-color: #ffffff !important;
+}
+html[data-theme="light"] #content .tile-game .game-viewers {
+    color: #b8b8c2 !important;
+    -webkit-text-fill-color: #b8b8c2 !important;
+}
+html[data-theme="light"] #content .tile-stream .stream-meta,
+html[data-theme="light"] #game-screen-grid .game-stream-card .stream-meta {
+    color: #dedee3 !important;
+    -webkit-text-fill-color: #dedee3 !important;
+}
+/* El foco de las tarjetas es un contorno negro visible sobre miniaturas claras. */
+html[data-theme="light"] #content .tile-stream:hover,
+html[data-theme="light"] #content .tile-stream.focused,
+html[data-theme="light"] #content .tile-game:hover,
+html[data-theme="light"] #content .tile-game.focused,
+html[data-theme="light"] #content .tile-clip:hover,
+html[data-theme="light"] #content .tile-clip.focused,
+html[data-theme="light"] #content .game-card:hover,
+html[data-theme="light"] #content .game-card.focused,
+html[data-theme="light"] #game-screen-grid .game-stream-card.focused {
+    outline: 3px solid #18181b !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 1px rgba(24,24,27,.28) !important;
+    filter: none !important;
+}
 </style>
 </head>
 <body>
