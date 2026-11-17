@@ -377,7 +377,7 @@ html[data-card-size="large"] #main-screen .tile-stream { flex-basis: 340px !impo
 .section-row { position: relative; border-radius: 14px; padding: 10px; margin: -10px; transition: opacity .25s ease; content-visibility: auto; contain: layout paint style; contain-intrinsic-size: 360px; }
 .section-row.dimmed { opacity: .32; }
 .section-row.sec-hidden { display: none !important; }
-/* Home: cada sección se muestra como cuadrícula (filas y columnas) en vez de una sola fila con scroll horizontal */
+
 html body #main-screen#main-screen #content#content .section-row .tile-track { --osm-card-w: var(--profile-card-size, clamp(175px, 16vw, 250px)); display: grid !important; grid-template-columns: repeat(auto-fill, var(--osm-card-w)) !important; justify-content: space-between !important; gap: 16px !important; overflow: visible !important; scroll-snap-type: none !important; scroll-behavior: auto !important; cursor: default !important; width: 100% !important; margin: 0 !important; padding: 12px 12px 18px !important; }
 html body #main-screen#main-screen #content#content .section-row[data-section-id="topGames"] .tile-track { --osm-card-w: var(--profile-card-size, clamp(175px, 16vw, 250px)); }
 html body #main-screen#main-screen #content#content .section-row .tile-track > * { margin: 0 !important; }
@@ -1200,7 +1200,7 @@ html[data-tv-scaled] .ctrl-btn-main { width: 128px !important; height: 128px !im
 html[data-tv-scaled] .ctrl-btn-main svg { width: 64px !important; height: 64px !important; }
 html[data-tv-scaled] .ctrl-btn { flex: 0 0 auto; }
 html[data-tv-scaled] .ctrl-btn-quality { flex: 0 1 auto; width: auto !important; min-width: 104px !important; padding: 0 20px !important; font-size: 30px !important; }
-/* Botones del perfil de canal (Ver en vivo / Chatear / Seguir): son .ctrl-btn.small pero NO son controles del reproductor; en TV no deben heredar el 104x104 / 52px de arriba. Crecen de forma moderada con "Tamaño texto app". */
+
 html[data-tv-scaled] .ctrl-btn.small { width: auto !important; height: auto !important; min-width: 0 !important; flex: 0 0 auto; padding: .5em 1em !important; border-radius: 8px; font-size: calc(22px + (var(--app-fs, 1) - 1) * 8px) !important; line-height: 1.2; white-space: nowrap; }
 html[data-tv-scaled] .ctrl-btn.small.hidden { display: none !important; }
 html[data-tv-scaled] #channel-statusbar { flex-wrap: wrap; row-gap: 10px; padding-top: 10px; padding-bottom: 10px; }
@@ -1258,14 +1258,14 @@ html[data-theme="light"] #nav-list .nav-icon, html[data-theme="light"] #nav-list
 html[data-theme="light"] #nav-list li.focused, html[data-theme="light"] #nav-list li.focused .nav-label, html[data-theme="light"] #nav-list li:focus, html[data-theme="light"] #nav-list li:focus .nav-label, html[data-theme="light"] #nav-list li:hover, html[data-theme="light"] #nav-list li:hover .nav-label { color: #ffffff !important; }
 html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"] #nav-list li.focused .nav-icon svg, html[data-theme="light"] #nav-list li:focus .nav-icon, html[data-theme="light"] #nav-list li:focus .nav-icon svg, html[data-theme="light"] #nav-list li:hover .nav-icon, html[data-theme="light"] #nav-list li:hover .nav-icon svg { color: #ffffff !important; stroke: #ffffff !important; }
 
-/* En tema claro, la barra lateral siempre usa texto negro, sin depender del color global. */
+
 html[data-theme="light"] #sidebar-logo-text,
 html[data-theme="light"] #main-screen #sidebar #nav-list li,
 html[data-theme="light"] #main-screen #sidebar #nav-list li .nav-label,
 html[data-theme="light"] #main-screen #sidebar #search-nav-item .nav-label {
   color: #000000 !important;
 }
-/* Las tarjetas conservan el blanco; los demás colores se adaptan a tonos legibles en tema claro. */
+
 html[data-text-color="white"] { --app-card-text-color-light: #ffffff; }
 html[data-text-color="yellow"] { --app-card-text-color-light: #a16207; }
 html[data-text-color="green"] { --app-card-text-color-light: #15803d; }
@@ -1295,13 +1295,13 @@ html[data-theme="light"] #main-screen #content .tile-vod .stream-meta {
     <script id="wgt-local-hls-player">
     (function () {
         "use strict";
-        // Diagnóstico en pantalla: SOLO dentro de la app Android (Capacitor).
+
         var __dbgLines = [];
         var FORCE_H264 = !!window.Capacitor;
         var __hlsState = "idle", __hlsQ = [];
         function __hlsFlush() { var q = __hlsQ.splice(0); for (var i = 0; i < q.length; i++) { try { q[i](); } catch (e) {} } }
-        // Aviso de diagnóstico apagado por defecto. Para activarlo en la app:
-        // localStorage.setItem("osm-debug","1") y reiniciar.
+
+
         var __dbgOn = false;
         try { __dbgOn = localStorage.getItem("osm-debug") === "1"; } catch (e) {}
         function dbg(msg) {
@@ -1320,8 +1320,8 @@ html[data-theme="light"] #main-screen #content .tile-vod .stream-meta {
                 el.textContent = __dbgLines.join("\n");
             } catch (e) {}
         }
-    // El WebView de Android no reproduce HLS nativo (<video> error code=4):
-    // en la app se usa hls.js (empaquetado como www/hls.min.js por el workflow).
+
+
     if (window.Capacitor) {
         __hlsState = "loading";
         try {
@@ -1336,8 +1336,8 @@ html[data-theme="light"] #main-screen #content .tile-vod .stream-meta {
             document.head.appendChild(__hs);
         } catch (e) { __hlsState = "missing"; }
     }
-    // Loader de hls.js: playlists por fetch nativo de Capacitor (sin CORS),
-    // segmentos de video por el fetch original del navegador (rapido, binario).
+
+
     function OsmLoader() {
         this.stats = { aborted: false, loaded: 0, retry: 0, total: 0, chunkCount: 0, bwEstimate: 0,
             loading: { start: 0, first: 0, end: 0 }, parsing: { start: 0, end: 0 }, buffering: { start: 0, first: 0, end: 0 } };
@@ -1697,7 +1697,7 @@ html[data-theme="light"] #main-screen #content .tile-vod .stream-meta {
     }
     </script>
 <style id="side-panel-css">
-/* Ajustes / Iniciar sesión / Donar / Sugerencias: se muestran como una sección más (pantalla completa del área de contenido) */
+
 #content > #account-overlay { position: static; inset: auto; display: none; background: none; z-index: auto; width: 100%; min-height: 100%; box-sizing: border-box; align-items: center; justify-content: center; }
 #content > #account-overlay.visible { display: flex; }
 #content.panel-open > #sections { display: none !important; }
@@ -2503,7 +2503,7 @@ const API_BASE = (location.protocol === "file:" || !location.hostname) ? "https:
 const TWITCH_TOKEN_ENDPOINT = API_BASE + "/api/twitch-token";
 let twitchAppToken = null;
 let twitchTokenExpiresAt = 0;
-// Máximo de streams que se cargan por sección (Helix entrega hasta 100 por página)
+
 const HOME_SECTION_STREAMS = 20;  // carga inicial ligera
 const NAV_ITEMS = [
     { id: "search",           label: "Buscar" },
@@ -3227,8 +3227,8 @@ function sectionGroupOf(id) {
 function rowInGroup(row, group) {
     return sectionGroupOf(row.dataset.sectionId) === group;
 }
-// Muestra solo las filas de la sección activa (las demás se ocultan).
-// Si la sección no tiene filas (Ajustes, Cuenta, etc.) se deja lo que ya había.
+
+
 function applySectionFilter() {
     const rows = Array.from(document.querySelectorAll(".section-row"));
     if (!activeSectionGroup || !rows.some(r => rowInGroup(r, activeSectionGroup))) {
@@ -3424,7 +3424,7 @@ async function getStreamerProfileMap(streams) {
     }
     return map;
 }
-// Versión de la app: subir en cada cambio (1.1 → 1.2 → 1.3 …)
+
 const APP_VERSION = "dev"; // los workflows lo reemplazan solos al compilar (.wgt / APK)
 function buildGameTile(g) {
     const el = document.createElement("div");
@@ -3486,7 +3486,7 @@ function buildClipTile(c) {
     el.addEventListener("click", () => openClip(c.id, c.broadcaster_login));
     return el;
 }
-// ===== Tope duro de tarjetas por fila =====
+
 function rowCardLimit(rowId) {
     rowId = String(rowId || "");
     if (rowId === "seguidosChannels") return FOLLOWED_MAX;
@@ -3520,7 +3520,7 @@ function trimTrack(track) {
     }
     if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", start); else start();
 })();
-// ===== Carga infinita: más streams al llegar al final de cada sección =====
+
 const ROW_MORE_PAGE = 20, ROW_MORE_MAX = 40, GAME_ROW_MAX = 20;
 const rowMore = new Map();      // rowId -> { fetchMore, loading, done }
 const rowMoreObservers = new Map();
@@ -3612,7 +3612,7 @@ async function loadTopGames() {
         setCategoriesMessage("No se pudieron cargar las categorías.");
         return;
     }
-    // Solo 12 streams por juego (no 100) y se cargan las secciones al hacer scroll
+
     const gamesWithStreams = await Promise.all(games.map(async g => {
         try {
             const streams = await fetchStreamsByGame(g.id, GAME_ROW_MAX);
@@ -3632,7 +3632,7 @@ async function buildGameStreamSections(games) {
     if (!gamesWithLiveStreams.length) { setCategoriesMessage("No hay streams disponibles por categoría."); return; }
     const catPlaceholder = document.querySelector('.section-row[data-section-id="categories"]');
     if (catPlaceholder) catPlaceholder.remove();
-    // Solo crear la sección vacía; las tarjetas se cargan al hacer scroll (lazy)
+
     gamesWithLiveStreams.forEach(g => {
         const sectionId = `game-${g.id}`;
         buildSectionSkeleton(sectionId, g.name);
@@ -3643,7 +3643,7 @@ async function buildGameStreamSections(games) {
         }
     });
 }
-// ===== Lazy loading de tarjetas por fila (categorías) =====
+
 const LAZY_CHUNK_SIZE = 12;
 const lazyRowState = new Map(); // sectionId -> { streams, loaded, profileMap, loading }
 
@@ -3660,7 +3660,7 @@ function setupLazyRowLoad(sectionId, streams) {
         done: false
     });
     loadMoreForRow(sectionId);
-    // Observer para cargar más al acercarse al final del scroll horizontal
+
     const row = track.closest(".section-row");
     if (!row) return;
     const obs = new IntersectionObserver((entries) => {
@@ -3669,7 +3669,7 @@ function setupLazyRowLoad(sectionId, streams) {
         });
     }, { root: null, rootMargin: "200px" });
     obs.observe(track);
-    // Al hacer scroll horizontal, cargar más si falta poco
+
     track.addEventListener("scroll", () => {
         const st = lazyRowState.get(sectionId);
         if (!st || st.loading) return;
@@ -3703,7 +3703,7 @@ async function loadMoreForRow(sectionId) {
     if (!track) { st.loading = false; return; }
     const chunk = st.streams.slice(st.loaded, Math.min(st.loaded + LAZY_CHUNK_SIZE, GAME_ROW_MAX));
     if (!chunk.length) { st.loading = false; return; }
-    // Cargar perfiles solo de este chunk
+
     const chunkProfiles = await getStreamerProfileMap(chunk);
     if (lazyRowState.get(sectionId) !== st) return;
     chunkProfiles.forEach((v, k) => st.profileMap.set(k, v));
@@ -3713,7 +3713,7 @@ async function loadMoreForRow(sectionId) {
     });
     st.loaded += chunk.length;
     st.loading = false;
-    // Si quedan y el track aún no llena el ancho, seguir
+
     if ((st.loaded < st.streams.length || (st.cursor && !st.done)) && track.scrollWidth <= track.clientWidth + 10) {
         loadMoreForRow(sectionId);
     }
@@ -4574,7 +4574,7 @@ var OsmPicker = (function () {
 })();
 
 let accountOverlayOrigin = "account";
-// --- Paneles a pantalla completa (Ajustes, Iniciar sesión, Donar, Sugerencias) ---
+
 const PANEL_IDS = ["settings", "account", "donate", "feedback"];
 let activePanel = null;
 let panelFocused = false;
@@ -5297,7 +5297,7 @@ function setupSearchInput() {
         if (!input?.value.trim()) input?.click();
         else submit(input);
     });
-    // Use the app keyboard instead of the native device keyboard.
+
     homeInput?.addEventListener("click", () => openHomeSearchKeyboard());
     homeInput?.addEventListener("input", () => scheduleHomeSearchSuggestions(homeInput.value));
     homeInput?.addEventListener("keydown", (e) => {
@@ -5388,6 +5388,7 @@ function closeHomeSearch() {
     }
 }
 function destroyPlayer() {
+    stopResolutionWatcher();
     playerPlaybackStarted = false;
     try { if (twitchPlayer && typeof twitchPlayer.destroy === "function") twitchPlayer.destroy(); } catch (_) {}
     const target = document.getElementById("twitch-player-target");
@@ -6337,7 +6338,7 @@ function selectQuality(index) {
     qualityIndex = index;
     hideQualityPanel();
     if (!q || !twitchPlayer) return;
-    // Mismo camino que Ajustes de reproducción (guarda la preferencia y aplica la calidad)
+
     savePlayerSetting("quality", q.group || q.quality || q.name);
     updateQualityCtrlLabel();
 }
@@ -6348,7 +6349,7 @@ function qualityShortLabel(q) {
     const match = String(q.name || raw).match(/^(\d+p)/i);
     return match ? match[1] : (q.name || raw || "Auto");
 }
-// Botón junto a "recargar": muestra la resolución real del video (y "Auto ·" si la calidad es automática)
+
 function updateQualityCtrlLabel() {
     const el = document.getElementById("ctrl-quality");
     if (!el) return;
@@ -6357,7 +6358,7 @@ function updateQualityCtrlLabel() {
     const h = lastResHeight || getRealResolution();
     let text;
     if (resDebugOn()) {
-        // Diagnóstico: localStorage.setItem("osm-debug","res") y reiniciar la app
+
         let w = 0;
         try { w = twitchPlayer._v.videoWidth || 0; } catch (_) {}
         text = h + "p " + w + "x" + h + " ev" + resEvents + " n" + resPolls;
@@ -6525,7 +6526,7 @@ function applyChatSizeAndPosFromSettings() {
     panel.classList.remove("chat-large", "chat-medium", "chat-small", "chat-left");
     panel.style.width = widthPct + "vw";
     panel.style.height = heightPct + "%";
-    // Con altura menor al 100% el chat puede ir arriba o abajo; al 100% ocupa todo y no cambia nada
+
     if (vpos === "top") {
         panel.style.top = "0";
         panel.style.bottom = "auto";
@@ -6603,11 +6604,16 @@ function updateResolutionUI(fromEvent) {
 window.updateResolutionUI = updateResolutionUI;
 let resWatchTimer = null;
 function startResolutionWatcher() {
-    if (resWatchTimer) clearInterval(resWatchTimer);
+    stopResolutionWatcher();
+    if (document.hidden || currentScreen !== "player") return;
     resWatchTimer = setInterval(() => {
-        if (currentScreen !== "player" || !twitchPlayer) return;
+        if (document.hidden || currentScreen !== "player" || !twitchPlayer) return;
         updateResolutionUI();
-    }, 500);
+    }, 2000);
+}
+function stopResolutionWatcher() {
+    if (resWatchTimer) clearInterval(resWatchTimer);
+    resWatchTimer = null;
 }
 function resetResolutionUI() {
     lastResHeight = 0;
@@ -6616,7 +6622,6 @@ function resetResolutionUI() {
 }
 function updateProgressUI() {
     if (!twitchPlayer) return;
-    updateResolutionUI();
     const track = document.getElementById("progress-track");
     const fill = document.getElementById("progress-fill");
     const elapsedEl = document.getElementById("progress-elapsed");
@@ -7055,7 +7060,7 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
         let fetchedAny = false;
         let hadError = false;
         for (let i = 0; i < 3; i++) {
-            // Sin timeout un fetch colgado dejaba vodChatLoading en true para siempre y el chat dejaba de avanzar
+
             timer = setTimeout(() => { timedOut = true; try { ctrl && ctrl.abort(); } catch (_) {} }, VOD_CHAT_FETCH_TIMEOUT_MS);
             let res;
             try {
@@ -7067,7 +7072,7 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
             if (myToken !== vodChatToken) return;
             if (data.error) { hadError = true; break; }
             fetchedAny = true;
-            // Los comentarios se agregan por página: ya se pueden mostrar mientras llegan las siguientes
+
             (data.comments || []).forEach(c => {
                 vodChatComments.push({
                     offset: c.content_offset_seconds || 0,
@@ -7101,7 +7106,7 @@ async function loadVodChatFrom(videoId, offsetSeconds, myToken, startCursor) {
         }
     } finally {
         clearTimeout(timer);
-        // Solo liberar si esta carga sigue siendo la vigente (si no, ya lo hizo stop/salto)
+
         if (myToken === vodChatToken) {
             vodChatLoading = false;
             if (vodChatAbort === ctrl) vodChatAbort = null;
@@ -7148,15 +7153,15 @@ function syncVodChatWithPlayback() {
         return;
     }
 
-    // Un salto (seek) se detecta por el cambio del tiempo del video entre ticks, no por la carga del
-    // chat: si la carga tardaba >20s se creía que el usuario había saltado y se reiniciaba en bucle.
+
+
     const delta = vodChatLastTime < 0 ? 0 : current - vodChatLastTime;
     vodChatLastTime = current;
     if (delta > 6 || delta < -2) {
         const first = vodChatComments.length ? vodChatComments[0].offset : null;
         const last = vodChatComments.length ? vodChatComments[vodChatComments.length - 1].offset : null;
         if (first !== null && current >= first && current <= last) {
-            // El salto cae dentro de lo ya descargado: reposicionar sin volver a pedir nada
+
             let i = 0;
             while (i < vodChatComments.length && vodChatComments[i].offset <= current) i++;
             chatMessages = [];
@@ -7168,7 +7173,7 @@ function syncVodChatWithPlayback() {
         }
     }
 
-    // Mostrar mensajes cuyo offset ya fue alcanzado (también mientras se descarga el siguiente bloque)
+
     while (vodChatPlayedIndex < vodChatComments.length &&
            vodChatComments[vodChatPlayedIndex].offset <= current) {
         appendVodChatMessage(vodChatComments[vodChatPlayedIndex]);
@@ -7177,7 +7182,7 @@ function syncVodChatWithPlayback() {
 
     if (vodChatLoading || vodChatEnded || Date.now() < vodChatRetryAt) return;
 
-    // Precarga del siguiente bloque
+
     const lastBuffered = vodChatComments.length
         ? vodChatComments[vodChatComments.length - 1].offset
         : current;
