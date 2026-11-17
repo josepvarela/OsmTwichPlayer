@@ -77,7 +77,7 @@ jobs:
       # Versión compartida con Tizen: 2.0.0 en el primer build y 2.1.0, 2.2.0...
       - name: Versión del APK (versionCode / versionName)
         run: |
-          COUNT=$(git rev-list --count "$VERSION_BASE"..HEAD)
+          COUNT=$(git rev-list --first-parent --count "$VERSION_BASE"..HEAD)
           MINOR=$((COUNT - 1))
           if [ "$MINOR" -lt 0 ]; then MINOR=0; fi
           APP_VERSION="2.${MINOR}.0"
