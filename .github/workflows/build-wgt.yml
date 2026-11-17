@@ -1,23 +1,20 @@
 name: Build Tizen .wgt
 
+# Serializa los dos workflows para que Android y Tizen adjunten assets
+# al mismo release/tag sin intentar crearlo simultáneamente.
+concurrency:
+  group: osmtwich-release-${{ github.sha }}
+  cancel-in-progress: false
+
 on:
-  push:
-    branches: [main]
-    paths:
-      - "tizen/**"
-      - "index.html"
-      - "api/**"
-      - ".github/workflows/build-wgt.yml"
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
 env:
-  # Versión automática: 1.<N>, donde N = cantidad de commits del repo.
-  # Sube sola con cualquier cambio de código. Si quieres que el próximo build
-  # sea 1.1, pon aquí (cantidad actual de commits - 1).
-  VERSION_OFFSET: "157"
+  # Base compartida con Android: primer build 2.0.0, luego 2.1.0, 2.2.0...
+  VERSION_BASE: "893a7a569239b7f4beda00f9f755b29bab603cc7"
 
 jobs:
   build-wgt:
@@ -29,18 +26,15 @@ jobs:
 
       - name: Actualizar versión en config.xml
         run: |
-          # Versión automática 1.<commits>; se copia también a APP_VERSION
-          # dentro de index.html (para mostrarla en Ajustes).
-          # Tizen pide formato x.y.z, por eso se le agrega ".0".
-          COUNT=$(git rev-list --count HEAD)
-          APP_VERSION="1.$((COUNT - VERSION_OFFSET))"
+          COUNT=$(git rev-list --first-parent --count "$VERSION_BASE"..HEAD)
+          MINOR=$((COUNT - 1))
+          if [ "$MINOR" -lt 0 ]; then MINOR=0; fi
+          APP_VERSION="2.${MINOR}.0"
+          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
           sed -i -E "s/const APP_VERSION = \"[^\"]*\"/const APP_VERSION = \"$APP_VERSION\"/" index.html
           grep -q "const APP_VERSION = \"$APP_VERSION\"" index.html || { echo "ERROR: no se pudo actualizar APP_VERSION"; exit 1; }
-          VERSION="${APP_VERSION}.0"
-          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          VERSION="$APP_VERSION"
           echo "Nueva versión: $VERSION"
-          # <widget ...> ocupa varias líneas en config.xml, por eso se usa perl -0
-          # (modo multilínea); con sed línea a línea nunca coincidía y quedaba 1.0.0.
           VERSION="$VERSION" perl -0pi -e 's/(<widget\b[^>]*?\sversion=")[^"]*(")/$1$ENV{VERSION}$2/s' tizen/config.xml
           grep -q "version=\"$VERSION\"" tizen/config.xml || { echo "ERROR: no se pudo actualizar la versión en config.xml"; exit 1; }
           grep -n 'version=' tizen/config.xml
@@ -62,12 +56,11 @@ jobs:
           name: OsmTwich-wgt
           path: OsmTwich.wgt
 
-      - name: Crear Release (solo en push a main)
-        if: github.event_name == 'push'
+      - name: Crear o actualizar Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.APP_VERSION }}
-          name: OsmTwich TV v${{ env.APP_VERSION }} (unsigned)
+          name: OsmTwich v${{ env.APP_VERSION }}
           files: OsmTwich.wgt
           body: |
             Versión: ${{ env.APP_VERSION }}
@@ -77,4 +70,4 @@ jobs:
 
             Commit: ${{ github.sha }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_PAT }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
