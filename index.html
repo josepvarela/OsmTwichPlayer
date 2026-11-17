@@ -1920,6 +1920,54 @@ html[data-theme="light"] #game-screen-grid .game-stream-card.focused {
     box-shadow: 0 0 0 1px rgba(24,24,27,.28) !important;
     filter: none !important;
 }
+
+/* Tema claro: foco translúcido que envuelve la fila completa (icono + texto), compatible con Tizen. */
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus-visible {
+    display: flex !important;
+    align-items: center !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+    background: rgba(24, 24, 27, 0.12) !important;
+    color: #18181b !important;
+    border: 1px solid rgba(24, 24, 27, 0.42) !important;
+    border-left: 5px solid #18181b !important;
+    border-radius: 10px !important;
+    outline: none !important;
+    box-shadow: 0 0 0 1px rgba(24, 24, 27, 0.08) !important;
+    text-shadow: none !important;
+}
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused .nav-label,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus .nav-label,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible .nav-label,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused .nav-label,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus .nav-label,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus-visible .nav-label {
+    color: #18181b !important;
+    -webkit-text-fill-color: #18181b !important;
+    text-shadow: none !important;
+}
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #search-nav-item:focus-visible .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list li.focused .nav-icon svg,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus .nav-icon svg,
+html[data-theme="light"] #main-screen #sidebar #nav-list li:focus-visible .nav-icon svg {
+    color: #18181b !important;
+    stroke: #18181b !important;
+    fill: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+    text-shadow: none !important;
+}
+
 </style>
 </head>
 <body>
