@@ -1775,6 +1775,67 @@ html[data-theme="light"] #main-screen #sidebar #nav-list li[data-id="topGames"] 
     filter: none !important;
     -webkit-filter: none !important;
 }
+
+/* Tema claro: texto de Buscar legible y foco oscuro en todas las tarjetas. */
+html[data-theme="light"] #main-screen #sidebar #nav-list #search-nav-item,
+html[data-theme="light"] #main-screen #sidebar #nav-list #search-nav-item .nav-label,
+html[data-theme="light"] #main-screen #sidebar #nav-list li[data-id="search"],
+html[data-theme="light"] #main-screen #sidebar #nav-list li[data-id="search"] .nav-label,
+html[data-theme="light"] #main-screen #sidebar #nav-list li[data-id="search"] span {
+    color: #18181b !important;
+    -webkit-text-fill-color: #18181b !important;
+    text-shadow: none !important;
+}
+html[data-theme="light"] #main-screen #sidebar #nav-list #search-nav-item .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list #search-nav-item .nav-icon svg,
+html[data-theme="light"] #main-screen #sidebar #nav-list li[data-id="search"] .nav-icon,
+html[data-theme="light"] #main-screen #sidebar #nav-list li[data-id="search"] .nav-icon svg {
+    color: #18181b !important;
+    stroke: #18181b !important;
+    filter: none !important;
+}
+html[data-theme="light"] #home-search-overlay .home-search-box {
+    background: rgba(255,255,255,.98) !important;
+    border-color: rgba(24,24,27,.2) !important;
+}
+html[data-theme="light"] #home-search-overlay input {
+    color: #18181b !important;
+    -webkit-text-fill-color: #18181b !important;
+    caret-color: #18181b !important;
+}
+html[data-theme="light"] #home-search-overlay input::placeholder {
+    color: #52525b !important;
+    opacity: 1 !important;
+}
+html[data-theme="light"] #home-search-overlay button {
+    background: #e4e4e7 !important;
+    color: #18181b !important;
+}
+html[data-theme="light"] #home-search-suggestions {
+    background: rgba(255,255,255,.99) !important;
+    border-color: rgba(24,24,27,.18) !important;
+}
+html[data-theme="light"] #home-search-suggestions li .home-search-suggestion-name {
+    color: #18181b !important;
+}
+html[data-theme="light"] #home-search-suggestions li:hover,
+html[data-theme="light"] #home-search-suggestions li.active {
+    background: #e4e4e7 !important;
+}
+html[data-theme="light"] .tile-stream:hover,
+html[data-theme="light"] .tile-game:hover,
+html[data-theme="light"] .tile-clip:hover,
+html[data-theme="light"] .game-card:hover,
+html[data-theme="light"] .tile-stream.focused,
+html[data-theme="light"] .tile-game.focused,
+html[data-theme="light"] .tile-clip.focused,
+html[data-theme="light"] .game-card.focused,
+html[data-theme="light"] #game-screen-grid .game-stream-card.focused {
+    outline: 3px solid #18181b !important;
+    outline-offset: 2px !important;
+    box-shadow: 0 0 0 1px rgba(24,24,27,.16) !important;
+    filter: none !important;
+}
 </style>
 </head>
 <body>
