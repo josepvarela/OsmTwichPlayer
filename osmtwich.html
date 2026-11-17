@@ -879,6 +879,23 @@ html[data-theme="light"] #sidebar-logo-text, html[data-theme="light"] #content, 
 html[data-theme="light"] #nav-list .nav-icon, html[data-theme="light"] #nav-list .nav-icon svg, html[data-theme="light"] #nav-list .nav-icon svg[stroke] { color: var(--app-text-color-light, #18181b) !important; stroke: var(--app-text-color-light, #18181b) !important; }
 html[data-theme="light"] #nav-list li.focused, html[data-theme="light"] #nav-list li.focused .nav-label, html[data-theme="light"] #nav-list li:focus, html[data-theme="light"] #nav-list li:focus .nav-label, html[data-theme="light"] #nav-list li:hover, html[data-theme="light"] #nav-list li:hover .nav-label { color: #ffffff !important; }
 html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"] #nav-list li.focused .nav-icon svg, html[data-theme="light"] #nav-list li:focus .nav-icon, html[data-theme="light"] #nav-list li:focus .nav-icon svg, html[data-theme="light"] #nav-list li:hover .nav-icon, html[data-theme="light"] #nav-list li:hover .nav-icon svg { color: #ffffff !important; stroke: #ffffff !important; }
+#osk { position: fixed; left: 50%; bottom: 3vh; transform: translateX(-50%); width: min(980px, 96vw); box-sizing: border-box; z-index: 2147483000; background: rgba(18,18,22,.98); border: 1px solid rgba(255,255,255,.16); border-radius: 14px; padding: 14px; box-shadow: 0 16px 48px rgba(0,0,0,.6); outline: none; }
+.osk-display { display: flex; align-items: center; min-height: 46px; box-sizing: border-box; padding: 8px 14px; margin-bottom: 8px; background: #2a2a2e; border: 2px solid #9146FF; border-radius: 8px; color: #fff; font-size: 22px; white-space: nowrap; overflow: hidden; }
+.osk-ph { color: #adadb8; }
+.osk-caret { flex: 0 0 2px; width: 2px; height: 1.2em; margin-left: 2px; background: #fff; }
+.osk-row { display: flex; gap: 6px; margin-top: 6px; }
+.osk-key { flex: 1 1 0; min-width: 0; height: 54px; display: flex; align-items: center; justify-content: center; box-sizing: border-box; background: #3a3a3f; color: #fff; border: 3px solid transparent; border-radius: 8px; font-size: 22px; cursor: pointer; user-select: none; -webkit-user-select: none; }
+.osk-key.osk-wide { flex: 1.5 1 0; }
+.osk-key.osk-space { flex: 4 1 0; }
+.osk-key.osk-on { background: #5b3a9e; }
+.osk-key.focused { border-color: #fff; background: #9146FF; }
+@media (max-height: 520px) {
+  #osk { padding: 8px; bottom: 1vh; }
+  .osk-display { min-height: 30px; padding: 4px 10px; font-size: 16px; margin-bottom: 4px; }
+  .osk-row { margin-top: 4px; gap: 4px; }
+  .osk-key { height: 34px; font-size: 16px; border-width: 2px; }
+}
+
 </style>
     <!-- ===== .wgt (file://): reproductor HLS propio =====
          Twitch.Player (embed.twitch.tv) NO se puede incrustar desde file://
@@ -1121,7 +1138,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
         </main>
         <div id="home-search-overlay" aria-hidden="true">
             <div class="home-search-box">
-                <input id="home-search-input" type="text" placeholder="Buscar canal…" autocomplete="off" aria-label="Buscar canal" role="combobox" aria-expanded="false" aria-controls="home-search-suggestions" aria-autocomplete="list">
+                <input id="home-search-input" type="text" placeholder="Buscar canal…" autocomplete="off" readonly inputmode="none" aria-label="Buscar canal" role="combobox" aria-expanded="false" aria-controls="home-search-suggestions" aria-autocomplete="list">
                 <button id="home-search-submit" type="button">Buscar</button>
                 <button id="home-search-close" class="search-close" type="button" aria-label="Cerrar búsqueda">✕</button>
             </div>
@@ -1141,7 +1158,7 @@ html[data-theme="light"] #nav-list li.focused .nav-icon, html[data-theme="light"
             <h1>Buscar canal</h1>
             <p class="search-hint">Escribe con tu teclado (PC) o usa el control del TV para abrir el teclado en pantalla.</p>
             <div id="search-box">
-                <input type="text" id="search-input" placeholder="Nombre del canal de Twitch..." autocomplete="off">
+                <input type="text" id="search-input" placeholder="Nombre del canal de Twitch..." autocomplete="off" readonly inputmode="none">
             </div>
             <button id="search-submit-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>Buscar</button>
         </header>
@@ -3948,6 +3965,149 @@ function scheduleHomeSearchSuggestions(rawValue) {
     }, 250);
 }
 
+var OskKeyboard = (function () {
+    const MAX_LEN = 500;
+    const LAYOUT = ["1234567890", "qwertyuiop", "asdfghjklñ", "zxcvbnm,.!?"];
+    let root = null, textEl = null, st = null;
+    let keyRows = [];
+    function isOpen() { return !!root; }
+    function render() {
+        const t = st.text;
+        const shown = t.length > 60 ? "…" + t.slice(-60) : t;
+        textEl.innerHTML = "";
+        if (!shown) {
+            const ph = document.createElement("span");
+            ph.className = "osk-ph";
+            ph.textContent = (st && st.placeholder) || "Chatea";
+            textEl.appendChild(ph);
+        } else {
+            textEl.appendChild(document.createTextNode(shown));
+        }
+        keyRows.forEach(row => row.forEach(k => {
+            if (k.ch) k.el.textContent = st.shift ? k.ch.toUpperCase() : k.ch;
+            if (k.act === "shift") k.el.classList.toggle("osk-on", st.shift);
+        }));
+        keyRows.forEach((row, r) => row.forEach((k, c) =>
+            k.el.classList.toggle("focused", r === st.row && c === st.col)));
+    }
+    function insert(ch) {
+        if (st.text.length >= MAX_LEN) return;
+        st.text += ch;
+        if (st.shift) st.shift = false;
+        render();
+    }
+    function press(k) {
+        if (!k) return;
+        if (k.ch) { insert(st.shift ? k.ch.toUpperCase() : k.ch); return; }
+        switch (k.act) {
+            case "shift": st.shift = !st.shift; render(); break;
+            case "space": insert(" "); break;
+            case "back": st.text = st.text.slice(0, -1); render(); break;
+            case "send": submit(); break;
+            case "cancel": close(); break;
+        }
+    }
+    function submit() {
+        const text = st.text, cb = st.onSubmit;
+        close();
+        if (cb) { try { cb(text); } catch (e) { console.warn("osk submit:", e); } }
+    }
+    function move(dr, dc) {
+        if (dr) {
+            const prevLen = keyRows[st.row].length;
+            const nr = Math.max(0, Math.min(keyRows.length - 1, st.row + dr));
+            if (nr === st.row) return;
+            const len = keyRows[nr].length;
+            st.col = (prevLen <= 1 || len <= 1) ? 0 : Math.round(st.col * (len - 1) / (prevLen - 1));
+            st.row = nr;
+        } else {
+            const len = keyRows[st.row].length;
+            st.col = (st.col + dc + len) % len;
+        }
+        render();
+    }
+    function onKeyDown(e) {
+        if (!root) return;
+        const c = e.keyCode || 0, k = e.key;
+        const isBack = c === 10009 || c === 27 || c === 461 || k === "Escape" || k === "BrowserBack" || k === "GoBack";
+        let handled = true;
+        if (isBack) close();
+        else if (c === 37) move(0, -1);
+        else if (c === 39) move(0, 1);
+        else if (c === 38) move(-1, 0);
+        else if (c === 40) move(1, 0);
+        else if (c === 13 || c === 23 || k === "Enter") press(keyRows[st.row][st.col]);
+        else if (k === "Backspace") { st.text = st.text.slice(0, -1); render(); }
+        else if (k && k.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey) { insert(k); }
+        else handled = false;
+        if (handled) { e.preventDefault(); e.stopImmediatePropagation(); }
+    }
+    function close() {
+        if (!root) return;
+        window.removeEventListener("keydown", onKeyDown, true);
+        const prev = st && st.prevFocus, cb = st && st.onClose;
+        root.remove();
+        root = null; textEl = null; st = null; keyRows = [];
+        try { if (prev && prev.isConnected && prev.focus) prev.focus({ preventScroll: true }); } catch (_) {}
+        try { window.focus(); } catch (_) {}
+        if (cb) { try { cb(); } catch (e) { console.warn("osk close:", e); } }
+    }
+    function open(opts) {
+        if (root) return;
+        opts = opts || {};
+        st = { text: "", shift: false, row: 1, col: 0, placeholder: opts.placeholder, onSubmit: opts.onSubmit, onClose: opts.onClose, prevFocus: document.activeElement };
+        root = document.createElement("div");
+        root.id = "osk";
+        root.tabIndex = -1;
+        root.setAttribute("role", "dialog");
+        root.setAttribute("aria-label", opts.label || "Enviar mensaje al chat");
+        const display = document.createElement("div");
+        display.className = "osk-display";
+        textEl = document.createElement("span");
+        const caret = document.createElement("span");
+        caret.className = "osk-caret";
+        display.appendChild(textEl);
+        display.appendChild(caret);
+        root.appendChild(display);
+        keyRows = [];
+        const addRow = (defs) => {
+            const rowEl = document.createElement("div");
+            rowEl.className = "osk-row";
+            const row = defs.map(d => {
+                const el = document.createElement("div");
+                el.className = "osk-key" + (d.cls ? " " + d.cls : "");
+                el.setAttribute("role", "button");
+                el.textContent = d.label || d.ch;
+                rowEl.appendChild(el);
+                const key = { el, ch: d.ch, act: d.act };
+                el.addEventListener("mousedown", ev => ev.preventDefault());
+                el.addEventListener("click", () => {
+                    keyRows.forEach((rr, ri) => rr.forEach((kk, ci) => { if (kk === key) { st.row = ri; st.col = ci; } }));
+                    press(key);
+                    if (root) render();
+                });
+                return key;
+            });
+            root.appendChild(rowEl);
+            keyRows.push(row);
+        };
+        LAYOUT.forEach(r => addRow(r.split("").map(ch => ({ ch }))));
+        addRow([
+            { act: "shift", label: "⇧", cls: "osk-wide" },
+            { act: "space", label: "Espacio", cls: "osk-space" },
+            { act: "back", label: "⌫", cls: "osk-wide" },
+            { act: "send", label: "Enviar", cls: "osk-wide" },
+            { act: "cancel", label: "Cancelar", cls: "osk-wide" }
+        ]);
+        (document.getElementById("tv-scale-root") || document.body).appendChild(root);
+        try { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); } catch (_) {}
+        try { root.focus({ preventScroll: true }); } catch (_) {}
+        window.addEventListener("keydown", onKeyDown, true);
+        render();
+    }
+    return { open, close, isOpen };
+})();
+
 // ============================================================
 // Búsqueda manual — input real (PC) / teclado nativo de Tizen (TV)
 // ============================================================
@@ -3967,12 +4127,22 @@ function setupSearchInput() {
         }
     };
 
+    input?.addEventListener("click", () => {
+        if (window.OskKeyboard && !OskKeyboard.isOpen()) {
+            OskKeyboard.open({
+                label: "Teclado de búsqueda",
+                placeholder: "Nombre del canal de Twitch",
+                onSubmit: (value) => { input.value = String(value || "").trim(); submit(input); }
+            });
+        }
+    });
     input?.addEventListener("keydown", (e) => {
         if (e.key === "Enter") { e.preventDefault(); submit(input); }
     });
     input?.addEventListener("change", () => submit(input));
     submitBtn?.addEventListener("click", () => submit(input));
 
+    homeInput?.addEventListener("click", () => openHomeSearchKeyboard());
     homeInput?.addEventListener("input", () => scheduleHomeSearchSuggestions(homeInput.value));
 
     homeInput?.addEventListener("keydown", (e) => {
@@ -4003,7 +4173,10 @@ function setupSearchInput() {
         }
     });
 
-    homeSubmit?.addEventListener("click", () => submit(homeInput));
+    homeSubmit?.addEventListener("click", () => {
+        if (!homeInput?.value.trim()) openHomeSearchKeyboard();
+        else submit(homeInput);
+    });
     homeClose?.addEventListener("click", closeHomeSearch);
     [homeSubmit, homeClose].forEach(btn => {
         btn?.addEventListener("focus", () => btn.classList.add("focused"));
@@ -4011,6 +4184,22 @@ function setupSearchInput() {
     });
 }
 
+function openHomeSearchKeyboard() {
+    const input = document.getElementById("home-search-input");
+    if (!input || (window.OskKeyboard && OskKeyboard.isOpen())) return;
+    OskKeyboard.open({
+        label: "Teclado de búsqueda",
+        placeholder: "Buscar canal",
+        onSubmit: (value) => {
+            const query = String(value || "").trim().toLowerCase();
+            if (!query) return;
+            input.value = query;
+            clearHomeSearchSuggestions();
+            closeHomeSearch();
+            runSearch(query);
+        }
+    });
+}
 function openSearch() {
     document.getElementById("main-screen")?.classList.add("search-dim-content");
     // El buscador vive ahora dentro de la pantalla de inicio.
@@ -4025,10 +4214,15 @@ function openSearch() {
     overlay?.classList.add("visible");
     overlay?.setAttribute("aria-hidden", "false");
     clearHomeSearchSuggestions();
-    if (input) { input.value = ""; setTimeout(() => input.focus({ preventScroll: true }), 30); }
+    if (input) {
+        input.value = "";
+        try { input.blur(); } catch (_) {}
+        setTimeout(() => openHomeSearchKeyboard(), 40);
+    }
 }
 
 function closeHomeSearch() {
+    if (window.OskKeyboard && OskKeyboard.isOpen()) OskKeyboard.close();
     const main = document.getElementById("main-screen");
     const overlay = document.getElementById("home-search-overlay");
 
