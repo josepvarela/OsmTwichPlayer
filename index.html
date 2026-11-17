@@ -2023,6 +2023,56 @@ html[data-theme="light"] #main-screen #sidebar #search-nav-item.focused::after {
     box-shadow: none !important;
 }
 
+
+/* Tema claro: eliminar cualquier marco/indicador de foco o selección del menú lateral.
+   El texto y los iconos permanecen negros incluso al pasar el cursor o seleccionar. */
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li:hover,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li:focus,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li:focus-visible,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li.focused,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li.selected,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li#search-nav-item,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li#search-nav-item:hover,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li#search-nav-item:focus,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li#search-nav-item:focus-visible,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li#search-nav-item.focused {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: 0 none transparent !important;
+    outline: 0 none transparent !important;
+    box-shadow: none !important;
+    filter: none !important;
+    transform: none !important;
+}
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li::before,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li::after,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li#search-nav-item::before,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li#search-nav-item::after {
+    content: none !important;
+    display: none !important;
+    border: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+}
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li .nav-label,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li:hover .nav-label,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li:focus .nav-label,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li:focus-visible .nav-label,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li.focused .nav-label,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li.selected .nav-label,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li .nav-icon,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li .nav-icon svg,
+html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li .nav-icon svg * {
+    color: #18181b !important;
+    -webkit-text-fill-color: #18181b !important;
+    stroke: #18181b !important;
+    text-shadow: none !important;
+    filter: none !important;
+    -webkit-filter: none !important;
+}
+
 </style>
 </head>
 <body>
