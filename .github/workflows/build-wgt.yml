@@ -7,13 +7,6 @@ concurrency:
   cancel-in-progress: false
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - "tizen/**"
-      - "index.html"
-      - "api/**"
-      - ".github/workflows/build-wgt.yml"
   workflow_dispatch: {}
 
 permissions:
