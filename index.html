@@ -2073,6 +2073,18 @@ html[data-theme="light"] #main-screen nav#sidebar ul#nav-list > li .nav-icon svg
     -webkit-filter: none !important;
 }
 
+
+/* Tema claro: el reborde de los controles seleccionados usa negro, no blanco. */
+html[data-theme="light"] .settings-options button.focused,
+html[data-theme="light"] .settings-options button:focus,
+html[data-theme="light"] .settings-options button:focus-visible {
+    outline: 3px solid #18181b !important;
+    outline-offset: 2px !important;
+}
+html[data-theme="light"] .settings-options button.active {
+    border-color: #18181b !important;
+}
+
 </style>
 </head>
 <body>
