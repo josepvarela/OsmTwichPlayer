@@ -63,7 +63,7 @@ jobs:
           name: OsmTwich-wgt
           path: OsmTwich.wgt
 
-      - name: Crear Release (solo en push a main)
+      - name: Crear o actualizar Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.APP_VERSION }}
