@@ -1,5 +1,11 @@
 name: Build Tizen .wgt
 
+# Serializa los dos workflows para que Android y Tizen adjunten assets
+# al mismo release/tag sin intentar crearlo simultáneamente.
+concurrency:
+  group: osmtwich-release-${{ github.sha }}
+  cancel-in-progress: false
+
 on:
   push:
     branches: [main]
