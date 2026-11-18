@@ -1595,19 +1595,29 @@ html #main-screen.sidebar-collapsed #sidebar #nav-list #search-nav-item .nav-ico
         }
 
 
-    if (window.Capacitor) {
+    var __hlsExperimentTarget = !!window.Capacitor || !!window.tizen ||
+        /Tizen|SMART-TV|SmartTV/i.test(String(navigator.userAgent || ""));
+    if (__hlsExperimentTarget) {
         __hlsState = "loading";
         try {
             var __hs = document.createElement("script");
-            __hs.src = "hls.min.js";
+            __hs.src = window.Capacitor ? "hls.min.js" : "https://cdn.jsdelivr.net/npm/hls.js@1.5.18/dist/hls.min.js";
             __hs.onload = function () {
-                __hlsState = (window.Hls && window.Hls.isSupported && window.Hls.isSupported()) ? "ready" : "nosupport";
+                var __mediaSource = !!(window.MediaSource || window.WebKitMediaSource);
+                var __supported = !!(window.Hls && window.Hls.isSupported && window.Hls.isSupported());
+                __hlsState = __supported ? "ready" : (__mediaSource ? "nosupport-codecs" : "nosupport-mse");
                 dbg("hls.js " + __hlsState);
                 __hlsFlush();
+                try { if (window.updateResolutionUI) window.updateResolutionUI(); } catch (e) {}
             };
-            __hs.onerror = function () { __hlsState = "missing"; dbg("hls.js NO se pudo cargar"); __hlsFlush(); };
+            __hs.onerror = function () {
+                __hlsState = "missing";
+                dbg("hls.js no disponible; reproductor nativo");
+                __hlsFlush();
+                try { if (window.updateResolutionUI) window.updateResolutionUI(); } catch (e) {}
+            };
             document.head.appendChild(__hs);
-        } catch (e) { __hlsState = "missing"; }
+        } catch (e) { __hlsState = "missing"; __hlsFlush(); }
     }
 
 
@@ -1872,10 +1882,11 @@ html #main-screen.sidebar-collapsed #sidebar #nav-list #search-nav-item .nav-ico
         };
         P._killHls = function () {
             if (this._hls) { try { this._hls.destroy(); } catch (e) {} this._hls = null; }
+            this._hlsLevelHeight = 0;
         };
         P._setSrc = function (url, startAt) {
             var self = this;
-            if (window.Capacitor && __hlsState === "loading") {
+            if (__hlsExperimentTarget && __hlsState === "loading") {
                 var gen = this._gen;
                 __hlsQ.push(function () { if (gen === self._gen) self._setSrc(url, startAt); });
                 return;
@@ -1892,6 +1903,16 @@ html #main-screen.sidebar-collapsed #sidebar #nav-list #search-nav-item .nav-ico
                               abrBandWidthUpFactor: 0.9,
                               capLevelToPlayerSize: false });
             this._hls = h;
+            this._hlsLevelHeight = 0;
+            h.on(Hls.Events.LEVEL_SWITCHED, function (ev, data) {
+                if (self._hls !== h) return;
+                try {
+                    var level = (data && data.level !== undefined) ? data.level : h.currentLevel;
+                    var info = h.levels && h.levels[level];
+                    self._hlsLevelHeight = info && info.height ? Number(info.height) : 0;
+                    if (window.updateResolutionUI) window.updateResolutionUI(true);
+                } catch (e) {}
+            });
             h.on(Hls.Events.MANIFEST_PARSED, function (ev, data) {
                 dbg("hls.js manifest ok");
                 try {
@@ -1927,7 +1948,7 @@ html #main-screen.sidebar-collapsed #sidebar #nav-list #search-nav-item .nav-ico
         P.setVideo = function (id, t) { this._load("video", id, t || 0); };
         P.getQualities = function () { return this._q.map(function (q) { return { name: q.name, group: q.group }; }); };
         P.getQuality = function () { return this._cur; };
-        P.getResolution = function () { return (this._v && this._v.videoHeight) || 0; };
+        P.getResolution = function () { return this._hlsLevelHeight || (this._v && this._v.videoHeight) || 0; };
         P.setQuality = function (g) {
             for (var i = 0; i < this._q.length; i++) {
                 if (this._q[i].group === g) {
