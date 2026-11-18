@@ -11,15 +11,17 @@ on:
     branches:
       - main
     paths-ignore:
-      - '.github/workflows/**'
+      - '.github/**'
+      - '*.md'
   workflow_dispatch: {}
 
 permissions:
   contents: write
 
 env:
-  # Base compartida con Android: primer build 2.0.0, luego 2.1.0, 2.2.0...
-  VERSION_BASE: "893a7a569239b7f4beda00f9f755b29bab603cc7"
+  # Primera versión del esquema: 2.7.1 -> 2.7.2 ... 2.7.9 -> 2.8.0 ...
+  # (la lógica está en .github/scripts/compute-version.sh, compartida con Android)
+  VERSION_START: "2.7.1"
 
 jobs:
   build-wgt:
@@ -31,11 +33,7 @@ jobs:
 
       - name: Actualizar versión en config.xml
         run: |
-          COUNT=$(git rev-list --first-parent --count "$VERSION_BASE"..HEAD -- index.html api capacitor tizen)
-          MINOR=$((COUNT - 1))
-          if [ "$MINOR" -lt 0 ]; then MINOR=0; fi
-          APP_VERSION="2.${MINOR}.0"
-          echo "APP_VERSION=$APP_VERSION" >> "$GITHUB_ENV"
+          bash .github/scripts/compute-version.sh
           sed -i -E "s/const APP_VERSION = \"[^\"]*\"/const APP_VERSION = \"$APP_VERSION\"/" index.html
           grep -q "const APP_VERSION = \"$APP_VERSION\"" index.html || { echo "ERROR: no se pudo actualizar APP_VERSION"; exit 1; }
           VERSION="$APP_VERSION"
@@ -65,7 +63,10 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ env.APP_VERSION }}
+          target_commitish: ${{ github.sha }}
           name: OsmTwich v${{ env.APP_VERSION }}
+          make_latest: "true"
+          fail_on_unmatched_files: true
           files: OsmTwich.wgt
           body: |
             Versión: ${{ env.APP_VERSION }}
