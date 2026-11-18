@@ -33,7 +33,7 @@ jobs:
 
       - name: Actualizar versión en config.xml
         run: |
-          bash .github/scripts/compute-version.sh
+          APP_VERSION="$(bash .github/scripts/compute-version.sh)"
           sed -i -E "s/const APP_VERSION = \"[^\"]*\"/const APP_VERSION = \"$APP_VERSION\"/" index.html
           grep -q "const APP_VERSION = \"$APP_VERSION\"" index.html || { echo "ERROR: no se pudo actualizar APP_VERSION"; exit 1; }
           VERSION="$APP_VERSION"
