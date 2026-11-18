@@ -1348,7 +1348,11 @@ html[data-theme="light"] #sidebar #search-nav-item:focus {
   flex-direction: column !important;
   align-items: stretch !important;
   justify-content: flex-start !important;
+  flex: 0 0 auto !important;
+  box-sizing: border-box !important;
   width: 100% !important;
+  min-width: 100% !important;
+  max-width: none !important;
   height: auto !important;
   min-height: 0 !important;
   gap: 0 !important;
@@ -1359,15 +1363,18 @@ html[data-theme="light"] #sidebar #search-nav-item:focus {
 #main-screen #sidebar #sidebar-logo::before {
   content: "" !important;
   display: block !important;
-  width: 100% !important;
-  min-width: 100% !important;
-  height: auto !important;
-  aspect-ratio: 910 / 512 !important;
+  box-sizing: border-box !important;
   flex: 0 0 auto !important;
   align-self: stretch !important;
+  width: 100% !important;
+  min-width: 100% !important;
+  max-width: none !important;
+  height: auto !important;
+  min-height: 0 !important;
+  aspect-ratio: 910 / 512 !important;
   background-image: url("capacitor/assets/banner.png") !important;
   background-repeat: no-repeat !important;
-  background-position: center !important;
+  background-position: center center !important;
   background-size: 100% 100% !important;
   background-color: #000 !important;
 }
