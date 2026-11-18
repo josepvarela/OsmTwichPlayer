@@ -1891,7 +1891,7 @@ html #main-screen.sidebar-collapsed #sidebar #nav-list #search-nav-item .nav-ico
                 __hlsQ.push(function () { if (gen === self._gen) self._setSrc(url, startAt); });
                 return;
             }
-            var wantHls = window.Capacitor && __hlsState === "ready" && /\.m3u8(\?|$)/.test(url);
+            var wantHls = __hlsExperimentTarget && __hlsState === "ready" && /\.m3u8(\?|$)/.test(url);
             if (!wantHls) { this._setSrcNative(url, startAt); return; }
             var v = this._v;
             this._killHls();
