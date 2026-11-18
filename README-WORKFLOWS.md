@@ -64,3 +64,23 @@ adjunto, así tenés un link fijo para descargar sin entrar a Actions.
   como tenías con el proyecto WebView viejo), es un cambio aparte al
   `AndroidManifest.xml` que Capacitor genera — pedímelo cuando lo necesites
   y lo agrego al workflow.
+
+## Versionado y releases automáticos (Android + Tizen)
+
+Cada push a `main` que toque código de la app (no `.github/**` ni `*.md`)
+dispara los dos workflows, que publican **el mismo release** con el APK
+(`OsmTwich-AndroidTV-beta.apk`) y el .wgt (`OsmTwich.wgt`).
+
+La versión sale de los tags `vX.Y.Z` del repo
+(`.github/scripts/compute-version.sh`):
+
+- Primera versión del esquema: **2.7.1**.
+- Cada build nuevo sube el patch: 2.7.2, 2.7.3 … 2.7.9, y después **2.8.0**,
+  2.8.1 … 2.8.9, **2.9.0**, etc.
+- Android y Tizen comparten versión: el segundo workflow reutiliza el tag que
+  creó el primero en ese mismo commit.
+- Para cambiar el punto de partida, edita `VERSION_START` en los dos workflows.
+
+Para publicar sin tocar código: pestaña **Actions → workflow → Run workflow**.
+Enlace fijo al último APK:
+`https://github.com/<usuario>/OsmTwichPlayer/releases/latest/download/OsmTwich-AndroidTV-beta.apk`
