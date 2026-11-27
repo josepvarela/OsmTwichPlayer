@@ -1,0 +1,1 @@
+window.addEventListener("keydown",function(n){var e=window.OsmPicker;e&&e.isOpen()&&e.key(n)},!0);

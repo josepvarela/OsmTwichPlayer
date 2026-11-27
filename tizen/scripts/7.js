@@ -1,0 +1,1 @@
+(function(){const e=document.getElementById("search-nav-item");e&&(e.addEventListener("focus",()=>e.classList.add("focused")),e.addEventListener("blur",()=>e.classList.remove("focused")))})();

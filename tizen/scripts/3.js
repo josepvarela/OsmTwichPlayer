@@ -1,0 +1,1 @@
+if(location.protocol!=="file:"){var __tw=document.createElement("script");__tw.async=!0,__tw.src="https://embed.twitch.tv/embed/v1.js",document.head.appendChild(__tw)}

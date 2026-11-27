@@ -1,0 +1,1 @@
+(function(){function n(){typeof applyInterfaceSettings=="function"&&applyInterfaceSettings()}document.readyState==="loading"?document.addEventListener("DOMContentLoaded",n):n(),window.openInterfaceSettings=function(){openPanel("settings")}})();

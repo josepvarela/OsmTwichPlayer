@@ -46,6 +46,12 @@ http
       try {
         const mod = await import(pathToFileURL(fnPath).href + `?t=${Date.now()}`);
         const handler = mod.default || mod;
+        if (req.method === "POST") {
+          const chunks = [];
+          for await (const c of req) chunks.push(c);
+          const raw = Buffer.concat(chunks).toString("utf8");
+          try { req.body = JSON.parse(raw); } catch { req.body = raw; }
+        }
         res.setHeader("Content-Type", "application/json; charset=utf-8");
         return await handler(req, res);
       } catch (err) {

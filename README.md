@@ -15,7 +15,7 @@ Cliente no oficial de Twitch para Samsung Tizen TV, Android TV y navegador. Opti
 - Sidebar navegable con D-pad
 - Canales seguidos, destacados, top streamers y juegos top
 - Reproductor con autoplay, calidades y seek en VODs
-- Chat propio con emotes de Twitch y 7TV, badges reales y repetición en VODs
+- Chat propio con emotes de Twitch, 7TV, BTTV y FFZ, badges reales y repetición en VODs
 - Login con Twitch (redirección o QR)
 - Ajustes de tema, tamaño de texto, color y tarjetas
 - Panel de ajustes del reproductor: calidad, tamaño/posición del chat
@@ -29,7 +29,7 @@ Cliente no oficial de Twitch para Samsung Tizen TV, Android TV y navegador. Opti
 
 ## 🛠 Desarrollo
 
-Todo vive en `index.html` (HTML + CSS + JS, sin frameworks). El backend serverless está en Vercel (`/api/*`) y maneja el token de Twitch y el proxy de comentarios de VODs.
+Todo vive en `index.html` (HTML + CSS + JS, sin frameworks). El backend serverless está en Vercel (`/api/*`) y maneja el token de Twitch, la renovación de sesión (`/api/twitch-refresh`) y el proxy de comentarios de VODs.
 
 ## 📄 Licencia
 
