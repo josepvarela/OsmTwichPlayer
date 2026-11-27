@@ -1,40 +1,51 @@
 # OsmTwich
 
-Cliente no oficial de Twitch para Samsung Tizen TV, Android TV y navegador. Optimizado para control remoto.
+Unofficial Twitch client for Samsung Tizen TVs, Android TV, and web browsers. Designed and optimized for remote control navigation.
 
-## 📸 Capturas
+## Screenshots
 
-| | | |
-|---|---|---|
-| <img src="https://github.com/user-attachments/assets/5abc6494-e44d-4c9a-b469-108c2488b219" width="300" /> | <img src="https://github.com/user-attachments/assets/761bbb9f-f90a-4432-9ccf-76555ffe6a1d" width="300" /> | <img src="https://github.com/user-attachments/assets/98590a47-a3ee-4c7f-a081-2ec7484ffdbd" width="300" /> |
-| <img src="https://github.com/user-attachments/assets/57213eb4-232b-47f0-b80b-7523b481610e" width="300" /> | <img src="https://github.com/user-attachments/assets/c461a425-8817-4543-adcd-469b1f3b3350" width="300" /> | <img src="https://github.com/user-attachments/assets/502d4d6f-0840-41a3-9f94-aa27c1c2ee46" width="300" /> |
-| <img src="https://github.com/user-attachments/assets/1e8151a1-b02a-491f-8af1-7633e8fa5cde" width="300" /> | <img src="https://github.com/user-attachments/assets/5e1292ab-7749-4819-98e1-930dd1cf2435" width="300" /> | |
+| Featured streams | Most watched games | Settings | Login |
+|---|---|---|---|
+| <img src="screenshots/01-featured-streams.png" width="300" /> | <img src="screenshots/02-most-watched-games.png" width="300" /> | <img src="screenshots/03-settings.png" width="300" /> | <img src="screenshots/04-login-qr.png" width="300" /> |
 
-## ✨ Características
+| Player | Playback settings | Channel profile | Just Chatting category |
+|---|---|---|---|
+| <img src="screenshots/05-player.png" width="300" /> | <img src="screenshots/06-playback-settings.png" width="300" /> | <img src="screenshots/07-channel-profile.png" width="300" /> | <img src="screenshots/08-just-chatting-category.png" width="300" /> |
 
-- Sidebar navegable con D-pad
-- Canales seguidos, destacados, top streamers y juegos top
-- Reproductor con autoplay, calidades y seek en VODs
-- Chat propio con emotes de Twitch, 7TV, BTTV y FFZ, badges reales y repetición en VODs
-- Login con Twitch (redirección o QR)
-- Ajustes de tema, tamaño de texto, color y tarjetas
-- Panel de ajustes del reproductor: calidad, tamaño/posición del chat
-- Modo `perf-lite` para TVs de gama baja
+## Features
 
-## 📦 Instalación
+- D-pad navigable sidebar
+- Followed channels, featured streams, top streamers, and top games
+- Player with autoplay, quality selection, and VOD seeking
+- Built-in chat with Twitch, 7TV, BTTV, and FFZ emotes, real badges, and VOD chat replay
+- Twitch login (redirect or QR code)
+- Theme, text size, text color, and card size settings
+- Player settings: video quality and chat size/position
+- `perf-lite` mode for lower-end TVs
 
-**Samsung TV:** descargá el `.wgt` desde Releases e instalalo con Tizen Studio.
+## Install on a TV
 
-> El `.wgt` viene sin firmar. Para instalarlo en un TV real hay que firmarlo con tu certificado (Certificate Manager).
+### Apps2Samsung catalog (recommended)
 
-## 🛠 Desarrollo
+1. Install [Apps2Samsung](https://apps2samsung.com/) on your phone or computer ([GitHub](https://github.com/Apps2Samsung/Apps2Samsung))
+2. Put the TV in **Developer Mode** and connect on the same network
+3. In Apps2Samsung, open the catalog and install **Arn0+** (also listed in the [community packages](https://github.com/Apps2Samsung/tizen-community-packages) bundle)
 
-Todo vive en `index.html` (HTML + CSS + JS, sin frameworks). El backend serverless está en Vercel (`/api/*`) y maneja el token de Twitch, la renovación de sesión (`/api/twitch-refresh`) y el proxy de comentarios de VODs.
+Open **OsmTwich** from the Samsung app list. No manual `.wgt` download needed for normal installs.
 
-## 📄 Licencia
+### Manual `.wgt` (updates / offline)
 
-Este proyecto está bajo la licencia [MIT](LICENSE). Podés usarlo, copiarlo, modificarlo y distribuirlo libremente, siempre que incluyas el aviso de copyright y de licencia.
+1. Download the latest [**release `.wgt`](https://github.com/josepvarela/OsmTwichPlayer/releases)
+2. Apps2Samsung → **Custom WGT** (signs on install)
 
-## ⚖️ Aviso
+## Development
 
-No está afiliado ni respaldado por Twitch ni Samsung. Twitch, sus emotes y su logo son marcas de Twitch Interactive, Inc.
+The app is built in `index.html` (HTML + CSS + JavaScript, no frameworks). The serverless backend runs on Vercel (`/api/*`) and handles the Twitch token, session refresh (`/api/twitch-refresh`), and VOD comments proxy.
+
+## License
+
+This project is licensed under the [MIT License](LICENSE). You may use, copy, modify, and distribute it freely, provided that the copyright and license notice are included.
+
+## Disclaimer
+
+This project is not affiliated with or endorsed by Twitch or Samsung. Twitch, its emotes, and its logo are trademarks of Twitch Interactive, Inc.
