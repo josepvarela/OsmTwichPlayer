@@ -29,7 +29,7 @@ Unofficial Twitch client for Samsung Tizen TVs, Android TV, and web browsers. De
 
 1. Install [Apps2Samsung](https://apps2samsung.com/) on your phone or computer ([GitHub](https://github.com/Apps2Samsung/Apps2Samsung))
 2. Put the TV in **Developer Mode** and connect on the same network
-3. In Apps2Samsung, open the catalog and install **Arn0+** (also listed in the [community packages](https://github.com/Apps2Samsung/tizen-community-packages) bundle)
+3. In Apps2Samsung, open the catalog and install **OsmTwich** (also listed in the [community packages](https://github.com/Apps2Samsung/tizen-community-packages) bundle)
 
 Open **OsmTwich** from the Samsung app list. No manual `.wgt` download needed for normal installs.
 
