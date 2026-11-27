@@ -32,6 +32,12 @@ else
     fi
     VERSION="$MA.$MI.$PA"
   fi
+  # VERSION_START también funciona como piso: si la secuencia va por debajo
+  # (p. ej. última 2.7.x y VERSION_START=3.0.0), la próxima versión salta a START.
+  # Una vez creado el tag de START, la secuencia sigue normal (3.0.1, 3.0.2 ...).
+  if [ "$(printf '%s\n%s\n' "$START" "$VERSION" | sort -V | tail -n1)" != "$VERSION" ]; then
+    VERSION="$START"
+  fi
   echo "Última versión de la secuencia: ${LAST:-ninguna} -> nueva versión: $VERSION" >&2
 fi
 
